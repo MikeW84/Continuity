@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,12 +19,27 @@ const projectFormSchema = z.object({
   description: z.string().optional(),
   progress: z.number().min(0).max(100).default(0),
   dueDate: z.string().optional(),
+  valueIds: z.array(z.number()).optional(),
+  dreamIds: z.array(z.number()).optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
 const ProjectsPage = () => {
-  const { projects, fetchProjects, addProject, updateProject, deleteProject, setPriorityProject, isLoading } = useAppContext();
+  const { 
+    projects, 
+    fetchProjects, 
+    addProject, 
+    updateProject, 
+    deleteProject, 
+    setPriorityProject, 
+    isLoading,
+    values,
+    fetchValues,
+    dreams,
+    fetchDreams 
+  } = useAppContext();
+  
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -35,12 +51,16 @@ const ProjectsPage = () => {
       description: "",
       progress: 0,
       dueDate: "",
+      valueIds: [],
+      dreamIds: [],
     },
   });
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    fetchValues();
+    fetchDreams();
+  }, [fetchProjects, fetchValues, fetchDreams]);
 
   const priorityProject = projects.find(p => p.isPriority);
   const otherProjects = projects.filter(p => !p.isPriority);
@@ -52,6 +72,8 @@ const ProjectsPage = () => {
       progress: data.progress,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
       isPriority: false,
+      valueIds: data.valueIds || [],
+      dreamIds: data.dreamIds || [],
     });
     setIsAddDialogOpen(false);
     form.reset();
@@ -86,6 +108,8 @@ const ProjectsPage = () => {
       description: project.description || "",
       progress: project.progress,
       dueDate: project.dueDate ? format(new Date(project.dueDate), 'yyyy-MM-dd') : undefined,
+      valueIds: project.valueIds || [],
+      dreamIds: project.dreamIds || [],
     });
     setIsAddDialogOpen(true);
   };
@@ -348,6 +372,115 @@ const ProjectsPage = () => {
                   </FormItem>
                 )}
               />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Link to Core Values</h3>
+                <FormField
+                  control={form.control}
+                  name="valueIds"
+                  render={() => (
+                    <FormItem>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {values.map((value) => (
+                          <FormField
+                            key={value.id}
+                            control={form.control}
+                            name="valueIds"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={value.id}
+                                  className="flex flex-row items-start space-x-3 space-y-0 p-2 border rounded-md"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(value.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...field.value || [], value.id])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (id) => id !== value.id
+                                              )
+                                            )
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 leading-none">
+                                    <FormLabel className="font-medium">
+                                      {value.title}
+                                    </FormLabel>
+                                    <p className="text-xs text-muted-foreground">
+                                      {value.description}
+                                    </p>
+                                  </div>
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Connected to Dreams</h3>
+                <FormField
+                  control={form.control}
+                  name="dreamIds"
+                  render={() => (
+                    <FormItem>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {dreams.map((dream) => (
+                          <FormField
+                            key={dream.id}
+                            control={form.control}
+                            name="dreamIds"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={dream.id}
+                                  className="flex flex-row items-start space-x-3 space-y-0 p-2 border rounded-md"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(dream.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...field.value || [], dream.id])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (id) => id !== dream.id
+                                              )
+                                            )
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 leading-none">
+                                    <FormLabel className="font-medium">
+                                      {dream.title}
+                                    </FormLabel>
+                                    <p className="text-xs text-muted-foreground">
+                                      {dream.description}
+                                    </p>
+                                    {dream.timeframe && (
+                                      <p className="text-xs bg-primary/10 text-primary inline-block px-2 py-0.5 rounded">
+                                        {dream.timeframe}
+                                      </p>
+                                    )}
+                                  </div>
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">

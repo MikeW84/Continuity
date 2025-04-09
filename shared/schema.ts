@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -32,6 +33,20 @@ export const projects = pgTable("projects", {
   userId: integer("user_id").notNull(),
 });
 
+// Project-Value Relations
+export const projectValues = pgTable("project_values", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  valueId: integer("value_id").notNull().references(() => values.id, { onDelete: "cascade" }),
+});
+
+// Project-Dream Relations
+export const projectDreams = pgTable("project_dreams", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  dreamId: integer("dream_id").notNull().references(() => dreams.id, { onDelete: "cascade" }),
+});
+
 export const insertProjectSchema = createInsertSchema(projects).pick({
   title: true,
   description: true,
@@ -43,6 +58,44 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+
+// Define relations for projects
+export const projectsRelations = relations(projects, ({ many }) => ({
+  projectValues: many(projectValues),
+  projectDreams: many(projectDreams)
+}));
+
+// Define relations for values through project_values
+export const projectValuesRelations = relations(projectValues, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectValues.projectId],
+    references: [projects.id]
+  }),
+  value: one(values, {
+    fields: [projectValues.valueId],
+    references: [values.id]
+  })
+}));
+
+// Define relations for dreams through project_dreams
+export const projectDreamsRelations = relations(projectDreams, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectDreams.projectId],
+    references: [projects.id]
+  }),
+  dream: one(dreams, {
+    fields: [projectDreams.dreamId],
+    references: [dreams.id]
+  })
+}));
+
+// Schema for the project with relations to values and dreams
+export const projectWithRelationsSchema = insertProjectSchema.extend({
+  valueIds: z.array(z.number()).optional(),
+  dreamIds: z.array(z.number()).optional(),
+});
+
+export type ProjectWithRelations = z.infer<typeof projectWithRelationsSchema>;
 
 // Ideas Schema
 export const ideas = pgTable("ideas", {
@@ -187,6 +240,11 @@ export const insertValueSchema = createInsertSchema(values).pick({
 export type InsertValue = z.infer<typeof insertValueSchema>;
 export type Value = typeof values.$inferSelect;
 
+// Define relations for values
+export const valuesRelations = relations(values, ({ many }) => ({
+  projectValues: many(projectValues)
+}));
+
 // Dreams Schema
 export const dreams = pgTable("dreams", {
   id: serial("id").primaryKey(),
@@ -207,3 +265,8 @@ export const insertDreamSchema = createInsertSchema(dreams).pick({
 
 export type InsertDream = z.infer<typeof insertDreamSchema>;
 export type Dream = typeof dreams.$inferSelect;
+
+// Define relations for dreams
+export const dreamsRelations = relations(dreams, ({ many }) => ({
+  projectDreams: many(projectDreams)
+}));
