@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAppContext } from "@/context/AppContext";
 
 interface HeaderProps {
   title: string;
@@ -10,6 +11,7 @@ interface HeaderProps {
 
 const Header = ({ title, subtitle }: HeaderProps) => {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [, navigate] = useLocation();
   
   const getPageTitle = () => {
     switch (title) {
@@ -90,35 +92,104 @@ const Header = ({ title, subtitle }: HeaderProps) => {
             <DialogTitle>Add New Item</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                navigate('/projects');
+              }}
+            >
               <i className="ri-task-line text-lg mr-2"></i>
               Project
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                navigate('/ideas');
+              }}
+            >
               <i className="ri-lightbulb-line text-lg mr-2"></i>
               Idea
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                navigate('/learning');
+              }}
+            >
               <i className="ri-book-open-line text-lg mr-2"></i>
               Learning Item
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                sessionStorage.setItem('addItemType', 'habit');
+                navigate('/health-habits');
+              }}
+            >
               <i className="ri-heart-pulse-line text-lg mr-2"></i>
               Habit
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                sessionStorage.setItem('addItemType', 'dateIdea');
+                navigate('/family');
+              }}
+            >
               <i className="ri-calendar-heart-line text-lg mr-2"></i>
               Date Idea
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                sessionStorage.setItem('addItemType', 'parentingTask');
+                navigate('/family');
+              }}
+            >
               <i className="ri-user-heart-line text-lg mr-2"></i>
               Parenting Task
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                sessionStorage.setItem('addItemType', 'value');
+                navigate('/values');
+              }}
+            >
               <i className="ri-compass-3-line text-lg mr-2"></i>
               Core Value
             </Button>
-            <Button variant="outline" className="flex justify-start items-center h-14">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center h-14"
+              onClick={() => {
+                setIsAddMenuOpen(false);
+                sessionStorage.setItem('openAddDialog', 'true');
+                sessionStorage.setItem('addItemType', 'dream');
+                navigate('/values');
+              }}
+            >
               <i className="ri-star-line text-lg mr-2"></i>
               Future Dream
             </Button>

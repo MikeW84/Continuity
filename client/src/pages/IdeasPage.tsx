@@ -37,7 +37,20 @@ const IdeasPage = () => {
 
   useEffect(() => {
     fetchIdeas();
-  }, [fetchIdeas]);
+
+    // Check if dialog should be opened
+    const shouldOpenDialog = sessionStorage.getItem('openAddDialog');
+    if (shouldOpenDialog === 'true') {
+      setSelectedIdea(null);
+      form.reset({
+        title: "",
+        description: "",
+        tags: "",
+      });
+      setIsAddDialogOpen(true);
+      sessionStorage.removeItem('openAddDialog');
+    }
+  }, [fetchIdeas, form]);
 
   const handleAddIdea = async (data: IdeaFormValues) => {
     // Convert comma-separated tags to array

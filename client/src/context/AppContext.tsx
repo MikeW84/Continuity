@@ -24,8 +24,8 @@ interface AppContextProps {
   
   // Projects
   fetchProjects: () => Promise<void>;
-  addProject: (project: Omit<Project, 'id' | 'userId'>) => Promise<void>;
-  updateProject: (id: number, project: Partial<Project>) => Promise<void>;
+  addProject: (project: Omit<Project, 'id' | 'userId'> & { valueIds?: number[], dreamIds?: number[] }) => Promise<void>;
+  updateProject: (id: number, project: Partial<Project> & { valueIds?: number[], dreamIds?: number[] }) => Promise<void>;
   deleteProject: (id: number) => Promise<void>;
   setPriorityProject: (id: number) => Promise<void>;
   
@@ -232,7 +232,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const addProject = async (project: Omit<Project, 'id' | 'userId'>) => {
+  const addProject = async (project: Omit<Project, 'id' | 'userId'> & { valueIds?: number[], dreamIds?: number[] }) => {
     try {
       await apiRequest('POST', '/api/projects', project);
       await fetchProjects();
@@ -251,7 +251,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const updateProject = async (id: number, project: Partial<Project>) => {
+  const updateProject = async (id: number, project: Partial<Project> & { valueIds?: number[], dreamIds?: number[] }) => {
     try {
       await apiRequest('PATCH', `/api/projects/${id}`, project);
       await fetchProjects();

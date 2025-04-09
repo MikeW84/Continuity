@@ -1,6 +1,7 @@
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { navigateToAddItem } from "@/lib/navigationHelpers";
 
 const IdeasSection = () => {
   const { ideas, voteIdea, isLoading } = useAppContext();
@@ -53,7 +54,7 @@ const IdeasSection = () => {
                 <h3 className="font-inter font-medium">{idea.title}</h3>
                 <div className="flex items-center">
                   <span className="text-sm font-medium text-secondary mr-2">
-                    {idea.votes > 0 ? `+${idea.votes}` : idea.votes}
+                    {(idea.votes ?? 0) > 0 ? `+${idea.votes ?? 0}` : idea.votes ?? 0}
                   </span>
                   <div className="flex">
                     <button 
@@ -83,7 +84,10 @@ const IdeasSection = () => {
           ))
         )}
         
-        <button className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-2 transition-colors">
+        <button 
+          className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-2 transition-colors"
+          onClick={() => navigateToAddItem('/ideas')}
+        >
           <i className="ri-add-line mr-1"></i> Add New Idea
         </button>
       </CardContent>

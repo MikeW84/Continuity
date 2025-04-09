@@ -41,7 +41,21 @@ const LearningPage = () => {
 
   useEffect(() => {
     fetchLearningItems();
-  }, [fetchLearningItems]);
+    
+    // Check if dialog should be opened
+    const shouldOpenDialog = sessionStorage.getItem('openAddDialog');
+    if (shouldOpenDialog === 'true') {
+      setSelectedItem(null);
+      form.reset({
+        title: "",
+        category: "",
+        progress: 0,
+        isCurrentlyLearning: false,
+      });
+      setIsAddDialogOpen(true);
+      sessionStorage.removeItem('openAddDialog');
+    }
+  }, [fetchLearningItems, form]);
 
   const currentlyLearning = learningItems.filter(item => item.isCurrentlyLearning);
   const learningQueue = learningItems.filter(item => !item.isCurrentlyLearning);

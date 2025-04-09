@@ -2,6 +2,7 @@ import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { navigateToAddItem } from "@/lib/navigationHelpers";
 
 const LearningSection = () => {
   const { learningItems, updateLearningItem, isLoading } = useAppContext();
@@ -117,7 +118,10 @@ const LearningSection = () => {
             ))
           )}
           
-          <button className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-4 transition-colors">
+          <button 
+            className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-4 transition-colors"
+            onClick={() => navigateToAddItem('/learning')}
+          >
             <i className="ri-add-line mr-1"></i> Add Learning Topic
           </button>
         </div>

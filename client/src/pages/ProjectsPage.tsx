@@ -60,7 +60,23 @@ const ProjectsPage = () => {
     fetchProjects();
     fetchValues();
     fetchDreams();
-  }, [fetchProjects, fetchValues, fetchDreams]);
+    
+    // Check if dialog should be opened
+    const shouldOpenDialog = sessionStorage.getItem('openAddDialog');
+    if (shouldOpenDialog === 'true') {
+      setSelectedProject(null);
+      form.reset({
+        title: "",
+        description: "",
+        progress: 0,
+        dueDate: "",
+        valueIds: [],
+        dreamIds: []
+      });
+      setIsAddDialogOpen(true);
+      sessionStorage.removeItem('openAddDialog');
+    }
+  }, [fetchProjects, fetchValues, fetchDreams, form]);
 
   const priorityProject = projects.find(p => p.isPriority);
   const otherProjects = projects.filter(p => !p.isPriority);

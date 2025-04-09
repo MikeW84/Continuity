@@ -3,6 +3,7 @@ import { format, differenceInDays } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Project } from "@shared/schema";
+import { navigateToAddItem } from "@/lib/navigationHelpers";
 
 const ProjectsSection = () => {
   const { projects, setPriorityProject, isLoading } = useAppContext();
@@ -123,7 +124,10 @@ const ProjectsSection = () => {
             </div>
           ))}
           
-          <button className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-2 transition-colors">
+          <button 
+            className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-2 transition-colors"
+            onClick={() => navigateToAddItem('/projects')}
+          >
             <i className="ri-add-line mr-1"></i> Add New Project
           </button>
         </CardContent>
