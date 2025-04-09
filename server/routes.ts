@@ -94,9 +94,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Received project data:", req.body);
       
       // Use the projectWithRelationsSchema for validation to handle valueIds and dreamIds
+      // Use the userId from the request if provided, otherwise use TEMP_USER_ID
       const projectData = validateRequest(projectWithRelationsSchema, {
         ...req.body,
-        userId: TEMP_USER_ID
+        userId: req.body.userId || TEMP_USER_ID
       });
       
       console.log("Validated project data:", projectData);
@@ -169,7 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const ideaData = validateRequest(insertIdeaSchema, {
         ...req.body,
-        userId: TEMP_USER_ID
+        userId: req.body.userId || TEMP_USER_ID
       });
       
       console.log("Validated idea data:", ideaData);
@@ -241,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/learning", async (req: Request, res: Response) => {
     const learningItemData = validateRequest(insertLearningItemSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newLearningItem = await storage.createLearningItem(learningItemData);
@@ -292,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/habits", async (req: Request, res: Response) => {
     const habitData = validateRequest(insertHabitSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newHabit = await storage.createHabit(habitData);
@@ -354,7 +355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/health-metrics", async (req: Request, res: Response) => {
     const healthMetricData = validateRequest(insertHealthMetricSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newHealthMetric = await storage.createHealthMetric(healthMetricData);
@@ -405,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/date-ideas", async (req: Request, res: Response) => {
     const dateIdeaData = validateRequest(insertDateIdeaSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newDateIdea = await storage.createDateIdea(dateIdeaData);
@@ -456,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/parenting-tasks", async (req: Request, res: Response) => {
     const parentingTaskData = validateRequest(insertParentingTaskSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newParentingTask = await storage.createParentingTask(parentingTaskData);
@@ -518,7 +519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/values", async (req: Request, res: Response) => {
     const valueData = validateRequest(insertValueSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newValue = await storage.createValue(valueData);
@@ -569,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dreams", async (req: Request, res: Response) => {
     const dreamData = validateRequest(insertDreamSchema, {
       ...req.body,
-      userId: TEMP_USER_ID
+      userId: req.body.userId || TEMP_USER_ID
     });
     
     const newDream = await storage.createDream(dreamData);
