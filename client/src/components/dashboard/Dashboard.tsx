@@ -8,9 +8,13 @@ import { useAppContext } from "@/context/AppContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
-  const { isLoading } = useAppContext();
+  const { isLoading, projects } = useAppContext();
+  
+  console.log('Dashboard component: isLoading =', isLoading);
+  console.log('Dashboard component: projects =', projects);
 
   if (isLoading) {
+    console.log('Dashboard: rendering loading state');
     return (
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

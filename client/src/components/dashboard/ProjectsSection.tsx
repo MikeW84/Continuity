@@ -42,8 +42,11 @@ const ProjectsSection = () => {
     );
   }
 
+  console.log('ProjectsSection: raw projects =', projects);
   const priorityProject = projects.find(p => p.isPriority);
   const otherProjects = projects.filter(p => !p.isPriority);
+  console.log('ProjectsSection: priorityProject =', priorityProject);
+  console.log('ProjectsSection: otherProjects =', otherProjects);
 
   return (
     <div className="lg:col-span-2">
