@@ -1,0 +1,209 @@
+import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Users Schema
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  displayName: text("display_name"),
+  email: text("email"),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+  displayName: true,
+  email: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+// Projects Schema
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  progress: integer("progress").default(0),
+  dueDate: timestamp("due_date"),
+  isPriority: boolean("is_priority").default(false),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertProjectSchema = createInsertSchema(projects).pick({
+  title: true,
+  description: true,
+  progress: true,
+  dueDate: true,
+  isPriority: true,
+  userId: true,
+});
+
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+
+// Ideas Schema
+export const ideas = pgTable("ideas", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  votes: integer("votes").default(0),
+  tags: text("tags").array(),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertIdeaSchema = createInsertSchema(ideas).pick({
+  title: true,
+  description: true,
+  votes: true,
+  tags: true,
+  userId: true,
+});
+
+export type InsertIdea = z.infer<typeof insertIdeaSchema>;
+export type Idea = typeof ideas.$inferSelect;
+
+// Learning Schema
+export const learningItems = pgTable("learning_items", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  category: text("category"),
+  progress: integer("progress").default(0),
+  isCurrentlyLearning: boolean("is_currently_learning").default(false),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertLearningItemSchema = createInsertSchema(learningItems).pick({
+  title: true,
+  category: true,
+  progress: true,
+  isCurrentlyLearning: true,
+  userId: true,
+});
+
+export type InsertLearningItem = z.infer<typeof insertLearningItemSchema>;
+export type LearningItem = typeof learningItems.$inferSelect;
+
+// Habits Schema
+export const habits = pgTable("habits", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  completedDays: integer("completed_days").default(0),
+  totalDays: integer("total_days").default(30),
+  isCompletedToday: boolean("is_completed_today").default(false),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertHabitSchema = createInsertSchema(habits).pick({
+  title: true,
+  completedDays: true,
+  totalDays: true,
+  isCompletedToday: true,
+  userId: true,
+});
+
+export type InsertHabit = z.infer<typeof insertHabitSchema>;
+export type Habit = typeof habits.$inferSelect;
+
+// Health Metrics Schema
+export const healthMetrics = pgTable("health_metrics", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  value: text("value").notNull(),
+  change: text("change"),
+  icon: text("icon"),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertHealthMetricSchema = createInsertSchema(healthMetrics).pick({
+  name: true,
+  value: true,
+  change: true,
+  icon: true,
+  userId: true,
+});
+
+export type InsertHealthMetric = z.infer<typeof insertHealthMetricSchema>;
+export type HealthMetric = typeof healthMetrics.$inferSelect;
+
+// Family Planning - Dates Schema
+export const dateIdeas = pgTable("date_ideas", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  date: timestamp("date"),
+  isScheduled: boolean("is_scheduled").default(false),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertDateIdeaSchema = createInsertSchema(dateIdeas).pick({
+  title: true,
+  description: true,
+  date: true,
+  isScheduled: true,
+  userId: true,
+});
+
+export type InsertDateIdea = z.infer<typeof insertDateIdeaSchema>;
+export type DateIdea = typeof dateIdeas.$inferSelect;
+
+// Family Planning - Parenting Tasks Schema
+export const parentingTasks = pgTable("parenting_tasks", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  isCompleted: boolean("is_completed").default(false),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertParentingTaskSchema = createInsertSchema(parentingTasks).pick({
+  title: true,
+  description: true,
+  isCompleted: true,
+  userId: true,
+});
+
+export type InsertParentingTask = z.infer<typeof insertParentingTaskSchema>;
+export type ParentingTask = typeof parentingTasks.$inferSelect;
+
+// Values Schema
+export const values = pgTable("values", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  alignmentScore: integer("alignment_score").default(0),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertValueSchema = createInsertSchema(values).pick({
+  title: true,
+  description: true,
+  alignmentScore: true,
+  userId: true,
+});
+
+export type InsertValue = z.infer<typeof insertValueSchema>;
+export type Value = typeof values.$inferSelect;
+
+// Dreams Schema
+export const dreams = pgTable("dreams", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  tags: text("tags").array(),
+  timeframe: text("timeframe"),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertDreamSchema = createInsertSchema(dreams).pick({
+  title: true,
+  description: true,
+  tags: true,
+  timeframe: true,
+  userId: true,
+});
+
+export type InsertDream = z.infer<typeof insertDreamSchema>;
+export type Dream = typeof dreams.$inferSelect;
