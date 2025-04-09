@@ -234,7 +234,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addProject = async (project: Omit<Project, 'id' | 'userId'> & { valueIds?: number[], dreamIds?: number[] }) => {
     try {
-      await apiRequest('POST', '/api/projects', project);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/projects', { ...project, userId: user?.id || 1 });
       await fetchProjects();
       toast({
         title: "Project Added",
@@ -323,7 +324,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addIdea = async (idea: Omit<Idea, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/ideas', idea);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/ideas', { ...idea, userId: user?.id || 1 });
       await fetchIdeas();
       toast({
         title: "Idea Added",
@@ -408,7 +410,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addLearningItem = async (item: Omit<LearningItem, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/learning', item);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/learning', { ...item, userId: user?.id || 1 });
       await fetchLearningItems();
       toast({
         title: "Learning Item Added",
@@ -478,7 +481,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addHabit = async (habit: Omit<Habit, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/habits', habit);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/habits', { ...habit, userId: user?.id || 1 });
       await fetchHabits();
       toast({
         title: "Habit Added",
@@ -563,7 +567,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addHealthMetric = async (metric: Omit<HealthMetric, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/health-metrics', metric);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/health-metrics', { ...metric, userId: user?.id || 1 });
       await fetchHealthMetrics();
       toast({
         title: "Health Metric Added",
@@ -633,7 +638,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addDateIdea = async (dateIdea: Omit<DateIdea, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/date-ideas', dateIdea);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/date-ideas', { ...dateIdea, userId: user?.id || 1 });
       await fetchDateIdeas();
       toast({
         title: "Date Idea Added",
@@ -703,7 +709,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addParentingTask = async (task: Omit<ParentingTask, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/parenting-tasks', task);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/parenting-tasks', { ...task, userId: user?.id || 1 });
       await fetchParentingTasks();
       toast({
         title: "Parenting Task Added",
@@ -788,7 +795,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addValue = async (value: Omit<Value, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/values', value);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/values', { ...value, userId: user?.id || 1 });
       await fetchValues();
       toast({
         title: "Value Added",
@@ -858,7 +866,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const addDream = async (dream: Omit<Dream, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/dreams', dream);
+      // Add userId to the request data
+      await apiRequest('POST', '/api/dreams', { ...dream, userId: user?.id || 1 });
       await fetchDreams();
       toast({
         title: "Dream Added",
