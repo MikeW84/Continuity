@@ -29,14 +29,14 @@ const Sidebar = () => {
           {navItems.map((item) => (
             <li key={item.path} className="mb-2">
               <Link href={item.path}>
-                <a className={`flex items-center p-4 text-white ${
+                <div className={`flex items-center p-4 text-white ${
                   location === item.path 
                     ? "bg-secondary bg-opacity-30 border-l-4 border-accent" 
                     : "hover:bg-secondary hover:bg-opacity-20 transition-colors"
                 }`}>
                   <i className={`${item.icon} text-xl md:mr-3`}></i>
                   <span className="hidden md:block">{item.label}</span>
-                </a>
+                </div>
               </Link>
             </li>
           ))}

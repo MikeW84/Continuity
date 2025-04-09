@@ -8,7 +8,7 @@ const DashboardPage = () => {
   useEffect(() => {
     // Refresh all data when dashboard is loaded
     fetchAllData();
-  }, [fetchAllData]);
+  }, [fetchAllData]); // explicitly adding the dependency here
 
   return <Dashboard />;
 };

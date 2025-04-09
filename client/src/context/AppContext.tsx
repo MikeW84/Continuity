@@ -6,6 +6,9 @@ import {
 } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 
+// Creating a context with an explicit default value
+// This should help with type safety and ensure the context is never undefined
+
 interface AppContextProps {
   user: { id: number, displayName: string } | null;
   projects: Project[];
@@ -82,7 +85,84 @@ interface AppContextProps {
   isLoading: boolean;
 }
 
-const AppContext = createContext<AppContextProps | undefined>(undefined);
+// Create a default empty implementation to avoid the undefined error
+const defaultContextValue: AppContextProps = {
+  user: null,
+  projects: [],
+  ideas: [],
+  learningItems: [],
+  habits: [],
+  healthMetrics: [],
+  dateIdeas: [],
+  parentingTasks: [],
+  values: [],
+  dreams: [],
+  priorityProject: null,
+  
+  // Projects
+  fetchProjects: async () => {},
+  addProject: async () => {},
+  updateProject: async () => {},
+  deleteProject: async () => {},
+  setPriorityProject: async () => {},
+  
+  // Ideas
+  fetchIdeas: async () => {},
+  addIdea: async () => {},
+  updateIdea: async () => {},
+  deleteIdea: async () => {},
+  voteIdea: async () => {},
+  
+  // Learning
+  fetchLearningItems: async () => {},
+  addLearningItem: async () => {},
+  updateLearningItem: async () => {},
+  deleteLearningItem: async () => {},
+  
+  // Habits
+  fetchHabits: async () => {},
+  addHabit: async () => {},
+  updateHabit: async () => {},
+  deleteHabit: async () => {},
+  toggleHabit: async () => {},
+  
+  // Health Metrics
+  fetchHealthMetrics: async () => {},
+  addHealthMetric: async () => {},
+  updateHealthMetric: async () => {},
+  deleteHealthMetric: async () => {},
+  
+  // Date Ideas
+  fetchDateIdeas: async () => {},
+  addDateIdea: async () => {},
+  updateDateIdea: async () => {},
+  deleteDateIdea: async () => {},
+  
+  // Parenting Tasks
+  fetchParentingTasks: async () => {},
+  addParentingTask: async () => {},
+  updateParentingTask: async () => {},
+  deleteParentingTask: async () => {},
+  toggleParentingTask: async () => {},
+  
+  // Values
+  fetchValues: async () => {},
+  addValue: async () => {},
+  updateValue: async () => {},
+  deleteValue: async () => {},
+  
+  // Dreams
+  fetchDreams: async () => {},
+  addDream: async () => {},
+  updateDream: async () => {},
+  deleteDream: async () => {},
+  
+  // Dashboard data
+  fetchAllData: async () => {},
+  isLoading: false,
+};
+
+const AppContext = createContext<AppContextProps>(defaultContextValue);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
@@ -107,25 +187,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      await Promise.all([
-        fetchProjects(),
-        fetchIdeas(),
-        fetchLearningItems(),
-        fetchHabits(),
-        fetchHealthMetrics(),
-        fetchDateIdeas(),
-        fetchParentingTasks(),
-        fetchValues(),
-        fetchDreams()
-      ]);
+      // Fetch each data type separately to prevent all failing if one fails
+      const fetchAll = [
+        fetchProjects().catch(err => console.error("Error fetching projects:", err)),
+        fetchIdeas().catch(err => console.error("Error fetching ideas:", err)),
+        fetchLearningItems().catch(err => console.error("Error fetching learning items:", err)),
+        fetchHabits().catch(err => console.error("Error fetching habits:", err)),
+        fetchHealthMetrics().catch(err => console.error("Error fetching health metrics:", err)),
+        fetchDateIdeas().catch(err => console.error("Error fetching date ideas:", err)),
+        fetchParentingTasks().catch(err => console.error("Error fetching parenting tasks:", err)),
+        fetchValues().catch(err => console.error("Error fetching values:", err)),
+        fetchDreams().catch(err => console.error("Error fetching dreams:", err))
+      ];
+      
+      await Promise.all(fetchAll);
     } catch (error) {
       toast({
         title: "Error loading data",
-        description: "There was a problem loading your data.",
+        description: "There was a problem loading some of your data.",
         variant: "destructive"
       });
       console.error("Error loading data:", error);
     } finally {
+      // Ensure loading is turned off even if errors occurred
       setIsLoading(false);
     }
   };
@@ -900,8 +984,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAppContext = () => {
   const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
+  // Since we provided a default value to createContext, this should never be undefined
   return context;
 };

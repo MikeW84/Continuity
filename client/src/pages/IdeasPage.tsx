@@ -89,16 +89,16 @@ const IdeasPage = () => {
   // Filter ideas based on selection
   const filteredIdeas = () => {
     if (filter === "positive") {
-      return ideas.filter(idea => idea.votes > 0);
+      return ideas.filter(idea => (idea.votes ?? 0) > 0);
     } else if (filter === "negative") {
-      return ideas.filter(idea => idea.votes < 0);
+      return ideas.filter(idea => (idea.votes ?? 0) < 0);
     } else {
       return ideas;
     }
   };
 
   // Sort ideas by votes (highest first)
-  const sortedIdeas = filteredIdeas().sort((a, b) => b.votes - a.votes);
+  const sortedIdeas = filteredIdeas().sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0));
 
   return (
     <div className="p-6">
@@ -125,14 +125,14 @@ const IdeasPage = () => {
         <div className="flex gap-2">
           <Button 
             variant={filter === "all" ? "default" : "outline"}
-            className={filter === "all" ? "bg-primary" : ""}
+            className={filter === "all" ? "bg-primary text-white" : ""}
             onClick={() => setFilter("all")}
           >
             All Ideas
           </Button>
           <Button 
             variant={filter === "positive" ? "default" : "outline"}
-            className={filter === "positive" ? "bg-success" : ""}
+            className={filter === "positive" ? "bg-success text-white" : ""}
             onClick={() => setFilter("positive")}
           >
             <i className="ri-arrow-up-s-line mr-1"></i>
@@ -140,7 +140,7 @@ const IdeasPage = () => {
           </Button>
           <Button 
             variant={filter === "negative" ? "default" : "outline"}
-            className={filter === "negative" ? "bg-destructive" : ""}
+            className={filter === "negative" ? "bg-destructive text-white" : ""}
             onClick={() => setFilter("negative")}
           >
             <i className="ri-arrow-down-s-line mr-1"></i>
@@ -227,14 +227,14 @@ const IdeasPage = () => {
                       <div className="flex items-center">
                         <span 
                           className={`text-lg font-medium ${
-                            idea.votes > 0 
+                            (idea.votes ?? 0) > 0 
                               ? "text-success" 
-                              : idea.votes < 0 
+                              : (idea.votes ?? 0) < 0 
                                 ? "text-destructive" 
                                 : "text-secondary"
                           }`}
                         >
-                          {idea.votes > 0 ? `+${idea.votes}` : idea.votes}
+                          {(idea.votes ?? 0) > 0 ? `+${idea.votes ?? 0}` : idea.votes ?? 0}
                         </span>
                       </div>
                       
