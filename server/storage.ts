@@ -707,6 +707,196 @@ import { db } from "./db";
 import { eq, and, desc, asc, inArray } from "drizzle-orm";
 
 export class DatabaseStorage implements IStorage {
+  constructor() {
+    // Initialize with sample data if needed
+    this.initializeData();
+  }
+
+  private async initializeData() {
+    try {
+      // Check if we have a user
+      const users = await db.select().from(schema.users);
+      
+      if (users.length === 0) {
+        // Create a sample user
+        const [user] = await db.insert(schema.users).values({
+          username: "johndoe",
+          password: "password",
+          displayName: "John Doe",
+          email: "john@example.com"
+        }).returning();
+        
+        // Create sample values
+        const [value1] = await db.insert(schema.values).values({
+          title: "Family Connection",
+          description: "Nurturing meaningful relationships with family through quality time and shared experiences",
+          alignmentScore: 75,
+          userId: user.id
+        }).returning();
+        
+        const [value2] = await db.insert(schema.values).values({
+          title: "Continuous Growth",
+          description: "Consistently developing skills and knowledge to reach full potential",
+          alignmentScore: 80,
+          userId: user.id
+        }).returning();
+        
+        // Create sample dreams
+        const [dream1] = await db.insert(schema.dreams).values({
+          title: "Build Mountain Cabin Retreat",
+          description: "Peaceful family getaway in the mountains with hiking access",
+          tags: ["long-term", "5-year plan"],
+          timeframe: "long-term",
+          userId: user.id
+        }).returning();
+        
+        const [dream2] = await db.insert(schema.dreams).values({
+          title: "Remote Work Sabbatical",
+          description: "Work remotely while exploring different countries with family",
+          tags: ["medium-term", "2-year plan"],
+          timeframe: "medium-term",
+          userId: user.id
+        }).returning();
+        
+        // Create sample projects
+        const [project1] = await db.insert(schema.projects).values({
+          title: "Life Management System",
+          description: "Complete MVP development by June 30th",
+          progress: 75,
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          isPriority: true,
+          userId: user.id
+        }).returning();
+        
+        // Add relations between project and values/dreams
+        await db.insert(schema.projectValues).values([
+          { projectId: project1.id, valueId: value1.id },
+          { projectId: project1.id, valueId: value2.id }
+        ]);
+        
+        await db.insert(schema.projectDreams).values([
+          { projectId: project1.id, dreamId: dream1.id }
+        ]);
+        
+        await db.insert(schema.projects).values({
+          title: "Home Renovation Plan",
+          description: "Finalize kitchen design and get contractor quotes",
+          progress: 25,
+          dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          isPriority: false,
+          userId: user.id
+        });
+        
+        // Create sample ideas
+        await db.insert(schema.ideas).values([
+          {
+            title: "Podcast on Life Management",
+            description: "Weekly podcast sharing productivity tips and life management strategies",
+            votes: 12,
+            tags: ["content creation", "productivity"],
+            userId: user.id
+          },
+          {
+            title: "Family Recipe Collection App",
+            description: "Digital cookbook to preserve family recipes with photos and stories",
+            votes: 8,
+            tags: ["app", "family"],
+            userId: user.id
+          }
+        ]);
+        
+        // Create sample learning items
+        await db.insert(schema.learningItems).values([
+          {
+            title: "React Advanced Patterns",
+            category: "Frontend Development",
+            progress: 67,
+            isCurrentlyLearning: true,
+            userId: user.id
+          },
+          {
+            title: "Spanish Language",
+            category: "Language",
+            progress: 33,
+            isCurrentlyLearning: true,
+            userId: user.id
+          }
+        ]);
+        
+        // Create sample habits
+        await db.insert(schema.habits).values([
+          {
+            title: "Morning Meditation",
+            completedDays: 20,
+            totalDays: 30,
+            isCompletedToday: true,
+            userId: user.id
+          },
+          {
+            title: "8 Glasses of Water",
+            completedDays: 15,
+            totalDays: 30,
+            isCompletedToday: false,
+            userId: user.id
+          }
+        ]);
+        
+        // Create sample health metrics
+        await db.insert(schema.healthMetrics).values([
+          {
+            name: "Avg. Sleep",
+            value: "7.2",
+            change: "+0.5 hrs",
+            icon: "heart-pulse",
+            userId: user.id
+          },
+          {
+            name: "Avg. Steps",
+            value: "8,752",
+            change: "+1,203",
+            icon: "footprint",
+            userId: user.id
+          }
+        ]);
+        
+        // Create sample date ideas
+        await db.insert(schema.dateIdeas).values([
+          {
+            title: "Dinner at Bella's followed by outdoor movie at the park",
+            description: "Upcoming Date",
+            date: new Date("2023-06-25"),
+            isScheduled: true,
+            userId: user.id
+          },
+          {
+            title: "Cooking class together",
+            description: "",
+            date: null,
+            isScheduled: false,
+            userId: user.id
+          }
+        ]);
+        
+        // Create sample parenting tasks
+        await db.insert(schema.parentingTasks).values([
+          {
+            title: "Research summer camps",
+            description: "Find STEM and outdoor activity options",
+            isCompleted: true,
+            userId: user.id
+          },
+          {
+            title: "Schedule pediatrician appointment",
+            description: "Annual check-up in July",
+            isCompleted: false,
+            userId: user.id
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error("Error initializing data:", error);
+    }
+  }
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
     return user;

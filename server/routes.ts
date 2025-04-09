@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import {
   insertProjectSchema,
   insertIdeaSchema,
@@ -12,7 +14,14 @@ import {
   insertDateIdeaSchema,
   insertParentingTaskSchema,
   insertValueSchema,
-  insertDreamSchema
+  insertDreamSchema,
+  projectWithRelationsSchema,
+  // Tables
+  projects,
+  projectValues,
+  projectDreams,
+  values,
+  dreams
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -36,7 +45,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects endpoints
   app.get("/api/projects", async (req: Request, res: Response) => {
     const projects = await storage.getProjects(TEMP_USER_ID);
-    res.json(projects);
+    
+    // Get values and dreams for each project
+    const projectsWithRelations = await Promise.all(
+      projects.map(async (project) => {
+        // Get the associated value IDs
+        const projectValueItems = await db.select().from(projectValues)
+          .where(eq(projectValues.projectId, project.id));
+        const valueIds = projectValueItems.map(pv => pv.valueId);
+        
+        // Get the associated dream IDs
+        const projectDreamItems = await db.select().from(projectDreams)
+          .where(eq(projectDreams.projectId, project.id));
+        const dreamIds = projectDreamItems.map(pd => pd.dreamId);
+        
+        return { ...project, valueIds, dreamIds };
+      })
+    );
+    
+    res.json(projectsWithRelations);
   });
   
   app.get("/api/projects/:id", async (req: Request, res: Response) => {
@@ -47,22 +74,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ message: "Project not found" });
     }
     
-    res.json(project);
+    // Get the associated value IDs
+    const projectValueItems = await db.select().from(projectValues)
+      .where(eq(projectValues.projectId, project.id));
+    const valueIds = projectValueItems.map(pv => pv.valueId);
+    
+    // Get the associated dream IDs
+    const projectDreamItems = await db.select().from(projectDreams)
+      .where(eq(projectDreams.projectId, project.id));
+    const dreamIds = projectDreamItems.map(pd => pd.dreamId);
+    
+    const projectWithRelations = { ...project, valueIds, dreamIds };
+    
+    res.json(projectWithRelations);
   });
   
   app.post("/api/projects", async (req: Request, res: Response) => {
-    const projectData = validateRequest(insertProjectSchema, {
-      ...req.body,
-      userId: TEMP_USER_ID
-    });
-    
-    const newProject = await storage.createProject(projectData);
-    res.status(201).json(newProject);
+    try {
+      // Use the projectWithRelationsSchema for validation to handle valueIds and dreamIds
+      const projectData = validateRequest(projectWithRelationsSchema, {
+        ...req.body,
+        userId: TEMP_USER_ID
+      });
+      
+      const newProject = await storage.createProject(projectData);
+      res.status(201).json(newProject);
+    } catch (error) {
+      throw error;
+    }
   });
   
   app.patch("/api/projects/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const projectData = req.body;
+    const projectData = validateRequest(projectWithRelationsSchema.partial(), req.body);
     
     const updatedProject = await storage.updateProject(id, projectData);
     
