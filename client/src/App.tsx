@@ -11,6 +11,7 @@ import LearningPage from "@/pages/LearningPage";
 import HealthHabitsPage from "@/pages/HealthHabitsPage";
 import FamilyPage from "@/pages/FamilyPage";
 import ValuesPage from "@/pages/ValuesPage";
+import { AppProvider } from "./context/AppContext";
 
 function Router() {
   return (
@@ -30,10 +31,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout>
-        <Router />
-      </Layout>
-      <Toaster />
+      <AppProvider>
+        <Layout>
+          <Router />
+        </Layout>
+        <Toaster />
+      </AppProvider>
     </QueryClientProvider>
   );
 }
