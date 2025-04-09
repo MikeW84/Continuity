@@ -91,16 +91,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/projects", async (req: Request, res: Response) => {
     try {
+      console.log("Received project data:", req.body);
+      
       // Use the projectWithRelationsSchema for validation to handle valueIds and dreamIds
       const projectData = validateRequest(projectWithRelationsSchema, {
         ...req.body,
         userId: TEMP_USER_ID
       });
       
+      console.log("Validated project data:", projectData);
+      
       const newProject = await storage.createProject(projectData);
+      console.log("Created new project:", newProject);
+      
       res.status(201).json(newProject);
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      console.error("Error creating project:", error);
+      res.status(400).json({ error: error.message || 'Unknown error' });
     }
   });
   
@@ -157,13 +164,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post("/api/ideas", async (req: Request, res: Response) => {
-    const ideaData = validateRequest(insertIdeaSchema, {
-      ...req.body,
-      userId: TEMP_USER_ID
-    });
-    
-    const newIdea = await storage.createIdea(ideaData);
-    res.status(201).json(newIdea);
+    try {
+      console.log("Received idea data:", req.body);
+      
+      const ideaData = validateRequest(insertIdeaSchema, {
+        ...req.body,
+        userId: TEMP_USER_ID
+      });
+      
+      console.log("Validated idea data:", ideaData);
+      
+      const newIdea = await storage.createIdea(ideaData);
+      console.log("Created new idea:", newIdea);
+      
+      res.status(201).json(newIdea);
+    } catch (error: any) {
+      console.error("Error creating idea:", error);
+      res.status(400).json({ error: error.message || 'Unknown error' });
+    }
   });
   
   app.patch("/api/ideas/:id", async (req: Request, res: Response) => {
