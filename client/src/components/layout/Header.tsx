@@ -2,7 +2,6 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useAppContext } from "@/context/AppContext";
 
 interface HeaderProps {
   title: string;

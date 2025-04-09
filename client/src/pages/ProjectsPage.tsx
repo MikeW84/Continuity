@@ -82,17 +82,39 @@ const ProjectsPage = () => {
   const otherProjects = projects.filter(p => !p.isPriority);
 
   const handleAddProject = async (data: ProjectFormValues) => {
-    await addProject({
-      title: data.title,
-      description: data.description || "",
-      progress: data.progress,
-      dueDate: data.dueDate ? new Date(data.dueDate) : null,
-      isPriority: false,
-      valueIds: data.valueIds || [],
-      dreamIds: data.dreamIds || [],
-    });
-    setIsAddDialogOpen(false);
-    form.reset();
+    try {
+      const projectData = {
+        title: data.title,
+        description: data.description || "",
+        progress: data.progress,
+        isPriority: false,
+        valueIds: data.valueIds || [],
+        dreamIds: data.dreamIds || [],
+      };
+      
+      // Convert date string to Date object if it exists, else use null
+      const dueDate = data.dueDate ? new Date(data.dueDate) : null;
+      
+      // Handle editing vs adding
+      if (selectedProject) {
+        // When editing, only pass the dueDate if it exists to avoid Date conversion issues
+        await updateProject(selectedProject, {
+          ...projectData,
+          ...(dueDate && { dueDate }) // Only include dueDate if it exists
+        });
+      } else {
+        // New project
+        await addProject({
+          ...projectData,
+          dueDate
+        });
+      }
+      
+      setIsAddDialogOpen(false);
+      form.reset();
+    } catch (error) {
+      console.error("Error submitting project:", error);
+    }
   };
 
   const handleDeleteProject = async () => {
