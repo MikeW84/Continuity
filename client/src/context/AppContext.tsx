@@ -222,9 +222,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Projects methods
   const fetchProjects = async () => {
     try {
+      console.log('Fetching projects...');
       const res = await fetch('/api/projects');
       if (!res.ok) throw new Error('Failed to fetch projects');
       const data = await res.json();
+      console.log('Projects data received:', data);
       setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
