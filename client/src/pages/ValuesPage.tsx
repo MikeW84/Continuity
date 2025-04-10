@@ -70,7 +70,7 @@ const ValuesPage = () => {
       // Add new value
       await addValue(data);
     }
-    
+
     setIsValueDialogOpen(false);
     valueForm.reset();
   };
@@ -78,7 +78,7 @@ const ValuesPage = () => {
   const handleAddDream = async (data: DreamFormValues) => {
     // Convert comma-separated tags to array
     const tagArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
-    
+
     if (selectedDream) {
       // Update existing dream
       await updateDream(selectedDream, {
@@ -92,20 +92,20 @@ const ValuesPage = () => {
         tags: tagArray,
       });
     }
-    
+
     setIsDreamDialogOpen(false);
     dreamForm.reset();
   };
 
   const handleDeleteItem = async () => {
     if (!selectedItem) return;
-    
+
     if (deleteType === 'value') {
       await deleteValue(selectedItem);
     } else {
       await deleteDream(selectedItem);
     }
-    
+
     setIsDeleteDialogOpen(false);
     setSelectedItem(null);
   };
@@ -115,7 +115,6 @@ const ValuesPage = () => {
     valueForm.reset({
       title: value.title,
       description: value.description || "",
-      alignmentScore: value.alignmentScore || 0,
     });
     setIsValueDialogOpen(true);
   };
@@ -149,7 +148,6 @@ const ValuesPage = () => {
               valueForm.reset({
                 title: "",
                 description: "",
-                alignmentScore: 0,
               });
               setIsValueDialogOpen(true);
             }}
@@ -175,13 +173,13 @@ const ValuesPage = () => {
           </Button>
         </div>
       </div>
-      
+
       <Tabs defaultValue="values" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="values">Core Values</TabsTrigger>
           <TabsTrigger value="dreams">Future Dreams</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="values">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -202,7 +200,6 @@ const ValuesPage = () => {
                       valueForm.reset({
                         title: "",
                         description: "",
-                        alignmentScore: 0,
                       });
                       setIsValueDialogOpen(true);
                     }}
@@ -236,25 +233,13 @@ const ValuesPage = () => {
                             </button>
                           </div>
                         </div>
-                        
+
                         <p className="text-secondary mb-4">{value.description}</p>
-                        
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm text-primary font-medium">Project Alignment:</span>
-                            <span className="text-sm text-secondary">{value.alignmentScore}%</span>
-                          </div>
-                          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-success rounded-full"
-                              style={{ width: `${value.alignmentScore}%` }}
-                            ></div>
-                          </div>
-                        </div>
+
                       </CardContent>
                     </Card>
                   ))}
-                  
+
                   {/* Add New Value Card */}
                   <Card className="border border-dashed border-gray-300 bg-gray-50">
                     <CardContent className="p-6 flex flex-col items-center justify-center h-full">
@@ -266,7 +251,6 @@ const ValuesPage = () => {
                           valueForm.reset({
                             title: "",
                             description: "",
-                            alignmentScore: 0,
                           });
                           setIsValueDialogOpen(true);
                         }}
@@ -281,7 +265,7 @@ const ValuesPage = () => {
             </>
           )}
         </TabsContent>
-        
+
         <TabsContent value="dreams">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -338,9 +322,9 @@ const ValuesPage = () => {
                             </button>
                           </div>
                         </div>
-                        
+
                         <p className="text-secondary mb-4">{dream.description}</p>
-                        
+
                         <div className="flex flex-wrap items-center gap-2">
                           {dream.timeframe && (
                             <span className="text-xs bg-primary bg-opacity-10 text-primary py-1 px-2 rounded-md">
@@ -356,7 +340,7 @@ const ValuesPage = () => {
                       </CardContent>
                     </Card>
                   ))}
-                  
+
                   {/* Add New Dream Card */}
                   <Card className="border border-dashed border-gray-300 bg-gray-50">
                     <CardContent className="p-6 flex flex-col items-center justify-center h-full">
@@ -385,14 +369,14 @@ const ValuesPage = () => {
           )}
         </TabsContent>
       </Tabs>
-      
+
       {/* Add/Edit Value Dialog */}
       <Dialog open={isValueDialogOpen} onOpenChange={setIsValueDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedValue ? "Edit Core Value" : "Add New Core Value"}</DialogTitle>
           </DialogHeader>
-          
+
           <Form {...valueForm}>
             <form onSubmit={valueForm.handleSubmit(handleAddValue)} className="space-y-4">
               <FormField
@@ -408,7 +392,7 @@ const ValuesPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={valueForm.control}
                 name="description"
@@ -422,9 +406,9 @@ const ValuesPage = () => {
                   </FormItem>
                 )}
               />
-              
-              
-              
+
+
+
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">
                   {selectedValue ? "Update Value" : "Add Value"}
@@ -434,14 +418,14 @@ const ValuesPage = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Add/Edit Dream Dialog */}
       <Dialog open={isDreamDialogOpen} onOpenChange={setIsDreamDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedDream ? "Edit Future Dream" : "Add New Future Dream"}</DialogTitle>
           </DialogHeader>
-          
+
           <Form {...dreamForm}>
             <form onSubmit={dreamForm.handleSubmit(handleAddDream)} className="space-y-4">
               <FormField
@@ -457,7 +441,7 @@ const ValuesPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={dreamForm.control}
                 name="description"
@@ -471,7 +455,7 @@ const ValuesPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={dreamForm.control}
                 name="timeframe"
@@ -494,7 +478,7 @@ const ValuesPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={dreamForm.control}
                 name="tags"
@@ -511,7 +495,7 @@ const ValuesPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">
                   {selectedDream ? "Update Dream" : "Add Dream"}
@@ -521,7 +505,7 @@ const ValuesPage = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>

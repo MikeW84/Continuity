@@ -232,7 +232,6 @@ export const values = pgTable("values", {
 export const insertValueSchema = createInsertSchema(values).pick({
   title: true,
   description: true,
-  alignmentScore: true,
   userId: true,
 });
 
