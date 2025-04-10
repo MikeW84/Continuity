@@ -7,17 +7,17 @@ import { navigateToAddItem } from "@/lib/navigationHelpers";
 
 const ProjectsSection = () => {
   const { projects, setPriorityProject, isLoading } = useAppContext();
-  
+
   const getDueInDays = (dueDate: Date | null) => {
     if (!dueDate) return "No due date";
-    
+
     const days = differenceInDays(new Date(dueDate), new Date());
     if (days === 0) return "Due today";
     if (days === 1) return "Due tomorrow";
     if (days < 0) return `Overdue by ${Math.abs(days)} days`;
     return `Due in ${days} days`;
   };
-  
+
   const handleSetPriority = async (id: number) => {
     await setPriorityProject(id);
   };
@@ -30,9 +30,9 @@ const ProjectsSection = () => {
             <Skeleton className="h-8 w-24" />
             <Skeleton className="h-8 w-8 rounded-full" />
           </div>
-          
+
           <Skeleton className="h-32 w-full mb-6" />
-          
+
           <div className="space-y-4">
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
@@ -58,7 +58,7 @@ const ProjectsSection = () => {
               <i className="ri-more-2-fill"></i>
             </button>
           </div>
-          
+
           {/* The One Thing Section */}
           {priorityProject ? (
             <div className="mb-6 bg-primary bg-opacity-5 p-4 rounded-lg border-l-4 border-accent">
@@ -91,7 +91,7 @@ const ProjectsSection = () => {
               <p className="text-secondary">No priority project set. Select "Make Priority" on a project below.</p>
             </div>
           )}
-          
+
           {/* Other Projects */}
           {otherProjects.map(project => (
             <div 
@@ -119,14 +119,14 @@ const ProjectsSection = () => {
                   <span className="ml-2 text-xs text-secondary">{project.progress}%</span>
                 </div>
                 <div>
-                  <span className="text-xs text-secondary bg-gray-100 py-1 px-2 rounded">
+                  <span className="text-xs text-secondary bg-muted/80 py-1 px-2 rounded font-medium">
                     {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
                   </span>
                 </div>
               </div>
             </div>
           ))}
-          
+
           <button 
             className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-2 transition-colors"
             onClick={() => navigateToAddItem('/projects')}
