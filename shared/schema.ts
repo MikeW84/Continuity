@@ -226,7 +226,6 @@ export const values = pgTable("values", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  alignmentScore: integer("alignment_score").default(0),
   userId: integer("user_id").notNull(),
 });
 

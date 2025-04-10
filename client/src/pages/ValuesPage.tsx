@@ -15,7 +15,6 @@ import { z } from "zod";
 const valueFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  alignmentScore: z.number().min(0).max(100).default(0),
 });
 
 type ValueFormValues = z.infer<typeof valueFormSchema>;
@@ -45,7 +44,6 @@ const ValuesPage = () => {
     defaultValues: {
       title: "",
       description: "",
-      alignmentScore: 0,
     },
   });
 
@@ -425,29 +423,7 @@ const ValuesPage = () => {
                 )}
               />
               
-              <FormField
-                control={valueForm.control}
-                name="alignmentScore"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Alignment ({field.value}%)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        step="5" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      How well your current projects align with this value
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
               
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">

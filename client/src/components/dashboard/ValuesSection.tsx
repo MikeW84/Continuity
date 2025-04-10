@@ -59,19 +59,6 @@ const ValuesSection = () => {
                 <div key={value.id} className="mb-4 p-4 bg-primary bg-opacity-5 rounded-lg">
                   <h4 className="font-inter font-medium mb-2">{value.title}</h4>
                   <p className="text-sm text-secondary mb-3">{value.description}</p>
-                  
-                  <div className="flex items-center text-xs text-primary font-medium">
-                    <span className="mr-2">Project Alignment:</span>
-                    <div className="flex items-center">
-                      <div className="h-2 w-20 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-success"
-                          style={{ width: `${value.alignmentScore}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-2 text-xs text-secondary">{value.alignmentScore}%</span>
-                    </div>
-                  </div>
                 </div>
               ))
             )}
