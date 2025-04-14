@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,6 +17,7 @@ import { z } from "zod";
 const projectFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
+  resources: z.string().optional(),
   progress: z.number().min(0).max(100).default(0),
   dueDate: z.string().optional(),
   valueIds: z.array(z.number()).optional(),
@@ -68,6 +69,7 @@ const ProjectsPage = () => {
       form.reset({
         title: "",
         description: "",
+        resources: "",
         progress: 0,
         dueDate: "",
         valueIds: [],
@@ -191,8 +193,11 @@ const ProjectsPage = () => {
             form.reset({
               title: "",
               description: "",
+              resources: "",
               progress: 0,
               dueDate: "",
+              valueIds: [],
+              dreamIds: [],
             });
             setIsAddDialogOpen(true);
           }}
