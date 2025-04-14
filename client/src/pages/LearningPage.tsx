@@ -64,12 +64,18 @@ const LearningPage = () => {
   const learningQueue = learningItems.filter(item => !item.isCurrentlyLearning);
 
   const handleAddLearningItem = async (data: LearningItemFormValues) => {
+    // Ensure resources is a string (not undefined)
+    const formattedData = {
+      ...data,
+      resources: data.resources || ""
+    };
+    
     if (selectedItem) {
       // Update existing learning item
-      await updateLearningItem(selectedItem, data);
+      await updateLearningItem(selectedItem, formattedData);
     } else {
       // Add new learning item
-      await addLearningItem(data);
+      await addLearningItem(formattedData);
     }
     
     setIsAddDialogOpen(false);
@@ -194,7 +200,13 @@ const LearningPage = () => {
                       
                       <CardContent>
                         <div className="mt-4 space-y-4">
-                          <div>
+                          <div className="space-y-3">
+                            {item.resources && (
+                              <div>
+                                <span className="text-sm font-medium">Resources:</span>
+                                <p className="text-sm text-muted-foreground mt-1">{item.resources}</p>
+                              </div>
+                            )}
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-sm">Progress</span>
                               <span className="text-sm font-medium">{item.progress}%</span>
@@ -271,6 +283,12 @@ const LearningPage = () => {
                               <i className={item.category?.toLowerCase().includes('language') ? "ri-translate-2 text-secondary text-xs mr-1" : "ri-book-open-line text-secondary text-xs mr-1"}></i>
                               <span className="text-xs text-secondary">{item.category}</span>
                             </div>
+                            {item.resources && (
+                              <div className="mt-2">
+                                <span className="text-xs text-secondary">Resources: </span>
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.resources}</p>
+                              </div>
+                            )}
                           </div>
                           
                           <div className="flex">
