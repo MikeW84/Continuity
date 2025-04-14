@@ -83,11 +83,15 @@ const ProjectsPage = () => {
 
   const handleAddProject = async (data: ProjectFormValues) => {
     try {
+      // Find the current project if we're editing
+      const currentProject = selectedProject ? projects.find(p => p.id === selectedProject) : null;
+      
       const projectData = {
         title: data.title,
         description: data.description || "",
         progress: data.progress,
-        isPriority: false,
+        // Only set isPriority to false for new projects, preserve it when editing
+        isPriority: currentProject ? currentProject.isPriority : false,
         valueIds: data.valueIds || [],
         dreamIds: data.dreamIds || [],
       };
