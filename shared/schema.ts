@@ -93,6 +93,11 @@ export const projectDreamsRelations = relations(projectDreams, ({ one }) => ({
 export const projectWithRelationsSchema = insertProjectSchema.extend({
   valueIds: z.array(z.number()).optional(),
   dreamIds: z.array(z.number()).optional(),
+  // Accept either a Date object or a date string for dueDate
+  dueDate: z.union([
+    z.date(),
+    z.string().transform((str) => str ? new Date(str) : null)
+  ]).optional().nullable(),
 });
 
 export type ProjectWithRelations = z.infer<typeof projectWithRelationsSchema>;
