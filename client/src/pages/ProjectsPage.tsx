@@ -92,12 +92,18 @@ const ProjectsPage = () => {
         dreamIds: data.dreamIds || [],
       };
       
-      // Convert date string to Date object if it exists, else use null
-      const dueDate = data.dueDate ? new Date(data.dueDate) : null;
+      // For dueDate, parse it correctly or leave it null
+      let dueDate = null;
+      if (data.dueDate) {
+        // Create a proper Date object with time set to noon to avoid timezone issues
+        const dateStr = data.dueDate;
+        const [year, month, day] = dateStr.split('-').map(Number);
+        dueDate = new Date(year, month - 1, day, 12, 0, 0);
+      }
       
       // Handle editing vs adding
       if (selectedProject) {
-        // When editing, only pass the dueDate if it exists to avoid Date conversion issues
+        // When editing, only pass the dueDate if it exists
         await updateProject(selectedProject, {
           ...projectData,
           ...(dueDate && { dueDate }) // Only include dueDate if it exists
