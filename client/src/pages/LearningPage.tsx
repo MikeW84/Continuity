@@ -51,6 +51,7 @@ const LearningPage = () => {
       form.reset({
         title: "",
         category: "",
+        resources: "",
         progress: 0,
         isCurrentlyLearning: false,
       });
@@ -88,6 +89,7 @@ const LearningPage = () => {
     form.reset({
       title: item.title,
       category: item.category || "",
+      resources: item.resources || "",
       progress: item.progress,
       isCurrentlyLearning: item.isCurrentlyLearning,
     });
@@ -109,6 +111,7 @@ const LearningPage = () => {
             form.reset({
               title: "",
               category: "",
+              resources: "",
               progress: 0,
               isCurrentlyLearning: false,
             });
@@ -146,6 +149,7 @@ const LearningPage = () => {
                       form.reset({
                         title: "",
                         category: "",
+                        resources: "",
                         progress: 0,
                         isCurrentlyLearning: true,
                       });
@@ -245,6 +249,7 @@ const LearningPage = () => {
                       form.reset({
                         title: "",
                         category: "",
+                        resources: "",
                         progress: 0,
                         isCurrentlyLearning: false,
                       });
@@ -308,6 +313,7 @@ const LearningPage = () => {
                           form.reset({
                             title: "",
                             category: "",
+                            resources: "",
                             progress: 0,
                             isCurrentlyLearning: false,
                           });
@@ -357,6 +363,24 @@ const LearningPage = () => {
                     <FormLabel>Category</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter category (e.g. Programming, Language)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="resources"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Resources</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Enter books, courses, websites, or other learning resources (optional)" 
+                        className="resize-y min-h-[100px]"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
