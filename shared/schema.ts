@@ -27,6 +27,7 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
+  resources: text("resources"),
   progress: integer("progress").default(0),
   dueDate: timestamp("due_date"),
   isPriority: boolean("is_priority").default(false),
@@ -50,6 +51,7 @@ export const projectDreams = pgTable("project_dreams", {
 export const insertProjectSchema = createInsertSchema(projects).pick({
   title: true,
   description: true,
+  resources: true,
   progress: true,
   dueDate: true,
   isPriority: true,
@@ -107,6 +109,7 @@ export const ideas = pgTable("ideas", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
+  resources: text("resources"),
   votes: integer("votes").default(0),
   tags: text("tags").array(),
   userId: integer("user_id").notNull(),
@@ -115,6 +118,7 @@ export const ideas = pgTable("ideas", {
 export const insertIdeaSchema = createInsertSchema(ideas).pick({
   title: true,
   description: true,
+  resources: true,
   votes: true,
   tags: true,
   userId: true,
@@ -128,6 +132,7 @@ export const learningItems = pgTable("learning_items", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   category: text("category"),
+  resources: text("resources"),
   progress: integer("progress").default(0),
   isCurrentlyLearning: boolean("is_currently_learning").default(false),
   userId: integer("user_id").notNull(),
@@ -136,6 +141,7 @@ export const learningItems = pgTable("learning_items", {
 export const insertLearningItemSchema = createInsertSchema(learningItems).pick({
   title: true,
   category: true,
+  resources: true,
   progress: true,
   isCurrentlyLearning: true,
   userId: true,
