@@ -313,8 +313,11 @@ const ProjectsPage = () => {
               </div>
               <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
                 <div 
-                  className="h-full bg-success"
-                  style={{ width: `${project.progress}%` }}
+                  className="h-full"
+                  style={{ 
+                    width: `${project.progress}%`,
+                    backgroundColor: "hsl(184, 22%, 65%)" /* Use the --success color directly */
+                  }}
                 ></div>
               </div>
               

@@ -112,8 +112,11 @@ const ProjectsSection = () => {
                 <div className="flex items-center">
                   <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-success" 
-                      style={{ width: `${project.progress}%` }}
+                      className="h-full" 
+                      style={{ 
+                        width: `${project.progress}%`,
+                        backgroundColor: "hsl(184, 22%, 65%)" /* Use the --success color directly */
+                      }}
                     ></div>
                   </div>
                   <span className="ml-2 text-xs text-secondary">{project.progress}%</span>
