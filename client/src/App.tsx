@@ -11,30 +11,31 @@ import LearningPage from "@/pages/LearningPage";
 import HealthHabitsPage from "@/pages/HealthHabitsPage";
 import FamilyPage from "@/pages/FamilyPage";
 import ValuesPage from "@/pages/ValuesPage";
+import AuthPage from "@/pages/AuthPage";
 import { AppProvider } from "./context/AppContext";
-
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={DashboardPage} />
-      <Route path="/projects" component={ProjectsPage} />
-      <Route path="/ideas" component={IdeasPage} />
-      <Route path="/learning" component={LearningPage} />
-      <Route path="/health-habits" component={HealthHabitsPage} />
-      <Route path="/family" component={FamilyPage} />
-      <Route path="/values" component={ValuesPage} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <Layout>
-          <Router />
-        </Layout>
+        <Switch>
+          <Route path="/auth" component={AuthPage} />
+          <Route>
+            <Layout>
+              <Switch>
+                <ProtectedRoute path="/" component={DashboardPage} />
+                <ProtectedRoute path="/projects" component={ProjectsPage} />
+                <ProtectedRoute path="/ideas" component={IdeasPage} />
+                <ProtectedRoute path="/learning" component={LearningPage} />
+                <ProtectedRoute path="/health-habits" component={HealthHabitsPage} />
+                <ProtectedRoute path="/family" component={FamilyPage} />
+                <ProtectedRoute path="/values" component={ValuesPage} />
+                <Route component={NotFound} />
+              </Switch>
+            </Layout>
+          </Route>
+        </Switch>
         <Toaster />
       </AppProvider>
     </QueryClientProvider>

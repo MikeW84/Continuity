@@ -83,6 +83,17 @@ const Header = ({ title, subtitle }: HeaderProps) => {
         >
           <i className="ri-add-line"></i>
         </Button>
+        <Button 
+          variant="outline" 
+          className="ml-2"
+          onClick={() => {
+            localStorage.removeItem("isAuthenticated");
+            navigate("/auth");
+          }}
+        >
+          <i className="ri-logout-box-line mr-1"></i>
+          <span className="hidden md:inline">Logout</span>
+        </Button>
       </div>
       
       <Dialog open={isAddMenuOpen} onOpenChange={setIsAddMenuOpen}>
