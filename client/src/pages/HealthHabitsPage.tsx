@@ -278,7 +278,7 @@ const HealthHabitsPage = () => {
               setSelectedExercise(null);
               exerciseForm.reset({
                 name: "",
-                date: new Date().toISOString().split('T')[0],
+                date: getNoonDate(),
                 category: "Cardio",
                 time: null,
                 distance: null,
@@ -421,7 +421,7 @@ const HealthHabitsPage = () => {
                       setSelectedExercise(null);
                       exerciseForm.reset({
                         name: "",
-                        date: new Date().toISOString().split('T')[0],
+                        date: getNoonDate(),
                         category: "Cardio",
                         time: null,
                         distance: null,
@@ -489,7 +489,7 @@ const HealthHabitsPage = () => {
                                 <h3 className="font-inter font-medium">{exercise.name}</h3>
                                 <p className="text-sm text-secondary">
                                   {typeof exercise.date === 'string' 
-                                    ? new Date(exercise.date).toLocaleDateString() 
+                                    ? new Date(exercise.date + 'T12:00:00').toLocaleDateString() 
                                     : new Date(exercise.date as unknown as string).toLocaleDateString()}
                                 </p>
                               </div>
@@ -550,7 +550,7 @@ const HealthHabitsPage = () => {
                             setSelectedExercise(null);
                             exerciseForm.reset({
                               name: "",
-                              date: new Date().toISOString().split('T')[0],
+                              date: getNoonDate(),
                               category: "Cardio",
                               time: null,
                               distance: null,
