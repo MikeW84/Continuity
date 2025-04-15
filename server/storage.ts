@@ -958,7 +958,9 @@ export class DatabaseStorage implements IStorage {
           habitId,
           year,
           month,
-          day
+          day,
+          date: new Date(), // Add a default date to satisfy existing constraint
+          completed: true   // Set to true for consistency
         })
         .returning();
       
