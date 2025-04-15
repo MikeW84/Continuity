@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import HabitCalendar from "@/components/habits/HabitCalendar";
+import ExerciseCalendar from "@/components/exercises/ExerciseCalendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Habit form schema
@@ -422,6 +423,23 @@ const HealthHabitsPage = () => {
               ) : (
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold mb-4">Exercise Tracking</h3>
+                  
+                  {/* Exercise Calendar */}
+                  <div className="mb-8">
+                    <div className="mb-4">
+                      <h4 className="text-lg font-medium mb-3">Monthly Overview</h4>
+                      <p className="text-sm text-secondary mb-4">
+                        Track your exercises by day with color coding for each type.
+                        Days with multiple exercise types show gradients.
+                      </p>
+                      
+                      <div className="max-w-lg mx-auto">
+                        <ExerciseCalendar />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h4 className="text-lg font-medium mb-3">Exercise History</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {exercises.map((exercise) => (
                       <Card key={exercise.id} className={

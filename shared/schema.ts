@@ -233,7 +233,8 @@ export const exerciseCompletions = pgTable("exercise_completions", {
   userId: integer("user_id").notNull(),
 });
 
-export const insertExerciseSchema = createInsertSchema(exercises).pick({
+// First create the base schema
+const baseExerciseSchema = createInsertSchema(exercises).pick({
   name: true,
   date: true,
   category: true,
@@ -246,6 +247,15 @@ export const insertExerciseSchema = createInsertSchema(exercises).pick({
   duration: true,
   musclesWorked: true,
   userId: true,
+});
+
+// Then extend it to handle string dates (similar to projectWithRelationsSchema)
+export const insertExerciseSchema = baseExerciseSchema.extend({
+  // Accept either a Date object or a date string for date
+  date: z.union([
+    z.date(),
+    z.string().transform((str) => str ? new Date(str) : null)
+  ]),
 });
 
 export const insertExerciseCompletionSchema = createInsertSchema(exerciseCompletions).pick({
