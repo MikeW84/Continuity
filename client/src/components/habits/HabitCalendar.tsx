@@ -58,21 +58,21 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
   // Toggle completion for a specific date
   const handleToggleDay = async (date: Date) => {
     if (!isSameMonth(date, currentMonth)) return;
-    
+
     try {
       // Extract simple year, month, day integers to pass to backend
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth() + 1; // 1-based month
       const day = parseInt(format(date, 'd')); // Get day number from date
-      
+
       console.log(`Calendar day clicked: Year ${year}, Month ${month}, Day ${day}`);
-      
+
       // Optimistic update - toggle the day in the local state immediately
       setCompletions(prevCompletions => {
         const existingCompletion = prevCompletions.find(
           c => c.year === year && c.month === month && c.day === day
         );
-        
+
         if (existingCompletion) {
           // Remove the completion
           return prevCompletions.filter(c => 
@@ -90,10 +90,10 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
           }];
         }
       });
-      
+
       // Make the API call
       await toggleHabitDay(habitId, year, month, day);
-      
+
       // After toggling, refetch the completions to ensure data consistency
       const data = await getHabitCompletions(
         habitId, 
@@ -103,7 +103,7 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
       setCompletions(data);
     } catch (error) {
       console.error('Error toggling habit completion:', error);
-      
+
       // On error, refetch to ensure the UI reflects the correct state
       const data = await getHabitCompletions(
         habitId, 
@@ -118,7 +118,7 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
   const isDayCompleted = (date: Date) => {
     // Simply check if the day number is in the completions
     const dayNum = parseInt(format(date, 'd'));
-    
+
     return completions.some(completion => {
       return completion.year === currentMonth.getFullYear() && 
              completion.month === currentMonth.getMonth() + 1 && 
@@ -129,6 +129,28 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
   // Calculate progress for the month
   const completedDaysCount = completions.length;
   const progressPercentage = targetDays ? Math.min(100, (completedDaysCount / targetDays) * 100) : 0;
+
+  // Organize days into weeks based on actual month start
+  const getWeeks = () => {
+    const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const startDay = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const totalDays = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    const totalSlots = Math.ceil((startDay + totalDays) / 7) * 7;
+    const calendarDays: (number | null)[] = Array(totalSlots).fill(null);
+
+    // Fill in the actual days
+    for (let i = 0; i < totalDays; i++) {
+      calendarDays[i + startDay] = i + 1;
+    }
+
+    // Group into weeks
+    const weeks: (number | null)[][] = [];
+    for (let i = 0; i < calendarDays.length; i += 7) {
+      weeks.push(calendarDays.slice(i, i + 7));
+    }
+
+    return weeks;
+  };
 
   return (
     <Card className="w-full">
@@ -184,7 +206,7 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
               {days.map((day, i) => {
                 const isCompleted = isDayCompleted(day);
                 const isCurrentMonth = isSameMonth(day, currentMonth);
-                
+
                 return (
                   <Button
                     key={i}
