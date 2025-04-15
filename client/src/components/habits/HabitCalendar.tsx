@@ -203,6 +203,9 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
                   {day}
                 </div>
               ))}
+              {Array.from({ length: startOfMonth(currentMonth).getDay() }).map((_, i) => (
+                <div key={`empty-${i}`} className="h-9" />
+              ))}
               {days.map((day, i) => {
                 const isCompleted = isDayCompleted(day);
                 const isCurrentMonth = isSameMonth(day, currentMonth);
