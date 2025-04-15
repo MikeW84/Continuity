@@ -1,12 +1,23 @@
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import MiniHabitCalendar from "../habits/MiniHabitCalendar";
+import { useState } from "react";
 
 const HealthHabitsSection = () => {
-  const { habits, healthMetrics, toggleHabit, isLoading } = useAppContext();
+  const { habits, healthMetrics, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
+  const [expandedHabit, setExpandedHabit] = useState<number | null>(null);
 
   const handleToggleHabit = async (id: number) => {
     await toggleHabit(id);
+  };
+
+  const handleToggleHabitDay = async (habitId: number, year: number, month: number, day: number) => {
+    await toggleHabitDay(habitId, year, month, day);
+  };
+
+  const toggleExpandHabit = (habitId: number) => {
+    setExpandedHabit(expandedHabit === habitId ? null : habitId);
   };
 
   if (isLoading) {
@@ -54,33 +65,52 @@ const HealthHabitsSection = () => {
             </div>
           ) : (
             habits.map(habit => (
-              <div key={habit.id} className="flex items-center mb-3">
-                <button 
-                  className={`h-6 w-6 rounded-full border-2 ${
-                    habit.isCompletedToday 
-                      ? "border-success mr-3 flex items-center justify-center bg-success bg-opacity-10" 
-                      : "border-secondary mr-3 flex items-center justify-center"
-                  }`}
-                  onClick={() => handleToggleHabit(habit.id)}
-                >
-                  {habit.isCompletedToday && (
-                    <i className="ri-check-line text-success"></i>
-                  )}
-                </button>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-inter font-medium text-sm">{habit.title}</span>
-                    <span className={`text-xs ${habit.completedDays / habit.totalDays > 0.5 ? "text-success" : "text-secondary"}`}>
-                      {habit.completedDays}/{habit.totalDays} days
-                    </span>
-                  </div>
-                  <div className="h-1 w-full bg-gray-200 rounded-full mt-1">
-                    <div 
-                      className={`h-full ${habit.completedDays / habit.totalDays > 0.5 ? "bg-success" : "bg-secondary"} rounded-full`} 
-                      style={{ width: `${(habit.completedDays / habit.totalDays) * 100}%` }}
-                    ></div>
+              <div key={habit.id} className="mb-4">
+                <div className="flex items-center mb-1">
+                  <button 
+                    className={`h-6 w-6 rounded-full border-2 ${
+                      habit.isCompletedToday 
+                        ? "border-success mr-3 flex items-center justify-center bg-success bg-opacity-10" 
+                        : "border-secondary mr-3 flex items-center justify-center"
+                    }`}
+                    onClick={() => handleToggleHabit(habit.id)}
+                  >
+                    {habit.isCompletedToday && (
+                      <i className="ri-check-line text-success"></i>
+                    )}
+                  </button>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span 
+                        className="font-inter font-medium text-sm cursor-pointer hover:text-primary"
+                        onClick={() => toggleExpandHabit(habit.id)}
+                      >
+                        {habit.title} {expandedHabit === habit.id ? 
+                          <i className="ri-arrow-up-s-line inline-block ml-1"></i> : 
+                          <i className="ri-arrow-down-s-line inline-block ml-1"></i>
+                        }
+                      </span>
+                      <span className={`text-xs ${habit.completedDays / (habit.targetDays || 20) > 0.5 ? "text-success" : "text-secondary"}`}>
+                        {habit.completedDays}/{habit.targetDays || 20} days
+                      </span>
+                    </div>
+                    <div className="h-1 w-full bg-gray-200 rounded-full mt-1">
+                      <div 
+                        className={`h-full ${habit.completedDays / (habit.targetDays || 20) > 0.5 ? "bg-success" : "bg-secondary"} rounded-full`} 
+                        style={{ width: `${(habit.completedDays / (habit.targetDays || 20)) * 100}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
+                
+                {expandedHabit === habit.id && (
+                  <div className="ml-9">
+                    <MiniHabitCalendar 
+                      habitId={habit.id} 
+                      onToggleDay={(year, month, day) => handleToggleHabitDay(habit.id, year, month, day)}
+                    />
+                  </div>
+                )}
               </div>
             ))
           )}
