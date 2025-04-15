@@ -573,20 +573,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const toggleHabitDay = async (habitId: number, year: number, month: number, day: number) => {
     try {
       console.log(`Toggling habit day: ${year}-${month}-${day}`);
+      
+      // Make sure habitId exists before proceeding
+      if (!habitId) {
+        throw new Error('Invalid habit ID');
+      }
+      
       // Send the simple integer values directly to the backend
-      await apiRequest('POST', `/api/habits/${habitId}/toggle-day`, { 
+      const response = await apiRequest('POST', `/api/habits/${habitId}/toggle-day`, { 
         year, 
         month, 
         day 
       });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      // Refresh habits data to update completion counts
       await fetchHabits();
+      
+      return await response.json();
     } catch (error) {
+      console.error('Error toggling habit day:', error);
       toast({
         title: "Failed to update habit",
         description: "There was a problem updating your habit completion.",
         variant: "destructive"
       });
-      console.error('Error toggling habit day:', error);
       throw error;
     }
   };

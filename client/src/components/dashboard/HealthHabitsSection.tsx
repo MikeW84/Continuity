@@ -3,10 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import MiniHabitCalendar from "../habits/MiniHabitCalendar";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const HealthHabitsSection = () => {
   const { habits, healthMetrics, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
   const [expandedHabit, setExpandedHabit] = useState<number | null>(null);
+  const { toast } = useToast();
 
   const handleToggleHabit = async (id: number) => {
     await toggleHabit(id);
@@ -16,8 +18,27 @@ const HealthHabitsSection = () => {
     await toggleHabitDay(habitId, year, month, day);
   };
 
+  // Toggle habit expansion with safety check for deleted habits
   const toggleExpandHabit = (habitId: number) => {
-    setExpandedHabit(expandedHabit === habitId ? null : habitId);
+    // Close if it's already open
+    if (expandedHabit === habitId) {
+      setExpandedHabit(null);
+      return;
+    }
+    
+    // Verify that the habit still exists before expanding
+    const habitExists = habits.some(h => h.id === habitId);
+    if (habitExists) {
+      setExpandedHabit(habitId);
+    } else {
+      // If habit no longer exists, reset expanded state and show a message
+      setExpandedHabit(null);
+      toast({
+        title: "Habit not found",
+        description: "This habit may have been deleted.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -90,14 +111,14 @@ const HealthHabitsSection = () => {
                           <i className="ri-arrow-down-s-line inline-block ml-1"></i>
                         }
                       </span>
-                      <span className={`text-xs ${habit.completedDays / (habit.targetDays || 20) > 0.5 ? "text-success" : "text-secondary"}`}>
-                        {habit.completedDays}/{habit.targetDays || 20} days
+                      <span className={`text-xs ${(habit.completedDays || 0) / (habit.targetDays || 20) > 0.5 ? "text-success" : "text-secondary"}`}>
+                        {habit.completedDays || 0}/{habit.targetDays || 20} days
                       </span>
                     </div>
                     <div className="h-1 w-full bg-gray-200 rounded-full mt-1">
                       <div 
-                        className={`h-full ${habit.completedDays / (habit.targetDays || 20) > 0.5 ? "bg-success" : "bg-secondary"} rounded-full`} 
-                        style={{ width: `${(habit.completedDays / (habit.targetDays || 20)) * 100}%` }}
+                        className={`h-full ${(habit.completedDays || 0) / (habit.targetDays || 20) > 0.5 ? "bg-success" : "bg-secondary"} rounded-full`} 
+                        style={{ width: `${((habit.completedDays || 0) / (habit.targetDays || 20)) * 100}%` }}
                       ></div>
                     </div>
                   </div>

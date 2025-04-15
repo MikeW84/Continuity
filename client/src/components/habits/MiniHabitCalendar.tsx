@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "../ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 // Define the HabitCompletion type here for clarity
 interface HabitCompletion {
@@ -9,6 +10,9 @@ interface HabitCompletion {
   year: number;
   month: number;
   day: number;
+  // Additional fields that might be present in the API response
+  date?: string | null;
+  completed?: boolean | null;
 }
 
 interface MiniHabitCalendarProps {
@@ -17,6 +21,7 @@ interface MiniHabitCalendarProps {
 }
 
 const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -31,18 +36,24 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
   // Create an array of days from 1 to days in month
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   
-  // Query key for habit completions - use array for proper caching
+  // Flag to prevent multiple simultaneous API calls
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Query key for habit completions
   const completionsQueryKey = useMemo(() => 
     [`/api/habits/${habitId}/completions/${currentYear}/${currentMonth}`],
     [habitId, currentYear, currentMonth]
   );
   
-  // Get habit completions for current month
+  // Get habit completions for current month - with error handling
   const { data = [], isLoading } = useQuery<HabitCompletion[]>({
     queryKey: completionsQueryKey,
     enabled: !!habitId && habitId > 0,
     refetchOnWindowFocus: false,
-    retry: 2,
+    retry: 3,
+    // Prevent fetching again for a short period to avoid flicker
+    staleTime: 2000,
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
   
   // Set of completed days
@@ -50,22 +61,41 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
   
   // Update completed days when completions data changes
   useEffect(() => {
-    if (!data || !Array.isArray(data)) return;
+    if (!Array.isArray(data)) return;
     
     const completedDaysSet = new Set<number>();
-    for (const completion of data) {
+    data.forEach(completion => {
       if (completion && typeof completion.day === 'number') {
         completedDaysSet.add(completion.day);
       }
+    });
+    
+    // Only update if the set is different to avoid endless render loops
+    let needsUpdate = completedDaysSet.size !== completedDays.size;
+    
+    // Check if sets have different content only if sizes differ
+    if (!needsUpdate) {
+      // Convert both sets to arrays for comparison
+      const newDays = Array.from(completedDaysSet);
+      const oldDays = Array.from(completedDays);
+      
+      // Check if every day in the new set exists in the old set
+      needsUpdate = !newDays.every(day => oldDays.includes(day));
     }
-    setCompletedDays(completedDaysSet);
+    
+    if (needsUpdate) {
+      setCompletedDays(completedDaysSet);
+    }
   }, [data]);
   
-  // Handle clicking on a day - using useCallback to prevent excessive re-renders
+  // Handle clicking on a day with debouncing to prevent multiple rapid clicks
   const handleDayClick = useCallback(async (day: number) => {
+    if (isSaving) return; // Prevent multiple simultaneous saves
+    
     try {
+      setIsSaving(true);
+      
       // Add optimistic update to improve UI responsiveness
-      // Clone the current completedDays set
       const newCompletedDays = new Set(completedDays);
       
       // Toggle day in our local state immediately for better UX
@@ -81,14 +111,36 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
       // Make API call
       await onToggleDay(currentYear, currentMonth, day);
       
-      // Manually invalidate the query to refresh data after API call succeeds
-      queryClient.invalidateQueries({ queryKey: completionsQueryKey });
+      // Force refetch of the data after toggle
+      await queryClient.invalidateQueries({ queryKey: completionsQueryKey });
+      await queryClient.refetchQueries({ queryKey: completionsQueryKey });
+      
+      // Also invalidate habits list to update counts
+      queryClient.invalidateQueries({ queryKey: ['/api/habits'] });
     } catch (error) {
       console.error(`Error toggling day ${day}:`, error);
-      // If the API call fails, revert our optimistic update
-      queryClient.invalidateQueries({ queryKey: completionsQueryKey });
+      
+      // Show error to user
+      toast({
+        title: "Failed to update habit",
+        description: "There was a problem updating your habit completion.",
+        variant: "destructive",
+      });
+      
+      // Revert optimistic update
+      const originalData = queryClient.getQueryData<HabitCompletion[]>(completionsQueryKey) || [];
+      const restoredSet = new Set<number>();
+      originalData.forEach(completion => {
+        if (completion && typeof completion.day === 'number') {
+          restoredSet.add(completion.day);
+        }
+      });
+      setCompletedDays(restoredSet);
+    } finally {
+      // Allow saving again
+      setIsSaving(false);
     }
-  }, [currentYear, currentMonth, completedDays, onToggleDay, queryClient, completionsQueryKey]);
+  }, [currentYear, currentMonth, completedDays, onToggleDay, queryClient, completionsQueryKey, toast, isSaving]);
   
   if (isLoading) {
     return (
