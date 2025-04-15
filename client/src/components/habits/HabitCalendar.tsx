@@ -60,12 +60,16 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
     if (!isSameMonth(date, currentMonth)) return;
     
     try {
-      // Format the date in ISO format to ensure consistent date representation
-      const formattedDate = new Date(date);
-      // Set to noon UTC to avoid timezone issues
-      formattedDate.setUTCHours(12, 0, 0, 0);
+      // Create a date string in YYYY-MM-DD format, which avoids timezone issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
       
-      await toggleHabitByDate(habitId, formattedDate);
+      // Create a new date object at current timezone (will be stored consistently on server)
+      const localDate = new Date(`${dateString}T12:00:00`);
+      
+      await toggleHabitByDate(habitId, localDate);
       // After toggling, refetch the completions to update the UI
       const data = await getHabitCompletions(
         habitId, 
@@ -81,15 +85,20 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
   // Check if a day is completed
   const isDayCompleted = (day: Date) => {
     return completions.some(completion => {
-      // Create normalized dates for comparison
+      // Get the date part only in YYYY-MM-DD format for comparison
+      const dayYear = day.getFullYear();
+      const dayMonth = String(day.getMonth() + 1).padStart(2, '0');
+      const dayDate = String(day.getDate()).padStart(2, '0');
+      const dayString = `${dayYear}-${dayMonth}-${dayDate}`;
+      
+      // Extract date part from completion date
       const completionDate = new Date(completion.date);
-      const normalizedDay = new Date(day);
+      const compYear = completionDate.getFullYear();
+      const compMonth = String(completionDate.getMonth() + 1).padStart(2, '0');
+      const compDate = String(completionDate.getDate()).padStart(2, '0');
+      const compString = `${compYear}-${compMonth}-${compDate}`;
       
-      // Reset time portions to avoid timezone issues
-      completionDate.setHours(0, 0, 0, 0);
-      normalizedDay.setHours(0, 0, 0, 0);
-      
-      return completion.completed && isSameDay(completionDate, normalizedDay);
+      return completion.completed && (dayString === compString);
     });
   };
 
