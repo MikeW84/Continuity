@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths } from 'date-fns';
 
 interface HabitCalendarProps {
   habitId: number;
@@ -13,7 +13,7 @@ interface HabitCalendarProps {
 }
 
 const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) => {
-  const { getHabitCompletions, toggleHabitByDate } = useAppContext();
+  const { getHabitCompletions, toggleHabitDay } = useAppContext();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [completions, setCompletions] = useState<HabitCompletion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,29 +60,20 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
     if (!isSameMonth(date, currentMonth)) return;
     
     try {
-      // Create a new Date object based on the clicked date
-      // and add one day to compensate for timezone issues
-      const adjustedDate = new Date(date);
-      adjustedDate.setDate(adjustedDate.getDate() + 1);
+      // Extract simple year, month, day integers to pass to backend
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth() + 1; // 1-based month
+      const day = parseInt(format(date, 'd')); // Get day number from date
       
-      // Format as YYYY-MM-DD string
-      const year = adjustedDate.getFullYear();
-      const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
-      const day = String(adjustedDate.getDate()).padStart(2, '0');
-      const dateString = `${year}-${month}-${day}`;
+      console.log(`Calendar day clicked: Year ${year}, Month ${month}, Day ${day}`);
       
-      console.log("Calendar day clicked:", date.toISOString());
-      console.log("Adjusted date string:", dateString);
+      await toggleHabitDay(habitId, year, month, day);
       
-      // Create a date at noon to avoid any timezone issues
-      const fixedDate = new Date(`${dateString}T12:00:00Z`);
-      
-      await toggleHabitByDate(habitId, fixedDate);
       // After toggling, refetch the completions to update the UI
       const data = await getHabitCompletions(
         habitId, 
-        currentMonth.getFullYear(), 
-        currentMonth.getMonth() + 1
+        year,
+        month
       );
       setCompletions(data);
     } catch (error) {
@@ -91,33 +82,19 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
   };
 
   // Check if a day is completed
-  const isDayCompleted = (day: Date) => {
+  const isDayCompleted = (date: Date) => {
+    // Simply check if the day number is in the completions
+    const dayNum = parseInt(format(date, 'd'));
+    
     return completions.some(completion => {
-      // Use the same date adjustment logic as when toggling
-      // Create a new adjusted date by adding 1 day to handle timezone
-      const adjustedDate = new Date(day);
-      adjustedDate.setDate(adjustedDate.getDate() + 1);
-      
-      // Format as YYYY-MM-DD string
-      const dayYear = adjustedDate.getFullYear();
-      const dayMonth = String(adjustedDate.getMonth() + 1).padStart(2, '0');
-      const dayDay = String(adjustedDate.getDate()).padStart(2, '0');
-      const dayString = `${dayYear}-${dayMonth}-${dayDay}`;
-      
-      // Extract date part from completion date 
-      const completionDate = new Date(completion.date);
-      // Use local date components for the server-stored dates
-      const compYear = completionDate.getFullYear();
-      const compMonth = String(completionDate.getMonth() + 1).padStart(2, '0');
-      const compDate = String(completionDate.getDate()).padStart(2, '0');
-      const compString = `${compYear}-${compMonth}-${compDate}`;
-      
-      return completion.completed && (dayString === compString);
+      return completion.year === currentMonth.getFullYear() && 
+             completion.month === currentMonth.getMonth() + 1 && 
+             completion.day === dayNum;
     });
   };
 
   // Calculate progress for the month
-  const completedDaysCount = completions.filter(c => c.completed).length;
+  const completedDaysCount = completions.length;
   const progressPercentage = targetDays ? Math.min(100, (completedDaysCount / targetDays) * 100) : 0;
 
   return (

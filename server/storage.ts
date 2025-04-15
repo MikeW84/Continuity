@@ -65,7 +65,7 @@ export interface IStorage {
   deleteHabit(id: number): Promise<boolean>;
   toggleHabitCompletion(id: number): Promise<Habit | undefined>;
   getHabitCompletions(habitId: number, year: number, month: number): Promise<HabitCompletion[]>;
-  toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined>;
+  toggleHabitDay(habitId: number, year: number, month: number, day: number): Promise<HabitCompletion | undefined>;
   
   // Health Metric methods
   getHealthMetrics(userId: number): Promise<HealthMetric[]>;
@@ -391,18 +391,19 @@ export class MemStorage implements IStorage {
     return [];
   }
   
-  async toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined> {
+  async toggleHabitDay(habitId: number, year: number, month: number, day: number): Promise<HabitCompletion | undefined> {
     // Just toggle today's completion in MemStorage
     const habit = await this.toggleHabitCompletion(habitId);
     
     if (!habit) return undefined;
     
-    // Return a mock HabitCompletion object
+    // Return a mock HabitCompletion object with the new format
     return {
       id: 1,
       habitId,
-      date,
-      completed: true
+      year,
+      month,
+      day
     };
   }
   
