@@ -390,9 +390,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If date is a string in YYYY-MM-DD format, create a proper Date object
       if (typeof modifiedBody.date === 'string' && modifiedBody.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const [year, month, day] = modifiedBody.date.split('-').map(Number);
-        // Create a date with just year, month, day components (month is 0-indexed in JS Date)
-        modifiedBody.date = new Date(year, month - 1, day);
+        // Use ISO format with T00:00:00.000Z to avoid timezone issues
+        modifiedBody.date = new Date(`${modifiedBody.date}T00:00:00.000Z`);
       }
       
       const exerciseData = validateRequest(insertExerciseSchema, {
