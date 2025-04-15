@@ -4,6 +4,7 @@ import {
   type Idea, type InsertIdea,
   type LearningItem, type InsertLearningItem,
   type Habit, type InsertHabit,
+  type HabitCompletion, type InsertHabitCompletion,
   type HealthMetric, type InsertHealthMetric,
   type DateIdea, type InsertDateIdea,
   type ParentingTask, type InsertParentingTask,
@@ -14,6 +15,7 @@ import {
   ideas,
   learningItems,
   habits,
+  habitCompletions,
   healthMetrics,
   dateIdeas,
   parentingTasks,
@@ -24,7 +26,7 @@ import {
 } from "@shared/schema";
 
 import { db } from "./db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -382,6 +384,26 @@ export class MemStorage implements IStorage {
     const updatedHabit = { ...habit, isCompletedToday, completedDays };
     this.habits.set(id, updatedHabit);
     return updatedHabit;
+  }
+  
+  async getHabitCompletions(habitId: number, year: number, month: number): Promise<HabitCompletion[]> {
+    // MemStorage doesn't track individual completions
+    return [];
+  }
+  
+  async toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined> {
+    // Just toggle today's completion in MemStorage
+    const habit = await this.toggleHabitCompletion(habitId);
+    
+    if (!habit) return undefined;
+    
+    // Return a mock HabitCompletion object
+    return {
+      id: 1,
+      habitId,
+      date,
+      completed: true
+    };
   }
   
   // Health Metric methods
