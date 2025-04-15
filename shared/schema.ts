@@ -203,26 +203,75 @@ export const habitCompletionsRelations = relations(habitCompletions, ({ one }) =
   habit: one(habits, { fields: [habitCompletions.habitId], references: [habits.id] })
 }));
 
-// Health Metrics Schema
-export const healthMetrics = pgTable("health_metrics", {
+// Exercise Schema
+export const exercises = pgTable("exercises", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  value: text("value").notNull(),
-  change: text("change"),
-  icon: text("icon"),
+  date: timestamp("date").notNull(),
+  category: text("category").notNull(), // 'Cardio', 'Strength', 'Flexibility'
+  // Optional fields that depend on the category
+  time: integer("time"), // in minutes - for Cardio
+  distance: integer("distance"), // in meters - for Cardio
+  heartRate: integer("heart_rate"), // peak heart rate - for Cardio
+  weight: integer("weight"), // in kg - for Strength
+  reps: integer("reps"), // for Strength
+  sets: integer("sets"), // for Strength
+  duration: integer("duration"), // in minutes - for Flexibility
+  musclesWorked: text("muscles_worked"), // for Flexibility
   userId: integer("user_id").notNull(),
 });
 
-export const insertHealthMetricSchema = createInsertSchema(healthMetrics).pick({
+// Exercise Completion Schema - for tracking which days exercises were completed
+export const exerciseCompletions = pgTable("exercise_completions", {
+  id: serial("id").primaryKey(),
+  exerciseId: integer("exercise_id").notNull().references(() => exercises.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(), // 1-12
+  day: integer("day").notNull(), // 1-31
+  category: text("category").notNull(), // 'Cardio', 'Strength', 'Flexibility'
+  userId: integer("user_id").notNull(),
+});
+
+export const insertExerciseSchema = createInsertSchema(exercises).pick({
   name: true,
-  value: true,
-  change: true,
-  icon: true,
+  date: true,
+  category: true,
+  time: true,
+  distance: true,
+  heartRate: true,
+  weight: true,
+  reps: true,
+  sets: true,
+  duration: true,
+  musclesWorked: true,
   userId: true,
 });
 
-export type InsertHealthMetric = z.infer<typeof insertHealthMetricSchema>;
-export type HealthMetric = typeof healthMetrics.$inferSelect;
+export const insertExerciseCompletionSchema = createInsertSchema(exerciseCompletions).pick({
+  exerciseId: true,
+  date: true,
+  year: true,
+  month: true,
+  day: true,
+  category: true,
+  userId: true,
+});
+
+export type InsertExercise = z.infer<typeof insertExerciseSchema>;
+export type Exercise = typeof exercises.$inferSelect;
+export type InsertExerciseCompletion = z.infer<typeof insertExerciseCompletionSchema>;
+export type ExerciseCompletion = typeof exerciseCompletions.$inferSelect;
+
+// Define relations for exercises
+export const exercisesRelations = relations(exercises, ({ many }) => ({
+  completions: many(exerciseCompletions)
+}));
+
+// Define relations for exercise completions
+export const exerciseCompletionsRelations = relations(exerciseCompletions, ({ one }) => ({
+  exercise: one(exercises, { fields: [exerciseCompletions.exerciseId], references: [exercises.id] })
+}));
 
 // Family Planning - Dates Schema
 export const dateIdeas = pgTable("date_ideas", {

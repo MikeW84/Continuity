@@ -10,7 +10,8 @@ import {
   insertIdeaSchema,
   insertLearningItemSchema,
   insertHabitSchema,
-  insertHealthMetricSchema,
+  insertExerciseSchema,
+  insertExerciseCompletionSchema,
   insertDateIdeaSchema,
   insertParentingTaskSchema,
   insertValueSchema,
@@ -365,55 +366,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(completion);
   });
   
-  // Health Metrics endpoints
-  app.get("/api/health-metrics", async (req: Request, res: Response) => {
-    const healthMetrics = await storage.getHealthMetrics(TEMP_USER_ID);
-    res.json(healthMetrics);
+  // Exercise endpoints
+  app.get("/api/exercises", async (req: Request, res: Response) => {
+    const exercises = await storage.getExercises(TEMP_USER_ID);
+    res.json(exercises);
   });
   
-  app.get("/api/health-metrics/:id", async (req: Request, res: Response) => {
+  app.get("/api/exercises/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const healthMetric = await storage.getHealthMetric(id);
+    const exercise = await storage.getExercise(id);
     
-    if (!healthMetric) {
-      return res.status(404).json({ message: "Health metric not found" });
+    if (!exercise) {
+      return res.status(404).json({ message: "Exercise not found" });
     }
     
-    res.json(healthMetric);
+    res.json(exercise);
   });
   
-  app.post("/api/health-metrics", async (req: Request, res: Response) => {
-    const healthMetricData = validateRequest(insertHealthMetricSchema, {
+  app.post("/api/exercises", async (req: Request, res: Response) => {
+    const exerciseData = validateRequest(insertExerciseSchema, {
       ...req.body,
       userId: req.body.userId || TEMP_USER_ID
     });
     
-    const newHealthMetric = await storage.createHealthMetric(healthMetricData);
-    res.status(201).json(newHealthMetric);
+    const newExercise = await storage.createExercise(exerciseData);
+    res.status(201).json(newExercise);
   });
   
-  app.patch("/api/health-metrics/:id", async (req: Request, res: Response) => {
+  app.patch("/api/exercises/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const healthMetricData = req.body;
+    const exerciseData = req.body;
     
-    const updatedHealthMetric = await storage.updateHealthMetric(id, healthMetricData);
+    const updatedExercise = await storage.updateExercise(id, exerciseData);
     
-    if (!updatedHealthMetric) {
-      return res.status(404).json({ message: "Health metric not found" });
+    if (!updatedExercise) {
+      return res.status(404).json({ message: "Exercise not found" });
     }
     
-    res.json(updatedHealthMetric);
+    res.json(updatedExercise);
   });
   
-  app.delete("/api/health-metrics/:id", async (req: Request, res: Response) => {
+  app.delete("/api/exercises/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const success = await storage.deleteHealthMetric(id);
+    const success = await storage.deleteExercise(id);
     
     if (!success) {
-      return res.status(404).json({ message: "Health metric not found" });
+      return res.status(404).json({ message: "Exercise not found" });
     }
     
     res.status(204).send();
+  });
+  
+  // Exercise Completion endpoints
+  app.get("/api/exercise-completions/:year/:month", async (req: Request, res: Response) => {
+    const year = parseInt(req.params.year);
+    const month = parseInt(req.params.month);
+    
+    const completions = await storage.getExerciseCompletions(year, month, TEMP_USER_ID);
+    res.json(completions);
+  });
+  
+  app.post("/api/exercise-completions", async (req: Request, res: Response) => {
+    const completionData = validateRequest(insertExerciseCompletionSchema, {
+      ...req.body,
+      userId: req.body.userId || TEMP_USER_ID
+    });
+    
+    const newCompletion = await storage.createExerciseCompletion(completionData);
+    res.status(201).json(newCompletion);
   });
   
   // Date Ideas endpoints

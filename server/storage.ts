@@ -5,7 +5,8 @@ import {
   type LearningItem, type InsertLearningItem,
   type Habit, type InsertHabit,
   type HabitCompletion, type InsertHabitCompletion,
-  type HealthMetric, type InsertHealthMetric,
+  type Exercise, type InsertExercise, 
+  type ExerciseCompletion, type InsertExerciseCompletion,
   type DateIdea, type InsertDateIdea,
   type ParentingTask, type InsertParentingTask,
   type Value, type InsertValue,
@@ -16,7 +17,8 @@ import {
   learningItems,
   habits,
   habitCompletions,
-  healthMetrics,
+  exercises,
+  exerciseCompletions,
   dateIdeas,
   parentingTasks,
   values,
@@ -67,12 +69,14 @@ export interface IStorage {
   getHabitCompletions(habitId: number, year: number, month: number): Promise<HabitCompletion[]>;
   toggleHabitDay(habitId: number, year: number, month: number, day: number): Promise<HabitCompletion | undefined>;
   
-  // Health Metric methods
-  getHealthMetrics(userId: number): Promise<HealthMetric[]>;
-  getHealthMetric(id: number): Promise<HealthMetric | undefined>;
-  createHealthMetric(healthMetric: InsertHealthMetric): Promise<HealthMetric>;
-  updateHealthMetric(id: number, healthMetric: Partial<InsertHealthMetric>): Promise<HealthMetric | undefined>;
-  deleteHealthMetric(id: number): Promise<boolean>;
+  // Exercise methods
+  getExercises(userId: number): Promise<Exercise[]>;
+  getExercise(id: number): Promise<Exercise | undefined>;
+  createExercise(exercise: InsertExercise): Promise<Exercise>;
+  updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise | undefined>;
+  deleteExercise(id: number): Promise<boolean>;
+  getExerciseCompletions(year: number, month: number, userId: number): Promise<ExerciseCompletion[]>;
+  createExerciseCompletion(completion: InsertExerciseCompletion): Promise<ExerciseCompletion>;
   
   // Date Idea methods
   getDateIdeas(userId: number): Promise<DateIdea[]>;
@@ -110,7 +114,8 @@ export class MemStorage implements IStorage {
   private ideas: Map<number, Idea>;
   private learningItems: Map<number, LearningItem>;
   private habits: Map<number, Habit>;
-  private healthMetrics: Map<number, HealthMetric>;
+  private exercises: Map<number, Exercise>;
+  private exerciseCompletions: Map<number, ExerciseCompletion>;
   private dateIdeas: Map<number, DateIdea>;
   private parentingTasks: Map<number, ParentingTask>;
   private values: Map<number, Value>;
@@ -121,7 +126,8 @@ export class MemStorage implements IStorage {
   private ideaId: number;
   private learningItemId: number;
   private habitId: number;
-  private healthMetricId: number;
+  private exerciseId: number;
+  private exerciseCompletionId: number;
   private dateIdeaId: number;
   private parentingTaskId: number;
   private valueId: number;
@@ -133,7 +139,8 @@ export class MemStorage implements IStorage {
     this.ideas = new Map();
     this.learningItems = new Map();
     this.habits = new Map();
-    this.healthMetrics = new Map();
+    this.exercises = new Map();
+    this.exerciseCompletions = new Map();
     this.dateIdeas = new Map();
     this.parentingTasks = new Map();
     this.values = new Map();
@@ -144,7 +151,8 @@ export class MemStorage implements IStorage {
     this.ideaId = 1;
     this.learningItemId = 1;
     this.habitId = 1;
-    this.healthMetricId = 1;
+    this.exerciseId = 1;
+    this.exerciseCompletionId = 1;
     this.dateIdeaId = 1;
     this.parentingTaskId = 1;
     this.valueId = 1;
@@ -407,35 +415,51 @@ export class MemStorage implements IStorage {
     };
   }
   
-  // Health Metric methods
-  async getHealthMetrics(userId: number): Promise<HealthMetric[]> {
-    return Array.from(this.healthMetrics.values()).filter(
-      (metric) => metric.userId === userId
+  // Exercise methods
+  async getExercises(userId: number): Promise<Exercise[]> {
+    return Array.from(this.exercises.values()).filter(
+      (exercise) => exercise.userId === userId
     );
   }
   
-  async getHealthMetric(id: number): Promise<HealthMetric | undefined> {
-    return this.healthMetrics.get(id);
+  async getExercise(id: number): Promise<Exercise | undefined> {
+    return this.exercises.get(id);
   }
   
-  async createHealthMetric(healthMetric: InsertHealthMetric): Promise<HealthMetric> {
-    const id = this.healthMetricId++;
-    const newHealthMetric: HealthMetric = { ...healthMetric, id };
-    this.healthMetrics.set(id, newHealthMetric);
-    return newHealthMetric;
+  async createExercise(exercise: InsertExercise): Promise<Exercise> {
+    const id = this.exerciseId++;
+    const newExercise: Exercise = { ...exercise, id };
+    this.exercises.set(id, newExercise);
+    return newExercise;
   }
   
-  async updateHealthMetric(id: number, healthMetric: Partial<InsertHealthMetric>): Promise<HealthMetric | undefined> {
-    const existingMetric = this.healthMetrics.get(id);
-    if (!existingMetric) return undefined;
+  async updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise | undefined> {
+    const existingExercise = this.exercises.get(id);
+    if (!existingExercise) return undefined;
     
-    const updatedMetric = { ...existingMetric, ...healthMetric };
-    this.healthMetrics.set(id, updatedMetric);
-    return updatedMetric;
+    const updatedExercise = { ...existingExercise, ...exercise };
+    this.exercises.set(id, updatedExercise);
+    return updatedExercise;
   }
   
-  async deleteHealthMetric(id: number): Promise<boolean> {
-    return this.healthMetrics.delete(id);
+  async deleteExercise(id: number): Promise<boolean> {
+    return this.exercises.delete(id);
+  }
+  
+  async getExerciseCompletions(year: number, month: number, userId: number): Promise<ExerciseCompletion[]> {
+    return Array.from(this.exerciseCompletions.values()).filter(
+      (completion) => 
+        completion.userId === userId && 
+        completion.year === year && 
+        completion.month === month
+    );
+  }
+  
+  async createExerciseCompletion(completion: InsertExerciseCompletion): Promise<ExerciseCompletion> {
+    const id = this.exerciseCompletionId++;
+    const newCompletion: ExerciseCompletion = { ...completion, id };
+    this.exerciseCompletions.set(id, newCompletion);
+    return newCompletion;
   }
   
   // Date Idea methods
@@ -999,34 +1023,63 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
   
-  // Health Metric methods
-  async getHealthMetrics(userId: number): Promise<HealthMetric[]> {
-    return await db.select().from(healthMetrics).where(eq(healthMetrics.userId, userId));
+  // Exercise methods
+  async getExercises(userId: number): Promise<Exercise[]> {
+    return await db.select().from(exercises).where(eq(exercises.userId, userId));
   }
   
-  async getHealthMetric(id: number): Promise<HealthMetric | undefined> {
-    const [metric] = await db.select().from(healthMetrics).where(eq(healthMetrics.id, id));
-    return metric;
+  async getExercise(id: number): Promise<Exercise | undefined> {
+    const [exercise] = await db.select().from(exercises).where(eq(exercises.id, id));
+    return exercise;
   }
   
-  async createHealthMetric(healthMetric: InsertHealthMetric): Promise<HealthMetric> {
-    const [newMetric] = await db.insert(healthMetrics).values(healthMetric).returning();
-    return newMetric;
+  async createExercise(exercise: InsertExercise): Promise<Exercise> {
+    // Ensure proper null handling for optional fields
+    const sanitizedExercise = {
+      ...exercise,
+      time: exercise.time ?? null,
+      distance: exercise.distance ?? null,
+      heartRate: exercise.heartRate ?? null,
+      weight: exercise.weight ?? null,
+      reps: exercise.reps ?? null,
+      sets: exercise.sets ?? null,
+      duration: exercise.duration ?? null,
+      musclesWorked: exercise.musclesWorked ?? null
+    };
+    
+    const [newExercise] = await db.insert(exercises).values(sanitizedExercise).returning();
+    return newExercise;
   }
   
-  async updateHealthMetric(id: number, healthMetric: Partial<InsertHealthMetric>): Promise<HealthMetric | undefined> {
-    const [updatedMetric] = await db
-      .update(healthMetrics)
-      .set(healthMetric)
-      .where(eq(healthMetrics.id, id))
+  async updateExercise(id: number, exercise: Partial<InsertExercise>): Promise<Exercise | undefined> {
+    const [updatedExercise] = await db
+      .update(exercises)
+      .set(exercise)
+      .where(eq(exercises.id, id))
       .returning();
       
-    return updatedMetric;
+    return updatedExercise;
   }
   
-  async deleteHealthMetric(id: number): Promise<boolean> {
-    await db.delete(healthMetrics).where(eq(healthMetrics.id, id));
+  async deleteExercise(id: number): Promise<boolean> {
+    await db.delete(exercises).where(eq(exercises.id, id));
     return true;
+  }
+  
+  async getExerciseCompletions(year: number, month: number, userId: number): Promise<ExerciseCompletion[]> {
+    return await db.select().from(exerciseCompletions)
+      .where(
+        and(
+          eq(exerciseCompletions.userId, userId),
+          eq(exerciseCompletions.year, year),
+          eq(exerciseCompletions.month, month)
+        )
+      );
+  }
+  
+  async createExerciseCompletion(completion: InsertExerciseCompletion): Promise<ExerciseCompletion> {
+    const [newCompletion] = await db.insert(exerciseCompletions).values(completion).returning();
+    return newCompletion;
   }
   
   // Date Idea methods
