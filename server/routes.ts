@@ -335,6 +335,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(habit);
   });
   
+  // Get habit completions for a specific month
+  app.get("/api/habits/:id/completions/:year/:month", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const year = parseInt(req.params.year);
+    const month = parseInt(req.params.month);
+    
+    const completions = await storage.getHabitCompletions(id, year, month);
+    res.json(completions);
+  });
+  
+  // Toggle habit completion for a specific date
+  app.post("/api/habits/:id/toggle-date", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const { date } = req.body;
+    
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+    
+    const completion = await storage.toggleHabitCompletionByDate(id, new Date(date));
+    
+    if (!completion) {
+      return res.status(404).json({ message: "Habit not found" });
+    }
+    
+    res.json(completion);
+  });
+  
   // Health Metrics endpoints
   app.get("/api/health-metrics", async (req: Request, res: Response) => {
     const healthMetrics = await storage.getHealthMetrics(TEMP_USER_ID);

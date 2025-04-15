@@ -6,6 +6,14 @@ import {
 } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 
+// HabitCompletion type - matches the backend type
+export interface HabitCompletion {
+  id: number;
+  habitId: number;
+  date: Date;
+  completed: boolean;
+}
+
 // Interface for our context
 interface AppContextProps {
   user: { id: number, displayName: string } | null;
