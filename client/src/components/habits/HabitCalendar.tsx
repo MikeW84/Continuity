@@ -67,9 +67,34 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
       
       console.log(`Calendar day clicked: Year ${year}, Month ${month}, Day ${day}`);
       
+      // Optimistic update - toggle the day in the local state immediately
+      setCompletions(prevCompletions => {
+        const existingCompletion = prevCompletions.find(
+          c => c.year === year && c.month === month && c.day === day
+        );
+        
+        if (existingCompletion) {
+          // Remove the completion
+          return prevCompletions.filter(c => 
+            !(c.year === year && c.month === month && c.day === day)
+          );
+        } else {
+          // Add a new completion
+          return [...prevCompletions, {
+            id: Date.now(), // Temporary ID
+            habitId,
+            year,
+            month,
+            day,
+            completed: true
+          }];
+        }
+      });
+      
+      // Make the API call
       await toggleHabitDay(habitId, year, month, day);
       
-      // After toggling, refetch the completions to update the UI
+      // After toggling, refetch the completions to ensure data consistency
       const data = await getHabitCompletions(
         habitId, 
         year,
@@ -78,6 +103,14 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
       setCompletions(data);
     } catch (error) {
       console.error('Error toggling habit completion:', error);
+      
+      // On error, refetch to ensure the UI reflects the correct state
+      const data = await getHabitCompletions(
+        habitId, 
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + 1
+      );
+      setCompletions(data);
     }
   };
 

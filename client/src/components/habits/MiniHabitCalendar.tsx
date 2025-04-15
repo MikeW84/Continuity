@@ -38,6 +38,8 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
   
   // Flag to prevent multiple simultaneous API calls
   const [isSaving, setIsSaving] = useState(false);
+  // Track which days are being saved (to show visual feedback for specific days)
+  const [pendingDays, setPendingDays] = useState<Set<number>>(new Set());
   
   // Query key for habit completions
   const completionsQueryKey = useMemo(() => 
@@ -46,74 +48,75 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
   );
   
   // Get habit completions for current month - with error handling
-  const { data = [], isLoading } = useQuery<HabitCompletion[]>({
+  const { data = [], isLoading, isError } = useQuery<HabitCompletion[]>({
     queryKey: completionsQueryKey,
     enabled: !!habitId && habitId > 0,
     refetchOnWindowFocus: false,
     retry: 3,
     // Prevent fetching again for a short period to avoid flicker
-    staleTime: 2000,
+    staleTime: 1000,
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
   
-  // Set of completed days
-  const [completedDays, setCompletedDays] = useState<Set<number>>(new Set());
-  
-  // Update completed days when completions data changes
-  useEffect(() => {
-    if (!Array.isArray(data)) return;
-    
+  // Compute completed days set directly from the data
+  // This eliminates the need for a separate state variable that can get out of sync
+  const completedDays = useMemo(() => {
     const completedDaysSet = new Set<number>();
-    data.forEach(completion => {
-      if (completion && typeof completion.day === 'number') {
-        completedDaysSet.add(completion.day);
-      }
-    });
-    
-    // Only update if the set is different to avoid endless render loops
-    let needsUpdate = completedDaysSet.size !== completedDays.size;
-    
-    // Check if sets have different content only if sizes differ
-    if (!needsUpdate) {
-      // Convert both sets to arrays for comparison
-      const newDays = Array.from(completedDaysSet);
-      const oldDays = Array.from(completedDays);
-      
-      // Check if every day in the new set exists in the old set
-      needsUpdate = !newDays.every(day => oldDays.includes(day));
+    if (Array.isArray(data)) {
+      data.forEach(completion => {
+        if (completion && typeof completion.day === 'number') {
+          completedDaysSet.add(completion.day);
+        }
+      });
     }
-    
-    if (needsUpdate) {
-      setCompletedDays(completedDaysSet);
-    }
+    return completedDaysSet;
   }, [data]);
   
   // Handle clicking on a day with debouncing to prevent multiple rapid clicks
   const handleDayClick = useCallback(async (day: number) => {
-    if (isSaving) return; // Prevent multiple simultaneous saves
+    if (isSaving && pendingDays.has(day)) return; // Prevent clicking same day multiple times
     
     try {
       setIsSaving(true);
+      setPendingDays(prev => {
+        const newSet = new Set(prev);
+        newSet.add(day);
+        return newSet;
+      });
       
-      // Add optimistic update to improve UI responsiveness
+      // Prepare optimistic update for the UI
       const newCompletedDays = new Set(completedDays);
-      
-      // Toggle day in our local state immediately for better UX
       if (newCompletedDays.has(day)) {
         newCompletedDays.delete(day);
       } else {
         newCompletedDays.add(day);
       }
       
-      // Update state with optimistic result
-      setCompletedDays(newCompletedDays);
+      // Optimistically update the cache for immediate feedback
+      queryClient.setQueryData<HabitCompletion[]>(completionsQueryKey, old => {
+        if (!old) return [];
+        
+        if (completedDays.has(day)) {
+          // Remove the completion if it exists
+          return old.filter(completion => completion.day !== day);
+        } else {
+          // Add a new completion
+          return [...old, {
+            id: Date.now(), // Temporary ID that will be replaced when we refetch
+            habitId,
+            year: currentYear,
+            month: currentMonth,
+            day,
+            completed: true
+          }];
+        }
+      });
       
-      // Make API call
+      // Make the actual API call
       await onToggleDay(currentYear, currentMonth, day);
       
-      // Force refetch of the data after toggle
+      // Invalidate queries to ensure everything is in sync
       await queryClient.invalidateQueries({ queryKey: completionsQueryKey });
-      await queryClient.refetchQueries({ queryKey: completionsQueryKey });
       
       // Also invalidate habits list to update counts
       queryClient.invalidateQueries({ queryKey: ['/api/habits'] });
@@ -127,25 +130,35 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
         variant: "destructive",
       });
       
-      // Revert optimistic update
-      const originalData = queryClient.getQueryData<HabitCompletion[]>(completionsQueryKey) || [];
-      const restoredSet = new Set<number>();
-      originalData.forEach(completion => {
-        if (completion && typeof completion.day === 'number') {
-          restoredSet.add(completion.day);
-        }
-      });
-      setCompletedDays(restoredSet);
+      // Revert the optimistic update by refetching
+      await queryClient.refetchQueries({ queryKey: completionsQueryKey });
     } finally {
-      // Allow saving again
-      setIsSaving(false);
+      // Remove this day from pending operations
+      setPendingDays(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(day);
+        return newSet;
+      });
+      
+      // Only set saving to false if no more pending days
+      if (pendingDays.size <= 1) {
+        setIsSaving(false);
+      }
     }
-  }, [currentYear, currentMonth, completedDays, onToggleDay, queryClient, completionsQueryKey, toast, isSaving]);
+  }, [currentYear, currentMonth, completedDays, onToggleDay, queryClient, completionsQueryKey, toast, isSaving, pendingDays, habitId]);
   
   if (isLoading) {
     return (
       <div className="mt-2">
         <Skeleton className="h-20 w-full" />
+      </div>
+    );
+  }
+  
+  if (isError) {
+    return (
+      <div className="mt-2 text-destructive text-xs">
+        Error loading habit data. Try refreshing the page.
       </div>
     );
   }
@@ -190,6 +203,7 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
                 h-6 w-6 flex items-center justify-center rounded-full text-xs 
                 ${!day ? 'invisible' : ''}
                 ${day === currentDay ? 'border border-blue-500' : ''}
+                ${pendingDays.has(day || 0) ? 'animate-pulse' : ''}
                 ${completedDays.has(day || 0) 
                   ? 'bg-success bg-opacity-20 text-success font-medium cursor-pointer hover:bg-opacity-30' 
                   : day 

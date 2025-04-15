@@ -29,7 +29,17 @@ const HealthHabitsSection = () => {
     // Verify that the habit still exists before expanding
     const habitExists = habits.some(h => h.id === habitId);
     if (habitExists) {
+      // Close any previously expanded habit and open the new one
       setExpandedHabit(habitId);
+      
+      // Optional: scroll to ensure the expanded habit is visible
+      // Set timeout to wait for render
+      setTimeout(() => {
+        const habitElement = document.getElementById(`habit-${habitId}`);
+        if (habitElement) {
+          habitElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 100);
     } else {
       // If habit no longer exists, reset expanded state and show a message
       setExpandedHabit(null);
@@ -86,7 +96,7 @@ const HealthHabitsSection = () => {
             </div>
           ) : (
             habits.map(habit => (
-              <div key={habit.id} className="mb-4">
+              <div key={habit.id} id={`habit-${habit.id}`} className="mb-4">
                 <div className="flex items-center mb-1">
                   <button 
                     className={`h-6 w-6 rounded-full border-2 ${

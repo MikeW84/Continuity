@@ -4,7 +4,7 @@ import {
   Project, Idea, LearningItem, Habit, HealthMetric, 
   DateIdea, ParentingTask, Value, Dream 
 } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 // HabitCompletion type - simplified with year/month/day integers
 export interface HabitCompletion {
@@ -590,17 +590,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
         throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
       }
       
+      // Invalidate the completions query for this specific month to trigger refetches
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/habits/${habitId}/completions/${year}/${month}`] 
+      });
+      
       // Refresh habits data to update completion counts
       await fetchHabits();
       
       return await response.json();
     } catch (error) {
       console.error('Error toggling habit day:', error);
-      toast({
-        title: "Failed to update habit",
-        description: "There was a problem updating your habit completion.",
-        variant: "destructive"
-      });
+      
+      // Only show toast for non-canceled requests
+      if (error instanceof Error && !error.message.includes('canceled')) {
+        toast({
+          title: "Failed to update habit",
+          description: "There was a problem updating your habit completion.",
+          variant: "destructive"
+        });
+      }
+      
       throw error;
     }
   };
