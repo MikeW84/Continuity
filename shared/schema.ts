@@ -155,21 +155,47 @@ export const habits = pgTable("habits", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   completedDays: integer("completed_days").default(0),
-  totalDays: integer("total_days").default(30),
+  targetDays: integer("target_days").default(20), // Monthly target
   isCompletedToday: boolean("is_completed_today").default(false),
   userId: integer("user_id").notNull(),
+});
+
+// Habit Completions Schema - for tracking individual days
+export const habitCompletions = pgTable("habit_completions", {
+  id: serial("id").primaryKey(),
+  habitId: integer("habit_id").notNull().references(() => habits.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  completed: boolean("completed").default(true),
 });
 
 export const insertHabitSchema = createInsertSchema(habits).pick({
   title: true,
   completedDays: true,
-  totalDays: true,
+  targetDays: true,
   isCompletedToday: true,
   userId: true,
 });
 
+export const insertHabitCompletionSchema = createInsertSchema(habitCompletions).pick({
+  habitId: true,
+  date: true,
+  completed: true,
+});
+
 export type InsertHabit = z.infer<typeof insertHabitSchema>;
 export type Habit = typeof habits.$inferSelect;
+export type InsertHabitCompletion = z.infer<typeof insertHabitCompletionSchema>;
+export type HabitCompletion = typeof habitCompletions.$inferSelect;
+
+// Define relations for habits
+export const habitsRelations = relations(habits, ({ many }) => ({
+  completions: many(habitCompletions)
+}));
+
+// Define relations for habit completions
+export const habitCompletionsRelations = relations(habitCompletions, ({ one }) => ({
+  habit: one(habits, { fields: [habitCompletions.habitId], references: [habits.id] })
+}));
 
 // Health Metrics Schema
 export const healthMetrics = pgTable("health_metrics", {

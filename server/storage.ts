@@ -62,6 +62,8 @@ export interface IStorage {
   updateHabit(id: number, habit: Partial<InsertHabit>): Promise<Habit | undefined>;
   deleteHabit(id: number): Promise<boolean>;
   toggleHabitCompletion(id: number): Promise<Habit | undefined>;
+  getHabitCompletions(habitId: number, year: number, month: number): Promise<HabitCompletion[]>;
+  toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined>;
   
   // Health Metric methods
   getHealthMetrics(userId: number): Promise<HealthMetric[]>;
@@ -819,11 +821,44 @@ export class DatabaseStorage implements IStorage {
     
     if (!habit) return undefined;
     
-    const isCompletedToday = !habit.isCompletedToday;
-    const completedDays = isCompletedToday 
-      ? (habit.completedDays || 0) + 1 
-      : (habit.completedDays || 0) - 1;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
+    // Check if we have a completion record for today
+    const [existingCompletion] = await db.select()
+      .from(habitCompletions)
+      .where(
+        and(
+          eq(habitCompletions.habitId, id),
+          gte(habitCompletions.date, today)
+        )
+      );
+    
+    const isCompletedToday = !habit.isCompletedToday;
+    let completedDays = habit.completedDays || 0;
+    
+    if (isCompletedToday) {
+      // Mark as completed
+      if (!existingCompletion) {
+        // Create new completion record
+        await db.insert(habitCompletions).values({
+          habitId: id,
+          date: new Date(),
+          completed: true
+        });
+      }
+      completedDays += 1;
+    } else {
+      // Mark as not completed
+      if (existingCompletion) {
+        // Delete the completion record
+        await db.delete(habitCompletions)
+          .where(eq(habitCompletions.id, existingCompletion.id));
+      }
+      completedDays = Math.max(0, completedDays - 1);
+    }
+    
+    // Update the habit record
     const [updatedHabit] = await db
       .update(habits)
       .set({ isCompletedToday, completedDays })
@@ -831,6 +866,99 @@ export class DatabaseStorage implements IStorage {
       .returning();
       
     return updatedHabit;
+  }
+  
+  async getHabitCompletions(habitId: number, year: number, month: number): Promise<HabitCompletion[]> {
+    // Get the start and end dates for the month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0); // Last day of month
+    
+    return db.select()
+      .from(habitCompletions)
+      .where(
+        and(
+          eq(habitCompletions.habitId, habitId),
+          gte(habitCompletions.date, startDate),
+          lte(habitCompletions.date, endDate)
+        )
+      );
+  }
+  
+  async toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined> {
+    // Convert the date to start of day
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    // Check if completion already exists for this date
+    const [existingCompletion] = await db.select()
+      .from(habitCompletions)
+      .where(
+        and(
+          eq(habitCompletions.habitId, habitId),
+          gte(habitCompletions.date, targetDate),
+          lte(habitCompletions.date, endOfDay)
+        )
+      );
+    
+    // Get the habit to update completedDays count
+    const [habit] = await db.select().from(habits).where(eq(habits.id, habitId));
+    if (!habit) return undefined;
+    
+    let result: HabitCompletion | undefined;
+    let completedDays = habit.completedDays || 0;
+    
+    if (existingCompletion) {
+      // Remove the completion
+      await db.delete(habitCompletions)
+        .where(eq(habitCompletions.id, existingCompletion.id));
+      
+      // Update habit completion count
+      completedDays = Math.max(0, completedDays - 1);
+      
+      // Check if this is today and update isCompletedToday
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (targetDate.getTime() === today.getTime()) {
+        await db.update(habits)
+          .set({ isCompletedToday: false, completedDays })
+          .where(eq(habits.id, habitId));
+      } else {
+        await db.update(habits)
+          .set({ completedDays })
+          .where(eq(habits.id, habitId));
+      }
+    } else {
+      // Add a new completion
+      const [newCompletion] = await db.insert(habitCompletions)
+        .values({
+          habitId,
+          date: targetDate,
+          completed: true
+        })
+        .returning();
+      
+      result = newCompletion;
+      
+      // Update habit completion count
+      completedDays += 1;
+      
+      // Check if this is today and update isCompletedToday
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (targetDate.getTime() === today.getTime()) {
+        await db.update(habits)
+          .set({ isCompletedToday: true, completedDays })
+          .where(eq(habits.id, habitId));
+      } else {
+        await db.update(habits)
+          .set({ completedDays })
+          .where(eq(habits.id, habitId));
+      }
+    }
+    
+    return result;
   }
   
   // Health Metric methods
