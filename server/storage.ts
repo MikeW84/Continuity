@@ -548,4 +548,457 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    // Ensure null values for optional fields
+    const userData = {
+      ...insertUser,
+      displayName: insertUser.displayName ?? null,
+      email: insertUser.email ?? null
+    };
+    
+    const [user] = await db.insert(users).values(userData).returning();
+    return user;
+  }
+  
+  // Project methods
+  async getProjects(userId: number): Promise<Project[]> {
+    return await db.select().from(projects).where(eq(projects.userId, userId));
+  }
+  
+  async getProject(id: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
+  }
+  
+  async createProject(project: ProjectWithRelations): Promise<Project> {
+    console.log("Creating project with data:", project);
+    
+    // Extract the valueIds and dreamIds from the project data
+    const { valueIds, dreamIds, ...projectData } = project;
+    
+    // Ensure all properties are properly set with null values for optional fields
+    const sanitizedProject = {
+      ...projectData,
+      description: projectData.description ?? null,
+      resources: projectData.resources ?? null,
+      progress: projectData.progress ?? null,
+      dueDate: projectData.dueDate ?? null,
+      isPriority: projectData.isPriority ?? false
+    };
+    
+    // Insert the project data
+    const [newProject] = await db.insert(projects).values(sanitizedProject).returning();
+    console.log("Project created with ID:", newProject.id);
+    
+    // Handle value relations
+    if (valueIds && valueIds.length > 0) {
+      console.log(`Linking project ${newProject.id} with values:`, valueIds);
+      const valueInserts = valueIds.map(valueId => ({
+        projectId: newProject.id,
+        valueId
+      }));
+      
+      await db.insert(projectValues).values(valueInserts);
+    }
+    
+    // Handle dream relations
+    if (dreamIds && dreamIds.length > 0) {
+      console.log(`Linking project ${newProject.id} with dreams:`, dreamIds);
+      const dreamInserts = dreamIds.map(dreamId => ({
+        projectId: newProject.id,
+        dreamId
+      }));
+      
+      await db.insert(projectDreams).values(dreamInserts);
+    }
+    
+    return newProject;
+  }
+  
+  async updateProject(id: number, project: Partial<ProjectWithRelations>): Promise<Project | undefined> {
+    console.log("Updating project with ID:", id, "Data:", project);
+    
+    // Extract the valueIds and dreamIds from the project data
+    const { valueIds, dreamIds, ...projectData } = project;
+    
+    // Update the project data
+    const [updatedProject] = await db
+      .update(projects)
+      .set(projectData)
+      .where(eq(projects.id, id))
+      .returning();
+    
+    if (!updatedProject) return undefined;
+    
+    // Handle value relations
+    if (valueIds && valueIds.length > 0) {
+      console.log(`Updating project ${id} with values:`, valueIds);
+      
+      // Delete existing relations
+      await db.delete(projectValues).where(eq(projectValues.projectId, id));
+      
+      // Insert new relations
+      const valueInserts = valueIds.map(valueId => ({
+        projectId: id,
+        valueId
+      }));
+      
+      await db.insert(projectValues).values(valueInserts);
+    }
+    
+    // Handle dream relations
+    if (dreamIds && dreamIds.length > 0) {
+      console.log(`Updating project ${id} with dreams:`, dreamIds);
+      
+      // Delete existing relations
+      await db.delete(projectDreams).where(eq(projectDreams.projectId, id));
+      
+      // Insert new relations
+      const dreamInserts = dreamIds.map(dreamId => ({
+        projectId: id,
+        dreamId
+      }));
+      
+      await db.insert(projectDreams).values(dreamInserts);
+    }
+    
+    return updatedProject;
+  }
+  
+  async deleteProject(id: number): Promise<boolean> {
+    await db.delete(projects).where(eq(projects.id, id));
+    return true;
+  }
+  
+  async setPriorityProject(id: number, userId: number): Promise<Project | undefined> {
+    // Reset priority for all user's projects
+    await db
+      .update(projects)
+      .set({ isPriority: false })
+      .where(and(eq(projects.userId, userId), eq(projects.isPriority, true)));
+    
+    // Set the selected project as priority
+    const [project] = await db
+      .update(projects)
+      .set({ isPriority: true })
+      .where(eq(projects.id, id))
+      .returning();
+      
+    return project;
+  }
+  
+  // Idea methods
+  async getIdeas(userId: number): Promise<Idea[]> {
+    return await db.select().from(ideas).where(eq(ideas.userId, userId));
+  }
+  
+  async getIdea(id: number): Promise<Idea | undefined> {
+    const [idea] = await db.select().from(ideas).where(eq(ideas.id, id));
+    return idea;
+  }
+  
+  async createIdea(idea: InsertIdea): Promise<Idea> {
+    // Ensure all properties are properly set with null values for optional fields
+    const sanitizedIdea = {
+      ...idea,
+      description: idea.description ?? null,
+      resources: idea.resources ?? null,
+      votes: idea.votes ?? 0,
+      tags: idea.tags ?? null
+    };
+    
+    const [newIdea] = await db.insert(ideas).values(sanitizedIdea).returning();
+    return newIdea;
+  }
+  
+  async updateIdea(id: number, idea: Partial<InsertIdea>): Promise<Idea | undefined> {
+    const [updatedIdea] = await db
+      .update(ideas)
+      .set(idea)
+      .where(eq(ideas.id, id))
+      .returning();
+      
+    return updatedIdea;
+  }
+  
+  async deleteIdea(id: number): Promise<boolean> {
+    await db.delete(ideas).where(eq(ideas.id, id));
+    return true;
+  }
+  
+  async voteIdea(id: number, upvote: boolean): Promise<Idea | undefined> {
+    const [idea] = await db.select().from(ideas).where(eq(ideas.id, id));
+    
+    if (!idea) return undefined;
+    
+    const votes = upvote ? (idea.votes || 0) + 1 : (idea.votes || 0) - 1;
+    
+    const [updatedIdea] = await db
+      .update(ideas)
+      .set({ votes })
+      .where(eq(ideas.id, id))
+      .returning();
+      
+    return updatedIdea;
+  }
+  
+  // Learning methods
+  async getLearningItems(userId: number): Promise<LearningItem[]> {
+    return await db.select().from(learningItems).where(eq(learningItems.userId, userId));
+  }
+  
+  async getLearningItem(id: number): Promise<LearningItem | undefined> {
+    const [item] = await db.select().from(learningItems).where(eq(learningItems.id, id));
+    return item;
+  }
+  
+  async createLearningItem(learningItem: InsertLearningItem): Promise<LearningItem> {
+    const [newItem] = await db.insert(learningItems).values(learningItem).returning();
+    return newItem;
+  }
+  
+  async updateLearningItem(id: number, learningItem: Partial<InsertLearningItem>): Promise<LearningItem | undefined> {
+    const [updatedItem] = await db
+      .update(learningItems)
+      .set(learningItem)
+      .where(eq(learningItems.id, id))
+      .returning();
+      
+    return updatedItem;
+  }
+  
+  async deleteLearningItem(id: number): Promise<boolean> {
+    await db.delete(learningItems).where(eq(learningItems.id, id));
+    return true;
+  }
+  
+  // Habit methods
+  async getHabits(userId: number): Promise<Habit[]> {
+    return await db.select().from(habits).where(eq(habits.userId, userId));
+  }
+  
+  async getHabit(id: number): Promise<Habit | undefined> {
+    const [habit] = await db.select().from(habits).where(eq(habits.id, id));
+    return habit;
+  }
+  
+  async createHabit(habit: InsertHabit): Promise<Habit> {
+    const [newHabit] = await db.insert(habits).values(habit).returning();
+    return newHabit;
+  }
+  
+  async updateHabit(id: number, habit: Partial<InsertHabit>): Promise<Habit | undefined> {
+    const [updatedHabit] = await db
+      .update(habits)
+      .set(habit)
+      .where(eq(habits.id, id))
+      .returning();
+      
+    return updatedHabit;
+  }
+  
+  async deleteHabit(id: number): Promise<boolean> {
+    await db.delete(habits).where(eq(habits.id, id));
+    return true;
+  }
+  
+  async toggleHabitCompletion(id: number): Promise<Habit | undefined> {
+    const [habit] = await db.select().from(habits).where(eq(habits.id, id));
+    
+    if (!habit) return undefined;
+    
+    const isCompletedToday = !habit.isCompletedToday;
+    const completedDays = isCompletedToday 
+      ? (habit.completedDays || 0) + 1 
+      : (habit.completedDays || 0) - 1;
+    
+    const [updatedHabit] = await db
+      .update(habits)
+      .set({ isCompletedToday, completedDays })
+      .where(eq(habits.id, id))
+      .returning();
+      
+    return updatedHabit;
+  }
+  
+  // Health Metric methods
+  async getHealthMetrics(userId: number): Promise<HealthMetric[]> {
+    return await db.select().from(healthMetrics).where(eq(healthMetrics.userId, userId));
+  }
+  
+  async getHealthMetric(id: number): Promise<HealthMetric | undefined> {
+    const [metric] = await db.select().from(healthMetrics).where(eq(healthMetrics.id, id));
+    return metric;
+  }
+  
+  async createHealthMetric(healthMetric: InsertHealthMetric): Promise<HealthMetric> {
+    const [newMetric] = await db.insert(healthMetrics).values(healthMetric).returning();
+    return newMetric;
+  }
+  
+  async updateHealthMetric(id: number, healthMetric: Partial<InsertHealthMetric>): Promise<HealthMetric | undefined> {
+    const [updatedMetric] = await db
+      .update(healthMetrics)
+      .set(healthMetric)
+      .where(eq(healthMetrics.id, id))
+      .returning();
+      
+    return updatedMetric;
+  }
+  
+  async deleteHealthMetric(id: number): Promise<boolean> {
+    await db.delete(healthMetrics).where(eq(healthMetrics.id, id));
+    return true;
+  }
+  
+  // Date Idea methods
+  async getDateIdeas(userId: number): Promise<DateIdea[]> {
+    return await db.select().from(dateIdeas).where(eq(dateIdeas.userId, userId));
+  }
+  
+  async getDateIdea(id: number): Promise<DateIdea | undefined> {
+    const [idea] = await db.select().from(dateIdeas).where(eq(dateIdeas.id, id));
+    return idea;
+  }
+  
+  async createDateIdea(dateIdea: InsertDateIdea): Promise<DateIdea> {
+    const [newIdea] = await db.insert(dateIdeas).values(dateIdea).returning();
+    return newIdea;
+  }
+  
+  async updateDateIdea(id: number, dateIdea: Partial<InsertDateIdea>): Promise<DateIdea | undefined> {
+    const [updatedIdea] = await db
+      .update(dateIdeas)
+      .set(dateIdea)
+      .where(eq(dateIdeas.id, id))
+      .returning();
+      
+    return updatedIdea;
+  }
+  
+  async deleteDateIdea(id: number): Promise<boolean> {
+    await db.delete(dateIdeas).where(eq(dateIdeas.id, id));
+    return true;
+  }
+  
+  // Parenting Task methods
+  async getParentingTasks(userId: number): Promise<ParentingTask[]> {
+    return await db.select().from(parentingTasks).where(eq(parentingTasks.userId, userId));
+  }
+  
+  async getParentingTask(id: number): Promise<ParentingTask | undefined> {
+    const [task] = await db.select().from(parentingTasks).where(eq(parentingTasks.id, id));
+    return task;
+  }
+  
+  async createParentingTask(parentingTask: InsertParentingTask): Promise<ParentingTask> {
+    const [newTask] = await db.insert(parentingTasks).values(parentingTask).returning();
+    return newTask;
+  }
+  
+  async updateParentingTask(id: number, parentingTask: Partial<InsertParentingTask>): Promise<ParentingTask | undefined> {
+    const [updatedTask] = await db
+      .update(parentingTasks)
+      .set(parentingTask)
+      .where(eq(parentingTasks.id, id))
+      .returning();
+      
+    return updatedTask;
+  }
+  
+  async deleteParentingTask(id: number): Promise<boolean> {
+    await db.delete(parentingTasks).where(eq(parentingTasks.id, id));
+    return true;
+  }
+  
+  async toggleParentingTaskCompletion(id: number): Promise<ParentingTask | undefined> {
+    const [task] = await db.select().from(parentingTasks).where(eq(parentingTasks.id, id));
+    
+    if (!task) return undefined;
+    
+    const isCompleted = !task.isCompleted;
+    
+    const [updatedTask] = await db
+      .update(parentingTasks)
+      .set({ isCompleted })
+      .where(eq(parentingTasks.id, id))
+      .returning();
+      
+    return updatedTask;
+  }
+  
+  // Value methods
+  async getValues(userId: number): Promise<Value[]> {
+    return await db.select().from(values).where(eq(values.userId, userId));
+  }
+  
+  async getValue(id: number): Promise<Value | undefined> {
+    const [value] = await db.select().from(values).where(eq(values.id, id));
+    return value;
+  }
+  
+  async createValue(value: InsertValue): Promise<Value> {
+    const [newValue] = await db.insert(values).values(value).returning();
+    return newValue;
+  }
+  
+  async updateValue(id: number, value: Partial<InsertValue>): Promise<Value | undefined> {
+    const [updatedValue] = await db
+      .update(values)
+      .set(value)
+      .where(eq(values.id, id))
+      .returning();
+      
+    return updatedValue;
+  }
+  
+  async deleteValue(id: number): Promise<boolean> {
+    const result = await db.delete(values).where(eq(values.id, id));
+    return result.count > 0;
+  }
+  
+  // Dream methods
+  async getDreams(userId: number): Promise<Dream[]> {
+    return await db.select().from(dreams).where(eq(dreams.userId, userId));
+  }
+  
+  async getDream(id: number): Promise<Dream | undefined> {
+    const [dream] = await db.select().from(dreams).where(eq(dreams.id, id));
+    return dream;
+  }
+  
+  async createDream(dream: InsertDream): Promise<Dream> {
+    const [newDream] = await db.insert(dreams).values(dream).returning();
+    return newDream;
+  }
+  
+  async updateDream(id: number, dream: Partial<InsertDream>): Promise<Dream | undefined> {
+    const [updatedDream] = await db
+      .update(dreams)
+      .set(dream)
+      .where(eq(dreams.id, id))
+      .returning();
+      
+    return updatedDream;
+  }
+  
+  async deleteDream(id: number): Promise<boolean> {
+    const result = await db.delete(dreams).where(eq(dreams.id, id));
+    return result.count > 0;
+  }
+}
+
+// Change from MemStorage to DatabaseStorage for persistence
+export const storage = new DatabaseStorage();
