@@ -965,8 +965,8 @@ export class DatabaseStorage implements IStorage {
   }
   
   async deleteValue(id: number): Promise<boolean> {
-    const result = await db.delete(values).where(eq(values.id, id));
-    return result.count > 0;
+    await db.delete(values).where(eq(values.id, id));
+    return true;
   }
   
   // Dream methods
@@ -995,8 +995,8 @@ export class DatabaseStorage implements IStorage {
   }
   
   async deleteDream(id: number): Promise<boolean> {
-    const result = await db.delete(dreams).where(eq(dreams.id, id));
-    return result.count > 0;
+    await db.delete(dreams).where(eq(dreams.id, id));
+    return true;
   }
 }
 
