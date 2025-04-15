@@ -571,7 +571,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const toggleHabitByDate = async (habitId: number, date: Date) => {
     try {
-      await apiRequest('POST', `/api/habits/${habitId}/toggle-date`, { date });
+      // Ensure consistent date format for API requests
+      const formattedDate = date.toISOString();
+      await apiRequest('POST', `/api/habits/${habitId}/toggle-date`, { date: formattedDate });
       await fetchHabits();
     } catch (error) {
       toast({

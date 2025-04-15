@@ -60,7 +60,12 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
     if (!isSameMonth(date, currentMonth)) return;
     
     try {
-      await toggleHabitByDate(habitId, date);
+      // Format the date in ISO format to ensure consistent date representation
+      const formattedDate = new Date(date);
+      // Set to noon UTC to avoid timezone issues
+      formattedDate.setUTCHours(12, 0, 0, 0);
+      
+      await toggleHabitByDate(habitId, formattedDate);
       // After toggling, refetch the completions to update the UI
       const data = await getHabitCompletions(
         habitId, 
@@ -75,9 +80,17 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
 
   // Check if a day is completed
   const isDayCompleted = (day: Date) => {
-    return completions.some(completion => 
-      completion.completed && isSameDay(new Date(completion.date), day)
-    );
+    return completions.some(completion => {
+      // Create normalized dates for comparison
+      const completionDate = new Date(completion.date);
+      const normalizedDay = new Date(day);
+      
+      // Reset time portions to avoid timezone issues
+      completionDate.setHours(0, 0, 0, 0);
+      normalizedDay.setHours(0, 0, 0, 0);
+      
+      return completion.completed && isSameDay(completionDate, normalizedDay);
+    });
   };
 
   // Calculate progress for the month
