@@ -844,8 +844,11 @@ export class DatabaseStorage implements IStorage {
     
     if (!habit) return undefined;
     
+    // Get today's date as integers
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1; // 1-12
+    const day = today.getDate();
     
     // Check if we have a completion record for today
     const [existingCompletion] = await db.select()
@@ -853,7 +856,9 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(habitCompletions.habitId, id),
-          gte(habitCompletions.date, today)
+          eq(habitCompletions.year, year),
+          eq(habitCompletions.month, month),
+          eq(habitCompletions.day, day)
         )
       );
     
@@ -863,10 +868,13 @@ export class DatabaseStorage implements IStorage {
     if (isCompletedToday) {
       // Mark as completed
       if (!existingCompletion) {
-        // Create new completion record
+        // Create new completion record with integer dates
         await db.insert(habitCompletions).values({
           habitId: id,
-          date: new Date(),
+          year,
+          month,
+          day,
+          date: new Date(), // Still add a date for backward compatibility
           completed: true
         });
       }
