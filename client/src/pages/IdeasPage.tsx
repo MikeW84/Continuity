@@ -235,7 +235,7 @@ const IdeasPage = () => {
                       {idea.tags?.map((tag, index) => (
                         <span 
                           key={index} 
-                          className="text-xs bg-primary bg-opacity-10 text-primary py-1 px-2 rounded-md"
+                          className="text-xs bg-primary text-white py-1 px-2 rounded-md"
                         >
                           {tag}
                         </span>
