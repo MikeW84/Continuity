@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  Project, Idea, LearningItem, Habit, HealthMetric, 
+  Project, Idea, LearningItem, Habit, Exercise, ExerciseCompletion,
   DateIdea, ParentingTask, Value, Dream 
 } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -22,7 +22,8 @@ interface AppContextProps {
   ideas: Idea[];
   learningItems: LearningItem[];
   habits: Habit[];
-  healthMetrics: HealthMetric[];
+  exercises: Exercise[];
+  exerciseCompletions: ExerciseCompletion[];
   dateIdeas: DateIdea[];
   parentingTasks: ParentingTask[];
   values: Value[];
@@ -58,11 +59,12 @@ interface AppContextProps {
   getHabitCompletions: (habitId: number, year: number, month: number) => Promise<HabitCompletion[]>;
   toggleHabitDay: (habitId: number, year: number, month: number, day: number) => Promise<void>;
   
-  // Health Metrics
-  fetchHealthMetrics: () => Promise<void>;
-  addHealthMetric: (metric: Omit<HealthMetric, 'id' | 'userId'>) => Promise<void>;
-  updateHealthMetric: (id: number, metric: Partial<HealthMetric>) => Promise<void>;
-  deleteHealthMetric: (id: number) => Promise<void>;
+  // Exercises
+  fetchExercises: () => Promise<void>;
+  addExercise: (exercise: Omit<Exercise, 'id' | 'userId'>) => Promise<void>;
+  updateExercise: (id: number, exercise: Partial<Exercise>) => Promise<void>;
+  deleteExercise: (id: number) => Promise<void>;
+  getExerciseCompletions: (year: number, month: number) => Promise<ExerciseCompletion[]>;
   
   // Date Ideas
   fetchDateIdeas: () => Promise<void>;
@@ -110,7 +112,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [learningItems, setLearningItems] = useState<LearningItem[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
-  const [healthMetrics, setHealthMetrics] = useState<HealthMetric[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [exerciseCompletions, setExerciseCompletions] = useState<ExerciseCompletion[]>([]);
   const [dateIdeas, setDateIdeas] = useState<DateIdea[]>([]);
   const [parentingTasks, setParentingTasks] = useState<ParentingTask[]>([]);
   const [values, setValues] = useState<Value[]>([]);
@@ -170,14 +173,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
   
-  const fetchHealthMetrics = useCallback(async () => {
+  const fetchExercises = useCallback(async () => {
     try {
-      const res = await fetch('/api/health-metrics');
-      if (!res.ok) throw new Error('Failed to fetch health metrics');
+      const res = await fetch('/api/exercises');
+      if (!res.ok) throw new Error('Failed to fetch exercises');
       const data = await res.json();
-      setHealthMetrics(data);
+      setExercises(data);
     } catch (error) {
-      console.error('Error fetching health metrics:', error);
+      console.error('Error fetching exercises:', error);
+      throw error;
+    }
+  }, []);
+  
+  const fetchExerciseCompletions = useCallback(async (year: number, month: number) => {
+    try {
+      const res = await fetch(`/api/exercise-completions/${year}/${month}`);
+      if (!res.ok) throw new Error('Failed to fetch exercise completions');
+      const data = await res.json();
+      setExerciseCompletions(data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching exercise completions:', error);
       throw error;
     }
   }, []);
@@ -240,7 +256,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         fetchIdeas().catch(err => console.error("Error fetching ideas:", err)),
         fetchLearningItems().catch(err => console.error("Error fetching learning items:", err)),
         fetchHabits().catch(err => console.error("Error fetching habits:", err)),
-        fetchHealthMetrics().catch(err => console.error("Error fetching health metrics:", err)),
+        fetchExercises().catch(err => console.error("Error fetching exercises:", err)),
         fetchDateIdeas().catch(err => console.error("Error fetching date ideas:", err)),
         fetchParentingTasks().catch(err => console.error("Error fetching parenting tasks:", err)),
         fetchValues().catch(err => console.error("Error fetching values:", err)),
@@ -263,7 +279,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fetchIdeas, 
     fetchLearningItems, 
     fetchHabits, 
-    fetchHealthMetrics,
+    fetchExercises,
     fetchDateIdeas,
     fetchParentingTasks,
     fetchValues,
@@ -615,60 +631,77 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const addHealthMetric = async (metric: Omit<HealthMetric, 'id' | 'userId'>) => {
+  const addExercise = async (exercise: Omit<Exercise, 'id' | 'userId'>) => {
     try {
-      await apiRequest('POST', '/api/health-metrics', { ...metric, userId: user?.id || 1 });
-      await fetchHealthMetrics();
+      await apiRequest('POST', '/api/exercises', { ...exercise, userId: user?.id || 1 });
+      await fetchExercises();
       toast({
-        title: "Health Metric Added",
-        description: "Your health metric has been added successfully.",
+        title: "Exercise Added",
+        description: "Your exercise has been added successfully.",
       });
     } catch (error) {
       toast({
-        title: "Failed to add health metric",
-        description: "There was a problem adding your health metric.",
+        title: "Failed to add exercise",
+        description: "There was a problem adding your exercise.",
         variant: "destructive"
       });
-      console.error('Error adding health metric:', error);
+      console.error('Error adding exercise:', error);
       throw error;
     }
   };
   
-  const updateHealthMetric = async (id: number, metric: Partial<HealthMetric>) => {
+  const updateExercise = async (id: number, exercise: Partial<Exercise>) => {
     try {
-      await apiRequest('PATCH', `/api/health-metrics/${id}`, metric);
-      await fetchHealthMetrics();
+      await apiRequest('PATCH', `/api/exercises/${id}`, exercise);
+      await fetchExercises();
       toast({
-        title: "Health Metric Updated",
-        description: "Your health metric has been updated successfully.",
+        title: "Exercise Updated",
+        description: "Your exercise has been updated successfully.",
       });
     } catch (error) {
       toast({
-        title: "Failed to update health metric",
-        description: "There was a problem updating your health metric.",
+        title: "Failed to update exercise",
+        description: "There was a problem updating your exercise.",
         variant: "destructive"
       });
-      console.error('Error updating health metric:', error);
+      console.error('Error updating exercise:', error);
       throw error;
     }
   };
   
-  const deleteHealthMetric = async (id: number) => {
+  const deleteExercise = async (id: number) => {
     try {
-      await apiRequest('DELETE', `/api/health-metrics/${id}`);
-      await fetchHealthMetrics();
+      await apiRequest('DELETE', `/api/exercises/${id}`);
+      await fetchExercises();
       toast({
-        title: "Health Metric Deleted",
-        description: "Your health metric has been deleted successfully.",
+        title: "Exercise Deleted",
+        description: "Your exercise has been deleted successfully.",
       });
     } catch (error) {
       toast({
-        title: "Failed to delete health metric",
-        description: "There was a problem deleting your health metric.",
+        title: "Failed to delete exercise",
+        description: "There was a problem deleting your exercise.",
         variant: "destructive"
       });
-      console.error('Error deleting health metric:', error);
+      console.error('Error deleting exercise:', error);
       throw error;
+    }
+  };
+  
+  const getExerciseCompletions = async (year: number, month: number): Promise<ExerciseCompletion[]> => {
+    try {
+      const res = await fetch(`/api/exercise-completions/${year}/${month}`);
+      if (!res.ok) throw new Error('Failed to fetch exercise completions');
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching exercise completions:', error);
+      toast({
+        title: "Failed to load exercise data",
+        description: "There was a problem loading your exercise completion data.",
+        variant: "destructive"
+      });
+      return [];
     }
   };
   
@@ -922,7 +955,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ideas,
     learningItems,
     habits,
-    healthMetrics,
+    exercises,
+    exerciseCompletions,
     dateIdeas,
     parentingTasks,
     values,
@@ -958,11 +992,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getHabitCompletions,
     toggleHabitDay,
     
-    // Health metrics methods
-    fetchHealthMetrics,
-    addHealthMetric,
-    updateHealthMetric,
-    deleteHealthMetric,
+    // Exercise methods
+    fetchExercises,
+    addExercise,
+    updateExercise,
+    deleteExercise,
+    getExerciseCompletions,
     
     // Date ideas methods
     fetchDateIdeas,

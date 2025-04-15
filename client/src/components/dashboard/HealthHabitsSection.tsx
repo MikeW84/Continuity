@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const HealthHabitsSection = () => {
-  const { habits, healthMetrics, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
+  const { habits, exercises, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
   const [expandedHabit, setExpandedHabit] = useState<number | null>(null);
   const { toast } = useToast();
 
@@ -148,31 +148,59 @@ const HealthHabitsSection = () => {
         </div>
         
         <div>
-          <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3">Health Metrics</h3>
+          <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3">Exercise Tracker</h3>
           
-          {healthMetrics.length === 0 ? (
+          {exercises.length === 0 ? (
             <div className="text-center py-3 text-secondary">
-              <p>No health metrics yet. Add your first metric!</p>
+              <p>No exercises tracked yet. Add your first exercise!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {healthMetrics.map(metric => (
-                <div key={metric.id} className="p-3 bg-primary bg-opacity-5 rounded-lg">
-                  <div className="flex items-center mb-1">
-                    <i className={`ri-${metric.icon}-line text-accent mr-1`}></i>
-                    <span className="text-xs text-secondary">{metric.name}</span>
+            <div className="grid grid-cols-1 gap-3 mb-4">
+              {exercises.map(exercise => {
+                // Define category-specific icons and colors
+                const categoryInfo = {
+                  'Cardio': { icon: 'heart-pulse', color: 'text-blue-500', bgColor: 'bg-blue-100' },
+                  'Strength': { icon: 'fitness', color: 'text-red-500', bgColor: 'bg-red-100' },
+                  'Flexibility': { icon: 'yoga', color: 'text-green-500', bgColor: 'bg-green-100' },
+                }[exercise.category] || { icon: 'heart-pulse', color: 'text-primary', bgColor: 'bg-primary-100' };
+                
+                // Format date
+                const exerciseDate = new Date(exercise.date);
+                const formattedDate = exerciseDate.toLocaleDateString(undefined, { 
+                  month: 'short', 
+                  day: 'numeric' 
+                });
+                
+                return (
+                  <div key={exercise.id} className={`p-3 rounded-lg flex items-center ${categoryInfo.bgColor} bg-opacity-30`}>
+                    <div className={`h-10 w-10 rounded-full ${categoryInfo.bgColor} flex items-center justify-center mr-3`}>
+                      <i className={`ri-${categoryInfo.icon}-line ${categoryInfo.color}`}></i>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between">
+                        <span className="font-inter font-medium">{exercise.name}</span>
+                        <span className="text-xs text-secondary">{formattedDate}</span>
+                      </div>
+                      <div className="text-xs text-secondary">
+                        {exercise.category === 'Cardio' && (
+                          <span>{exercise.time} min • {exercise.distance ? `${exercise.distance}m` : 'No distance'}</span>
+                        )}
+                        {exercise.category === 'Strength' && (
+                          <span>{exercise.sets || 0} sets • {exercise.reps || 0} reps • {exercise.weight ? `${exercise.weight}kg` : 'No weight'}</span>
+                        )}
+                        {exercise.category === 'Flexibility' && (
+                          <span>{exercise.duration} min • {exercise.musclesWorked || 'General stretching'}</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-inter font-semibold">{metric.value}</span>
-                    <span className="text-xs text-success bg-success bg-opacity-10 py-1 px-2 rounded">{metric.change}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           
           <button className="text-accent hover:text-opacity-80 text-sm font-medium flex items-center mt-2 transition-colors">
-            <i className="ri-add-line mr-1"></i> Add Health Metric
+            <i className="ri-add-line mr-1"></i> Add Exercise
           </button>
         </div>
       </CardContent>
