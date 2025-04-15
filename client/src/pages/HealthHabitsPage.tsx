@@ -120,53 +120,69 @@ const HealthHabitsPage = () => {
   };
 
   const handleAddExercise = async (data: ExerciseFormValues) => {
-    if (selectedExercise) {
-      // Update existing exercise
-      await updateExercise(selectedExercise, {
-        name: data.name,
-        date: new Date(data.date),
-        category: data.category,
-        time: data.time,
-        distance: data.distance,
-        heartRate: data.heartRate,
-        weight: data.weight,
-        reps: data.reps,
-        sets: data.sets,
-        duration: data.duration,
-        musclesWorked: data.musclesWorked,
-      });
-    } else {
-      // Add new exercise
-      await addExercise({
-        name: data.name,
-        date: new Date(data.date),
-        category: data.category,
-        time: data.time,
-        distance: data.distance,
-        heartRate: data.heartRate,
-        weight: data.weight,
-        reps: data.reps,
-        sets: data.sets,
-        duration: data.duration,
-        musclesWorked: data.musclesWorked,
-      });
+    try {
+      if (selectedExercise) {
+        // Update existing exercise
+        await updateExercise(selectedExercise, {
+          name: data.name,
+          date: new Date(data.date),
+          category: data.category,
+          time: data.time,
+          distance: data.distance,
+          heartRate: data.heartRate,
+          weight: data.weight,
+          reps: data.reps,
+          sets: data.sets,
+          duration: data.duration,
+          musclesWorked: data.musclesWorked,
+        });
+      } else {
+        // Add new exercise
+        await addExercise({
+          name: data.name,
+          date: new Date(data.date),
+          category: data.category,
+          time: data.time,
+          distance: data.distance,
+          heartRate: data.heartRate,
+          weight: data.weight,
+          reps: data.reps,
+          sets: data.sets,
+          duration: data.duration,
+          musclesWorked: data.musclesWorked,
+        });
+      }
+      
+      setIsExerciseDialogOpen(false);
+      exerciseForm.reset();
+      // Make sure to fetch the latest data
+      await fetchExercises();
+    } catch (error) {
+      console.error("Error saving exercise:", error);
+      // Keep the dialog open so user can try again
     }
-    
-    setIsExerciseDialogOpen(false);
-    exerciseForm.reset();
   };
 
   const handleDeleteItem = async () => {
     if (!selectedItem) return;
     
-    if (deleteType === 'habit') {
-      await deleteHabit(selectedItem);
-    } else {
-      await deleteExercise(selectedItem);
+    try {
+      if (deleteType === 'habit') {
+        await deleteHabit(selectedItem);
+        // Refresh habits data
+        await fetchHabits();
+      } else {
+        await deleteExercise(selectedItem);
+        // Refresh exercises data
+        await fetchExercises();
+      }
+      
+      setIsDeleteDialogOpen(false);
+      setSelectedItem(null);
+    } catch (error) {
+      console.error(`Error deleting ${deleteType}:`, error);
+      // Keep the dialog open so user can try again or cancel
     }
-    
-    setIsDeleteDialogOpen(false);
-    setSelectedItem(null);
   };
 
   const handleToggleHabit = async (id: number) => {
