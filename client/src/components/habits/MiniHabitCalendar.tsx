@@ -54,23 +54,39 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
     refetchOnWindowFocus: false,
     retry: 3,
     // Prevent fetching again for a short period to avoid flicker
-    staleTime: 1000,
+    staleTime: 0, // Make sure we always have fresh data
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
+
+  // Log completions data for debugging
+  useEffect(() => {
+    console.log(`MiniCalendar for habit ${habitId}: Completions data:`, data);
+  }, [data, habitId]);
   
   // Compute completed days set directly from the data
   // This eliminates the need for a separate state variable that can get out of sync
   const completedDays = useMemo(() => {
     const completedDaysSet = new Set<number>();
-    if (Array.isArray(data)) {
+    
+    // Make sure data is valid and is an array
+    if (Array.isArray(data) && data.length > 0) {
+      // Process each completion
       data.forEach(completion => {
-        if (completion && typeof completion.day === 'number') {
+        if (completion && 
+            typeof completion.day === 'number' && 
+            completion.year === currentYear && 
+            completion.month === currentMonth) {
           completedDaysSet.add(completion.day);
+          console.log(`Added day ${completion.day} to completed days set`);
         }
       });
     }
+    
+    console.log(`MiniCalendar completedDays set has ${completedDaysSet.size} days:`, 
+      Array.from(completedDaysSet));
+    
     return completedDaysSet;
-  }, [data]);
+  }, [data, currentYear, currentMonth]);
   
   // Handle clicking on a day with debouncing to prevent multiple rapid clicks
   const handleDayClick = useCallback(async (day: number) => {
@@ -96,11 +112,25 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
       queryClient.setQueryData<HabitCompletion[]>(completionsQueryKey, old => {
         if (!old) return [];
         
-        if (completedDays.has(day)) {
+        // Find exact match for the day we're toggling
+        const existingCompletionIndex = old.findIndex(
+          c => c.year === currentYear && 
+               c.month === currentMonth && 
+               c.day === day
+        );
+        
+        console.log(`Day ${day} exists in cache: ${existingCompletionIndex !== -1}`);
+        
+        if (existingCompletionIndex !== -1) {
           // Remove the completion if it exists
-          return old.filter(completion => completion.day !== day);
+          console.log(`Removing day ${day} from completions cache`);
+          return [
+            ...old.slice(0, existingCompletionIndex),
+            ...old.slice(existingCompletionIndex + 1)
+          ];
         } else {
           // Add a new completion
+          console.log(`Adding day ${day} to completions cache`);
           return [...old, {
             id: Date.now(), // Temporary ID that will be replaced when we refetch
             habitId,
