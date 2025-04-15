@@ -54,6 +54,8 @@ interface AppContextProps {
   updateHabit: (id: number, habit: Partial<Habit>) => Promise<void>;
   deleteHabit: (id: number) => Promise<void>;
   toggleHabit: (id: number) => Promise<void>;
+  getHabitCompletions: (habitId: number, year: number, month: number) => Promise<HabitCompletion[]>;
+  toggleHabitByDate: (habitId: number, date: Date) => Promise<void>;
   
   // Health Metrics
   fetchHealthMetrics: () => Promise<void>;
@@ -551,6 +553,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  const getHabitCompletions = async (habitId: number, year: number, month: number): Promise<HabitCompletion[]> => {
+    try {
+      const res = await fetch(`/api/habits/${habitId}/completions/${year}/${month}`);
+      if (!res.ok) throw new Error('Failed to fetch habit completions');
+      return await res.json();
+    } catch (error) {
+      console.error('Error fetching habit completions:', error);
+      toast({
+        title: "Failed to load habit data",
+        description: "There was a problem loading your habit completion data.",
+        variant: "destructive"
+      });
+      return [];
+    }
+  };
+  
+  const toggleHabitByDate = async (habitId: number, date: Date) => {
+    try {
+      await apiRequest('POST', `/api/habits/${habitId}/toggle-date`, { date });
+      await fetchHabits();
+    } catch (error) {
+      toast({
+        title: "Failed to update habit",
+        description: "There was a problem updating your habit completion.",
+        variant: "destructive"
+      });
+      console.error('Error toggling habit by date:', error);
+      throw error;
+    }
+  };
+  
   const addHealthMetric = async (metric: Omit<HealthMetric, 'id' | 'userId'>) => {
     try {
       await apiRequest('POST', '/api/health-metrics', { ...metric, userId: user?.id || 1 });
@@ -891,6 +924,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updateHabit,
     deleteHabit,
     toggleHabit,
+    getHabitCompletions,
+    toggleHabitByDate,
     
     // Health metrics methods
     fetchHealthMetrics,
