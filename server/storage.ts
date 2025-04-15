@@ -8,15 +8,23 @@ import {
   type DateIdea, type InsertDateIdea,
   type ParentingTask, type InsertParentingTask,
   type Value, type InsertValue,
-  type Dream, type InsertDream
+  type Dream, type InsertDream,
+  users,
+  projects,
+  ideas,
+  learningItems,
+  habits,
+  healthMetrics,
+  dateIdeas,
+  parentingTasks,
+  values,
+  dreams,
+  projectValues,
+  projectDreams
 } from "@shared/schema";
 
-// Database imports commented out until PostgreSQL is properly set up
-// import * as schema from "@shared/schema";
-// import { Pool, neonConfig } from '@neondatabase/serverless';
-// import { drizzle } from 'drizzle-orm/neon-serverless';
-// import { eq } from "drizzle-orm";
-// import ws from "ws";
+import { db } from "./db";
+import { eq, and, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
