@@ -43,19 +43,7 @@ const Sidebar = () => {
         </ul>
       </nav>
       
-      <div className="p-4 md:p-6">
-        <div className="hidden md:flex items-center">
-          <div className="h-8 w-8 rounded-full bg-accent mr-2">
-            <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white">
-              {user?.displayName?.charAt(0) || "U"}
-            </div>
-          </div>
-          <span className="text-sm font-medium">{user?.displayName || "User"}</span>
-        </div>
-        <button className="md:hidden mx-auto flex items-center justify-center h-10 w-10 rounded hover:bg-secondary transition-colors">
-          <i className="ri-user-line text-xl"></i>
-        </button>
-      </div>
+      
     </aside>
   );
 };
