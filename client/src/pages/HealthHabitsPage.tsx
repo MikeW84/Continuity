@@ -258,97 +258,38 @@ const HealthHabitsPage = () => {
                     <h3 className="text-xl font-semibold mb-4">Monthly Tracking</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {habits.map(habit => (
-                        <HabitCalendar 
-                          key={`calendar-${habit.id}`}
-                          habitId={habit.id} 
-                          habitName={habit.title}
-                          targetDays={habit.targetDays}
-                        />
+                        <div key={`calendar-${habit.id}`} className="relative">
+                          <div className="absolute top-2 right-2 z-10 flex gap-2">
+                            <button 
+                              className="text-secondary hover:text-primary transition-colors"
+                              onClick={() => openEditHabitDialog(habit)}
+                            >
+                              <i className="ri-edit-line"></i>
+                            </button>
+                            <button 
+                              className="text-secondary hover:text-destructive transition-colors"
+                              onClick={() => {
+                                setDeleteType('habit');
+                                setSelectedItem(habit.id);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                            >
+                              <i className="ri-delete-bin-line"></i>
+                            </button>
+                          </div>
+                          <HabitCalendar 
+                            habitId={habit.id} 
+                            habitName={habit.title}
+                            targetDays={habit.targetDays}
+                          />
+                        </div>
                       ))}
                     </div>
                   </div>
                   
-                  {/* Habit Cards */}
-                  <h3 className="text-xl font-semibold mb-4">Daily Habits</h3>
+                  {/* Add New Habit Card */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {habits.map(habit => (
-                      <Card key={habit.id}>
-                        <CardContent className="p-6">
-                          <div className="flex items-center mb-4">
-                            <button 
-                              className={`h-8 w-8 rounded-full border-2 ${
-                                habit.isCompletedToday 
-                                  ? "border-success mr-3 flex items-center justify-center bg-success bg-opacity-10" 
-                                  : "border-secondary mr-3 flex items-center justify-center"
-                              }`}
-                              onClick={() => handleToggleHabit(habit.id)}
-                            >
-                              {habit.isCompletedToday && (
-                                <i className="ri-check-line text-success"></i>
-                              )}
-                            </button>
-                            <div className="flex-1">
-                              <h3 className="font-inter font-medium">{habit.title}</h3>
-                            </div>
-                            <div className="flex">
-                              <button 
-                                className="text-secondary hover:text-primary transition-colors mr-2"
-                                onClick={() => openEditHabitDialog(habit)}
-                              >
-                                <i className="ri-edit-line"></i>
-                              </button>
-                              <button 
-                                className="text-secondary hover:text-destructive transition-colors"
-                                onClick={() => {
-                                  setDeleteType('habit');
-                                  setSelectedItem(habit.id);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                              >
-                                <i className="ri-delete-bin-line"></i>
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-secondary">Progress</span>
-                            <span className={`text-sm ${
-                              (habit.completedDays || 0) / (habit.targetDays || 30) > 0.5 
-                                ? "text-success" 
-                                : "text-secondary"
-                            }`}>
-                              {habit.completedDays || 0}/{habit.targetDays || 30} days
-                            </span>
-                          </div>
-                          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${
-                                (habit.completedDays || 0) / (habit.targetDays || 30) > 0.5 
-                                  ? "bg-success" 
-                                  : "bg-secondary"
-                              } rounded-full`}
-                              style={{ 
-                                width: `${((habit.completedDays || 0) / (habit.targetDays || 30)) * 100}%` 
-                              }}
-                            ></div>
-                          </div>
-                          
-                          <div className="mt-4 text-sm text-center">
-                            {habit.isCompletedToday ? (
-                              <span className="text-success">
-                                <i className="ri-check-double-line mr-1"></i>
-                                Completed today
-                              </span>
-                            ) : (
-                              <span className="text-secondary">
-                                <i className="ri-time-line mr-1"></i>
-                                Not completed today
-                              </span>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    
                     
                     {/* Add New Habit Card */}
                     <Card className="border border-dashed border-gray-300 bg-gray-50">
