@@ -264,8 +264,7 @@ const ProjectsPage = () => {
                   </span>
                   
                   <Button
-                    variant="outline"
-                    className="text-sm"
+                    className="text-sm bg-accent text-white"
                     onClick={() => openEditDialog(priorityProject)}
                   >
                     Update Progress
