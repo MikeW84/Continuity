@@ -160,12 +160,13 @@ export const habits = pgTable("habits", {
   userId: integer("user_id").notNull(),
 });
 
-// Habit Completions Schema - for tracking individual days
+// Habit Completions Schema - for tracking individual days with simple integer days
 export const habitCompletions = pgTable("habit_completions", {
   id: serial("id").primaryKey(),
   habitId: integer("habit_id").notNull().references(() => habits.id, { onDelete: "cascade" }),
-  date: timestamp("date").notNull(),
-  completed: boolean("completed").default(true),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(), // 1-12
+  day: integer("day").notNull(), // 1-31
 });
 
 export const insertHabitSchema = createInsertSchema(habits).pick({
@@ -178,8 +179,9 @@ export const insertHabitSchema = createInsertSchema(habits).pick({
 
 export const insertHabitCompletionSchema = createInsertSchema(habitCompletions).pick({
   habitId: true,
-  date: true,
-  completed: true,
+  year: true,
+  month: true,
+  day: true,
 });
 
 export type InsertHabit = z.infer<typeof insertHabitSchema>;

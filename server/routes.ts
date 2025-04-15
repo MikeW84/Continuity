@@ -345,22 +345,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(completions);
   });
   
-  // Toggle habit completion for a specific date
-  app.post("/api/habits/:id/toggle-date", async (req: Request, res: Response) => {
+  // Toggle habit completion using just year, month, and day integers
+  app.post("/api/habits/:id/toggle-day", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const { date } = req.body;
+    const { year, month, day } = req.body;
     
-    if (!date) {
-      return res.status(400).json({ message: "Date is required" });
+    if (!year || !month || !day) {
+      return res.status(400).json({ message: "Year, month and day are all required" });
     }
     
-    console.log("Received date:", date);
-    // Create date at noon local time to avoid timezone issues
-    const dateObj = new Date(date);
-    // Don't adjust for timezone - keep the date as is
-    console.log("Parsed date object:", dateObj);
+    console.log(`Toggling habit day: ${year}-${month}-${day}`);
     
-    const completion = await storage.toggleHabitCompletionByDate(id, dateObj);
+    const completion = await storage.toggleHabitDay(id, year, month, day);
     
     if (!completion) {
       return res.status(404).json({ message: "Habit not found" });

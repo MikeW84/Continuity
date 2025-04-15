@@ -891,43 +891,30 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getHabitCompletions(habitId: number, year: number, month: number): Promise<HabitCompletion[]> {
-    // Get the start and end dates for the month
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0); // Last day of month
-    
+    // Simple integer-based query for month/year
     return db.select()
       .from(habitCompletions)
       .where(
         and(
           eq(habitCompletions.habitId, habitId),
-          gte(habitCompletions.date, startDate),
-          lte(habitCompletions.date, endDate)
+          eq(habitCompletions.year, year),
+          eq(habitCompletions.month, month)
         )
       );
   }
   
-  async toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined> {
-    console.log("Server received date for toggle:", date);
-    // Get the date components and construct a date string in YYYY-MM-DD format
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const dateString = `${year}-${month}-${day}`;
-    console.log("Date string for database:", dateString);
+  async toggleHabitDay(habitId: number, year: number, month: number, day: number): Promise<HabitCompletion | undefined> {
+    console.log(`Toggling habit day: ${year}-${month}-${day}`);
     
-    // Create a date at the start of the day in local timezone
-    const targetDate = new Date(`${dateString}T00:00:00`);
-    console.log("Target date:", targetDate);
-    const endOfDay = new Date(`${dateString}T23:59:59.999`);
-    
-    // Check if completion already exists for this date
+    // Check if completion already exists for this date using simple integer comparison
     const [existingCompletion] = await db.select()
       .from(habitCompletions)
       .where(
         and(
           eq(habitCompletions.habitId, habitId),
-          gte(habitCompletions.date, targetDate),
-          lte(habitCompletions.date, endOfDay)
+          eq(habitCompletions.year, year),
+          eq(habitCompletions.month, month),
+          eq(habitCompletions.day, day)
         )
       );
     
@@ -948,8 +935,13 @@ export class DatabaseStorage implements IStorage {
       
       // Check if this is today and update isCompletedToday
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (targetDate.getTime() === today.getTime()) {
+      const isToday = (
+        today.getFullYear() === year && 
+        today.getMonth() + 1 === month && 
+        today.getDate() === day
+      );
+      
+      if (isToday) {
         await db.update(habits)
           .set({ isCompletedToday: false, completedDays })
           .where(eq(habits.id, habitId));
@@ -959,12 +951,13 @@ export class DatabaseStorage implements IStorage {
           .where(eq(habits.id, habitId));
       }
     } else {
-      // Add a new completion
+      // Add a new completion with simple integer values
       const [newCompletion] = await db.insert(habitCompletions)
         .values({
           habitId,
-          date: targetDate,
-          completed: true
+          year,
+          month,
+          day
         })
         .returning();
       
@@ -975,8 +968,13 @@ export class DatabaseStorage implements IStorage {
       
       // Check if this is today and update isCompletedToday
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (targetDate.getTime() === today.getTime()) {
+      const isToday = (
+        today.getFullYear() === year && 
+        today.getMonth() + 1 === month && 
+        today.getDate() === day
+      );
+      
+      if (isToday) {
         await db.update(habits)
           .set({ isCompletedToday: true, completedDays })
           .where(eq(habits.id, habitId));
