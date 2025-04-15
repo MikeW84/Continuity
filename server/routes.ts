@@ -385,13 +385,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/exercises", async (req: Request, res: Response) => {
     try {
-      // Handle date string conversion before validation
+      // Store date as a string in YYYY-MM-DD format only
       let modifiedBody = { ...req.body };
       
-      // If date is a string in YYYY-MM-DD format, create a proper Date object
-      if (typeof modifiedBody.date === 'string' && modifiedBody.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        // Use ISO format with T00:00:00.000Z to avoid timezone issues
-        modifiedBody.date = new Date(`${modifiedBody.date}T00:00:00.000Z`);
+      // If date is provided as a Date object, convert it to string
+      if (modifiedBody.date instanceof Date) {
+        // Get the date portion only in YYYY-MM-DD format
+        modifiedBody.date = modifiedBody.date.toISOString().split('T')[0];
       }
       
       const exerciseData = validateRequest(insertExerciseSchema, {
@@ -414,13 +414,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       
-      // Handle date string conversion before sending to storage
+      // Store date as a string in YYYY-MM-DD format only
       let exerciseData = { ...req.body };
       
-      // If date is a string in YYYY-MM-DD format, create a proper Date object
-      if (typeof exerciseData.date === 'string' && exerciseData.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        // Use ISO format with T00:00:00.000Z to avoid timezone issues
-        exerciseData.date = new Date(`${exerciseData.date}T00:00:00.000Z`);
+      // If date is provided as a Date object, convert it to string
+      if (exerciseData.date instanceof Date) {
+        // Get the date portion only in YYYY-MM-DD format
+        exerciseData.date = exerciseData.date.toISOString().split('T')[0];
       }
       
       const updatedExercise = await storage.updateExercise(id, exerciseData);
