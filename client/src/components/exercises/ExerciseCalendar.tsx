@@ -26,8 +26,8 @@ const ExerciseCalendar: React.FC = () => {
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
   
   // Extract just the year and month from the date (no time information)
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+  const year = useMemo(() => currentDate.getFullYear(), [currentDate]);
+  const month = useMemo(() => currentDate.getMonth() + 1, [currentDate]); // JavaScript months are 0-indexed
   
   // Fetch exercises for the current month
   const { data: exercises = [] } = useQuery({

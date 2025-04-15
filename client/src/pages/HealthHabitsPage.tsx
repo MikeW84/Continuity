@@ -472,7 +472,7 @@ const HealthHabitsPage = () => {
                       </p>
                       
                       <div className="max-w-lg mx-auto">
-                        <ExerciseCalendar key={exercises.length} />
+                        <ExerciseCalendar />
                       </div>
                     </div>
                   </div>
