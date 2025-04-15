@@ -121,32 +121,14 @@ const HealthHabitsPage = () => {
 
   const handleAddExercise = async (data: ExerciseFormValues) => {
     try {
-      // Properly format the date as a Date object
-      let dateObj;
-      try {
-        // If data.date is a string with format YYYY-MM-DD
-        if (typeof data.date === 'string') {
-          // Make sure we create the date correctly by using the ISO string format
-          dateObj = new Date(data.date + 'T00:00:00Z');
-        } else {
-          dateObj = new Date(data.date);
-        }
-        
-        // Validate that we have a valid date
-        if (isNaN(dateObj.getTime())) {
-          throw new Error('Invalid date format');
-        }
-      } catch (err) {
-        console.error('Error parsing date:', err);
-        // Default to today if date parsing fails
-        dateObj = new Date();
-      }
+      // Pass the date string directly to the server
+      // The server will handle the conversion to a Date object
       
       if (selectedExercise) {
         // Update existing exercise
         await updateExercise(selectedExercise, {
           name: data.name,
-          date: dateObj,
+          date: data.date, // Send as string in YYYY-MM-DD format
           category: data.category,
           time: data.time,
           distance: data.distance,
@@ -161,7 +143,7 @@ const HealthHabitsPage = () => {
         // Add new exercise
         await addExercise({
           name: data.name,
-          date: dateObj,
+          date: data.date, // Send as string in YYYY-MM-DD format
           category: data.category,
           time: data.time,
           distance: data.distance,

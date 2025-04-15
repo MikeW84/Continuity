@@ -385,9 +385,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/exercises", async (req: Request, res: Response) => {
     try {
+      // Handle date string conversion before validation
+      let modifiedBody = { ...req.body };
+      
+      // If date is a string in YYYY-MM-DD format, create a proper Date object
+      if (typeof modifiedBody.date === 'string' && modifiedBody.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = modifiedBody.date.split('-').map(Number);
+        // Create a date with just year, month, day components (month is 0-indexed in JS Date)
+        modifiedBody.date = new Date(year, month - 1, day);
+      }
+      
       const exerciseData = validateRequest(insertExerciseSchema, {
-        ...req.body,
-        userId: req.body.userId || TEMP_USER_ID
+        ...modifiedBody,
+        userId: modifiedBody.userId || TEMP_USER_ID
       });
       
       const newExercise = await storage.createExercise(exerciseData);
@@ -404,7 +414,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/exercises/:id", async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const exerciseData = req.body;
+      
+      // Handle date string conversion before sending to storage
+      let exerciseData = { ...req.body };
+      
+      // If date is a string in YYYY-MM-DD format, create a proper Date object
+      if (typeof exerciseData.date === 'string' && exerciseData.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = exerciseData.date.split('-').map(Number);
+        // Create a date with just year, month, day components (month is 0-indexed in JS Date)
+        exerciseData.date = new Date(year, month - 1, day);
+      }
       
       const updatedExercise = await storage.updateExercise(id, exerciseData);
       
