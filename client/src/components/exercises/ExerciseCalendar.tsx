@@ -75,34 +75,36 @@ const ExerciseCalendar: React.FC = () => {
     });
     
     // Fill in exercise data
-    exercises.forEach(exercise => {
-      // Handle date as a string directly
-      let dateStr = '';
-      
-      if (typeof exercise.date === 'string') {
-        // If date is already a string, ensure it's in YYYY-MM-DD format
-        dateStr = exercise.date.split('T')[0];
-      } else {
-        // Fallback for legacy date objects
-        dateStr = new Date(exercise.date as any).toISOString().split('T')[0];
-      }
-      
-      const [yearStr, monthStr, dayStr] = dateStr.split('-');
-      const dayOfMonth = parseInt(dayStr, 10);
-      
-      if (days[dayOfMonth - 1]) {
-        days[dayOfMonth - 1].hasExercises = true;
+    if (exercises && exercises.length > 0) {
+      exercises.forEach(exercise => {
+        // Handle date as a string directly
+        let dateStr = '';
         
-        // Mark the specific category
-        if (exercise.category === 'Cardio') {
-          days[dayOfMonth - 1].categories.Cardio = true;
-        } else if (exercise.category === 'Strength') {
-          days[dayOfMonth - 1].categories.Strength = true;
-        } else if (exercise.category === 'Flexibility') {
-          days[dayOfMonth - 1].categories.Flexibility = true;
+        if (typeof exercise.date === 'string') {
+          // If date is already a string, ensure it's in YYYY-MM-DD format
+          dateStr = exercise.date.split('T')[0];
+        } else {
+          // Fallback for legacy date objects
+          dateStr = new Date(exercise.date as any).toISOString().split('T')[0];
         }
-      }
-    });
+        
+        const [yearStr, monthStr, dayStr] = dateStr.split('-');
+        const dayOfMonth = parseInt(dayStr, 10);
+        
+        if (dayOfMonth > 0 && dayOfMonth <= days.length) {
+          days[dayOfMonth - 1].hasExercises = true;
+          
+          // Mark the specific category
+          if (exercise.category === 'Cardio') {
+            days[dayOfMonth - 1].categories.Cardio = true;
+          } else if (exercise.category === 'Strength') {
+            days[dayOfMonth - 1].categories.Strength = true;
+          } else if (exercise.category === 'Flexibility') {
+            days[dayOfMonth - 1].categories.Flexibility = true;
+          }
+        }
+      });
+    }
     
     // Add empty cells for days from previous month
     const previousMonthDays = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
@@ -124,10 +126,13 @@ const ExerciseCalendar: React.FC = () => {
     return [...emptyDaysBefore, ...days, ...emptyDaysAfter];
   }, [currentDate, exercises]);
   
-  // Update calendar days when data changes
-  useEffect(() => {
-    setCalendarDays(calendarData);
-  }, [calendarData]);
+  // Update calendar days when data changes - directly from the memo, no useEffect
+  // This eliminates the potential infinite update loop
+  useMemo(() => {
+    if (calendarData.length > 0 && JSON.stringify(calendarData) !== JSON.stringify(calendarDays)) {
+      setCalendarDays(calendarData);
+    }
+  }, [calendarData, calendarDays]);
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     if (direction === 'prev') {

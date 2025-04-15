@@ -588,7 +588,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const toggleHabitDay = async (habitId: number, year: number, month: number, day: number) => {
     try {
-      console.log(`Toggling habit day: ${year}-${month}-${day}`);
+      console.log(`Toggling habit day: ${year}-${month}-${day} for habitId: ${habitId}`);
       
       // Make sure habitId exists before proceeding
       if (!habitId) {
@@ -606,15 +606,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
         throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
       }
       
-      // Invalidate the completions query for this specific month to trigger refetches
+      // Wait for complete response before proceeding
+      const result = await response.json();
+      
+      // Add a small delay to ensure the database has synchronized
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Invalidate specifically only the completions for this habit
       queryClient.invalidateQueries({ 
-        queryKey: [`/api/habits/${habitId}/completions/${year}/${month}`] 
+        queryKey: [`/api/habits/${habitId}/completions/${year}/${month}`],
+        exact: true 
       });
+      
+      // Add another small delay before refreshing habits to avoid race conditions
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Refresh habits data to update completion counts
       await fetchHabits();
       
-      return await response.json();
+      return result;
     } catch (error) {
       console.error('Error toggling habit day:', error);
       
