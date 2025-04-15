@@ -907,11 +907,18 @@ export class DatabaseStorage implements IStorage {
   }
   
   async toggleHabitCompletionByDate(habitId: number, date: Date): Promise<HabitCompletion | undefined> {
-    // Convert the date to start of day
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    console.log("Server received date for toggle:", date);
+    // Get the date components and construct a date string in YYYY-MM-DD format
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    console.log("Date string for database:", dateString);
+    
+    // Create a date at the start of the day in local timezone
+    const targetDate = new Date(`${dateString}T00:00:00`);
+    console.log("Target date:", targetDate);
+    const endOfDay = new Date(`${dateString}T23:59:59.999`);
     
     // Check if completion already exists for this date
     const [existingCompletion] = await db.select()

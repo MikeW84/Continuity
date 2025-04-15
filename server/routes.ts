@@ -354,7 +354,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Date is required" });
     }
     
-    const completion = await storage.toggleHabitCompletionByDate(id, new Date(date));
+    console.log("Received date:", date);
+    // Create date at noon local time to avoid timezone issues
+    const dateObj = new Date(date);
+    // Don't adjust for timezone - keep the date as is
+    console.log("Parsed date object:", dateObj);
+    
+    const completion = await storage.toggleHabitCompletionByDate(id, dateObj);
     
     if (!completion) {
       return res.status(404).json({ message: "Habit not found" });
