@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { format, addMonths, subMonths, getDaysInMonth, getDay, startOfMonth, endOfMonth } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
@@ -53,7 +53,8 @@ const ExerciseCalendar: React.FC = () => {
     }
   });
 
-  useEffect(() => {
+  // Generate calendar data with useMemo to prevent unnecessary recalculations
+  const calendarData = useMemo(() => {
     // Generate calendar data for the month
     const daysInMonth = getDaysInMonth(currentDate);
     const firstDayOfMonth = getDay(startOfMonth(currentDate));
@@ -119,9 +120,14 @@ const ExerciseCalendar: React.FC = () => {
       hasExercises: false
     }));
     
-    // Combine all days
-    setCalendarDays([...emptyDaysBefore, ...days, ...emptyDaysAfter]);
+    // Return combined days
+    return [...emptyDaysBefore, ...days, ...emptyDaysAfter];
   }, [currentDate, exercises]);
+  
+  // Update calendar days when data changes
+  useEffect(() => {
+    setCalendarDays(calendarData);
+  }, [calendarData]);
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     if (direction === 'prev') {
@@ -131,36 +137,38 @@ const ExerciseCalendar: React.FC = () => {
     }
   };
 
-  // Function to generate the background style for a day
-  const generateDayStyle = (day: CalendarDay): React.CSSProperties => {
-    if (!day.hasExercises) {
+  // Function to generate the background style for a day - memoized for better performance
+  const generateDayStyle = useMemo(() => {
+    return (day: CalendarDay): React.CSSProperties => {
+      if (!day.hasExercises) {
+        return {};
+      }
+      
+      const { Cardio, Strength, Flexibility } = day.categories;
+      const activeCategories = [
+        Cardio ? '#3b82f6' : null, // blue for Cardio
+        Strength ? '#ef4444' : null, // red for Strength
+        Flexibility ? '#10b981' : null // green for Flexibility
+      ].filter(Boolean) as string[];
+      
+      if (activeCategories.length === 1) {
+        // Single color
+        return { backgroundColor: activeCategories[0] };
+      } else if (activeCategories.length === 2) {
+        // Two color gradient
+        return { 
+          background: `linear-gradient(135deg, ${activeCategories[0]} 0%, ${activeCategories[1]} 100%)`
+        };
+      } else if (activeCategories.length === 3) {
+        // Three color gradient
+        return { 
+          background: `linear-gradient(135deg, ${activeCategories[0]} 0%, ${activeCategories[1]} 50%, ${activeCategories[2]} 100%)`
+        };
+      }
+      
       return {};
-    }
-    
-    const { Cardio, Strength, Flexibility } = day.categories;
-    const activeCategories = [
-      Cardio ? '#3b82f6' : null, // blue for Cardio
-      Strength ? '#ef4444' : null, // red for Strength
-      Flexibility ? '#10b981' : null // green for Flexibility
-    ].filter(Boolean) as string[];
-    
-    if (activeCategories.length === 1) {
-      // Single color
-      return { backgroundColor: activeCategories[0] };
-    } else if (activeCategories.length === 2) {
-      // Two color gradient
-      return { 
-        background: `linear-gradient(135deg, ${activeCategories[0]} 0%, ${activeCategories[1]} 100%)`
-      };
-    } else if (activeCategories.length === 3) {
-      // Three color gradient
-      return { 
-        background: `linear-gradient(135deg, ${activeCategories[0]} 0%, ${activeCategories[1]} 50%, ${activeCategories[2]} 100%)`
-      };
-    }
-    
-    return {};
-  };
+    };
+  }, []);
 
   return (
     <Card className="w-full">
