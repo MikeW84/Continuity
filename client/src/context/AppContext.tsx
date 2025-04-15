@@ -6,12 +6,13 @@ import {
 } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 
-// HabitCompletion type - matches the backend type
+// HabitCompletion type - simplified with year/month/day integers
 export interface HabitCompletion {
   id: number;
   habitId: number;
-  date: Date;
-  completed: boolean;
+  year: number;
+  month: number;
+  day: number;
 }
 
 // Interface for our context
@@ -55,7 +56,7 @@ interface AppContextProps {
   deleteHabit: (id: number) => Promise<void>;
   toggleHabit: (id: number) => Promise<void>;
   getHabitCompletions: (habitId: number, year: number, month: number) => Promise<HabitCompletion[]>;
-  toggleHabitByDate: (habitId: number, date: Date) => Promise<void>;
+  toggleHabitDay: (habitId: number, year: number, month: number, day: number) => Promise<void>;
   
   // Health Metrics
   fetchHealthMetrics: () => Promise<void>;
@@ -569,11 +570,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const toggleHabitByDate = async (habitId: number, date: Date) => {
+  const toggleHabitDay = async (habitId: number, year: number, month: number, day: number) => {
     try {
-      // Ensure consistent date format for API requests
-      const formattedDate = date.toISOString();
-      await apiRequest('POST', `/api/habits/${habitId}/toggle-date`, { date: formattedDate });
+      console.log(`Toggling habit day: ${year}-${month}-${day}`);
+      // Send the simple integer values directly to the backend
+      await apiRequest('POST', `/api/habits/${habitId}/toggle-day`, { 
+        year, 
+        month, 
+        day 
+      });
       await fetchHabits();
     } catch (error) {
       toast({
@@ -581,7 +586,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         description: "There was a problem updating your habit completion.",
         variant: "destructive"
       });
-      console.error('Error toggling habit by date:', error);
+      console.error('Error toggling habit day:', error);
       throw error;
     }
   };
@@ -927,7 +932,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteHabit,
     toggleHabit,
     getHabitCompletions,
-    toggleHabitByDate,
+    toggleHabitDay,
     
     // Health metrics methods
     fetchHealthMetrics,
