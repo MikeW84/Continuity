@@ -182,7 +182,7 @@ const HealthHabitsPage = () => {
         <h2 className="text-2xl font-inter font-bold text-primary">Health & Habits</h2>
         <div className="flex gap-2">
           <Button 
-            className="bg-success text-white"
+            className="bg-accent text-white"
             onClick={() => {
               setSelectedHabit(null);
               habitForm.reset({
