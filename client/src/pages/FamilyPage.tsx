@@ -179,7 +179,7 @@ const FamilyPage = () => {
             New Date Idea
           </Button>
           <Button 
-            className="bg-success text-white"
+            className="bg-accent text-white"
             onClick={() => {
               setSelectedTask(null);
               taskForm.reset({
