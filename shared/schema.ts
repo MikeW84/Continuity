@@ -207,7 +207,7 @@ export const habitCompletionsRelations = relations(habitCompletions, ({ one }) =
 export const exercises = pgTable("exercises", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  date: timestamp("date").notNull(),
+  date: text("date").notNull(), // Store as YYYY-MM-DD string format
   category: text("category").notNull(), // 'Cardio', 'Strength', 'Flexibility'
   // Optional fields that depend on the category
   time: integer("time"), // in minutes - for Cardio
@@ -249,13 +249,11 @@ const baseExerciseSchema = createInsertSchema(exercises).pick({
   userId: true,
 });
 
-// Then extend it to handle string dates (similar to projectWithRelationsSchema)
+// Then use string dates only for exercises
 export const insertExerciseSchema = baseExerciseSchema.extend({
-  // Accept either a Date object or a date string for date
-  date: z.union([
-    z.date(),
-    z.string().transform((str) => str ? new Date(str) : null)
-  ]),
+  // Accept only strings in YYYY-MM-DD format
+  date: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
 });
 
 export const insertExerciseCompletionSchema = createInsertSchema(exerciseCompletions).pick({

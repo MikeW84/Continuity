@@ -35,8 +35,17 @@ const ExerciseCalendar: React.FC = () => {
     select: (data: Exercise[]) => {
       // Filter exercises for the current month and year only
       return data.filter(exercise => {
-        // Parse the date with UTC to avoid timezone issues
-        const dateStr = new Date(exercise.date).toISOString().split('T')[0];
+        // Handle date as a string directly
+        let dateStr = '';
+        
+        if (typeof exercise.date === 'string') {
+          // If date is already a string, ensure it's in YYYY-MM-DD format
+          dateStr = exercise.date.split('T')[0];
+        } else {
+          // Fallback for legacy date objects
+          dateStr = new Date(exercise.date as any).toISOString().split('T')[0];
+        }
+        
         const [exerciseYear, exerciseMonth] = dateStr.split('-').map(Number);
         return exerciseYear === year && exerciseMonth === month;
       });
@@ -65,8 +74,17 @@ const ExerciseCalendar: React.FC = () => {
     
     // Fill in exercise data
     exercises.forEach(exercise => {
-      // Create date in UTC to avoid timezone issues
-      const dateStr = new Date(exercise.date).toISOString().split('T')[0];
+      // Handle date as a string directly
+      let dateStr = '';
+      
+      if (typeof exercise.date === 'string') {
+        // If date is already a string, ensure it's in YYYY-MM-DD format
+        dateStr = exercise.date.split('T')[0];
+      } else {
+        // Fallback for legacy date objects
+        dateStr = new Date(exercise.date as any).toISOString().split('T')[0];
+      }
+      
       const [yearStr, monthStr, dayStr] = dateStr.split('-');
       const dayOfMonth = parseInt(dayStr, 10);
       

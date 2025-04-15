@@ -206,9 +206,20 @@ const HealthHabitsPage = () => {
 
   const openEditExerciseDialog = (exercise: any) => {
     setSelectedExercise(exercise.id);
+    
+    // Format date from database (could be string already or date object)
+    let formattedDate = "";
+    if (typeof exercise.date === 'string') {
+      // If it's already a string - ensure it's in YYYY-MM-DD format
+      formattedDate = exercise.date.split('T')[0]; // Remove any time component
+    } else {
+      // If it's a date object, convert to YYYY-MM-DD
+      formattedDate = new Date(exercise.date).toISOString().split('T')[0];
+    }
+    
     exerciseForm.reset({
       name: exercise.name,
-      date: exercise.date ? new Date(exercise.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date: formattedDate,
       category: exercise.category || "Cardio",
       time: exercise.time || null,
       distance: exercise.distance || null,
@@ -469,7 +480,11 @@ const HealthHabitsPage = () => {
                               </div>
                               <div>
                                 <h3 className="font-inter font-medium">{exercise.name}</h3>
-                                <p className="text-sm text-secondary">{new Date(`${new Date(exercise.date).toISOString().split('T')[0]}T00:00:00.000Z`).toLocaleDateString()}</p>
+                                <p className="text-sm text-secondary">
+                                  {typeof exercise.date === 'string' 
+                                    ? new Date(exercise.date).toLocaleDateString() 
+                                    : new Date(exercise.date as unknown as string).toLocaleDateString()}
+                                </p>
                               </div>
                             </div>
                             <div className="flex">
