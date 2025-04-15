@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import HabitCalendar from "@/components/habits/HabitCalendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Habit form schema
 const habitFormSchema = z.object({
@@ -21,38 +22,46 @@ const habitFormSchema = z.object({
 
 type HabitFormValues = z.infer<typeof habitFormSchema>;
 
-// Health metric form schema
-const healthMetricFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  value: z.string().min(1, "Value is required"),
-  change: z.string().nullable().default(null),
-  icon: z.string().default("heart-pulse"),
+// Exercise form schema
+const exerciseFormSchema = z.object({
+  name: z.string().min(1, "Exercise name is required"),
+  date: z.string().min(1, "Date is required"),
+  category: z.enum(["Cardio", "Strength", "Flexibility"]),
+  // Optional fields based on category
+  time: z.number().nullable().default(null),
+  distance: z.number().nullable().default(null),
+  heartRate: z.number().nullable().default(null),
+  weight: z.number().nullable().default(null),
+  reps: z.number().nullable().default(null),
+  sets: z.number().nullable().default(null),
+  duration: z.number().nullable().default(null),
+  musclesWorked: z.string().nullable().default(null),
 });
 
-type HealthMetricFormValues = z.infer<typeof healthMetricFormSchema>;
+type ExerciseFormValues = z.infer<typeof exerciseFormSchema>;
 
 const HealthHabitsPage = () => {
   const { 
     habits, 
-    healthMetrics, 
+    exercises, 
     fetchHabits, 
-    fetchHealthMetrics, 
+    fetchExercises, 
     addHabit, 
     updateHabit, 
     deleteHabit, 
     toggleHabit,
-    addHealthMetric,
-    updateHealthMetric,
-    deleteHealthMetric,
+    addExercise,
+    updateExercise,
+    deleteExercise,
     isLoading 
   } = useAppContext();
   
   const [isHabitDialogOpen, setIsHabitDialogOpen] = useState(false);
-  const [isMetricDialogOpen, setIsMetricDialogOpen] = useState(false);
+  const [isExerciseDialogOpen, setIsExerciseDialogOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<number | null>(null);
-  const [selectedMetric, setSelectedMetric] = useState<number | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteType, setDeleteType] = useState<'habit' | 'metric'>('habit');
+  const [deleteType, setDeleteType] = useState<'habit' | 'exercise'>('habit');
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
 
   const habitForm = useForm<HabitFormValues>({
@@ -65,20 +74,27 @@ const HealthHabitsPage = () => {
     },
   });
 
-  const metricForm = useForm<HealthMetricFormValues>({
-    resolver: zodResolver(healthMetricFormSchema),
+  const exerciseForm = useForm<ExerciseFormValues>({
+    resolver: zodResolver(exerciseFormSchema),
     defaultValues: {
       name: "",
-      value: "",
-      change: null,
-      icon: "heart-pulse",
+      date: new Date().toISOString().split('T')[0],
+      category: "Cardio",
+      time: null,
+      distance: null,
+      heartRate: null,
+      weight: null,
+      reps: null,
+      sets: null,
+      duration: null,
+      musclesWorked: null,
     },
   });
 
   useEffect(() => {
     fetchHabits();
-    fetchHealthMetrics();
-  }, [fetchHabits, fetchHealthMetrics]);
+    fetchExercises();
+  }, [fetchHabits, fetchExercises]);
 
   const handleAddHabit = async (data: HabitFormValues) => {
     if (selectedHabit) {
@@ -103,27 +119,41 @@ const HealthHabitsPage = () => {
     habitForm.reset();
   };
 
-  const handleAddHealthMetric = async (data: HealthMetricFormValues) => {
-    if (selectedMetric) {
-      // Update existing health metric
-      await updateHealthMetric(selectedMetric, {
+  const handleAddExercise = async (data: ExerciseFormValues) => {
+    if (selectedExercise) {
+      // Update existing exercise
+      await updateExercise(selectedExercise, {
         name: data.name,
-        value: data.value,
-        change: data.change,
-        icon: data.icon,
+        date: new Date(data.date),
+        category: data.category,
+        time: data.time,
+        distance: data.distance,
+        heartRate: data.heartRate,
+        weight: data.weight,
+        reps: data.reps,
+        sets: data.sets,
+        duration: data.duration,
+        musclesWorked: data.musclesWorked,
       });
     } else {
-      // Add new health metric
-      await addHealthMetric({
+      // Add new exercise
+      await addExercise({
         name: data.name,
-        value: data.value,
-        change: data.change,
-        icon: data.icon,
+        date: new Date(data.date),
+        category: data.category,
+        time: data.time,
+        distance: data.distance,
+        heartRate: data.heartRate,
+        weight: data.weight,
+        reps: data.reps,
+        sets: data.sets,
+        duration: data.duration,
+        musclesWorked: data.musclesWorked,
       });
     }
     
-    setIsMetricDialogOpen(false);
-    metricForm.reset();
+    setIsExerciseDialogOpen(false);
+    exerciseForm.reset();
   };
 
   const handleDeleteItem = async () => {
