@@ -75,11 +75,18 @@ const HealthHabitsPage = () => {
     },
   });
 
+  // Create today's date with noon time to avoid timezone issues
+  const getNoonDate = () => {
+    const today = new Date();
+    today.setHours(12, 0, 0, 0); // Set to noon
+    return today.toISOString().split('T')[0];
+  };
+  
   const exerciseForm = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
     defaultValues: {
       name: "",
-      date: new Date().toISOString().split('T')[0],
+      date: getNoonDate(),
       category: "Cardio",
       time: null,
       distance: null,
