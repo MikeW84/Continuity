@@ -2,20 +2,20 @@ import { useEffect, useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import HabitCalendar from "@/components/habits/HabitCalendar";
 
 // Habit form schema
 const habitFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   completedDays: z.number().min(0).default(0),
-  totalDays: z.number().min(1).default(30),
+  targetDays: z.number().min(1).default(30),
   isCompletedToday: z.boolean().default(false),
 });
 
@@ -25,7 +25,7 @@ type HabitFormValues = z.infer<typeof habitFormSchema>;
 const healthMetricFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   value: z.string().min(1, "Value is required"),
-  change: z.string().optional(),
+  change: z.string().nullable().default(null),
   icon: z.string().default("heart-pulse"),
 });
 
@@ -46,6 +46,7 @@ const HealthHabitsPage = () => {
     deleteHealthMetric,
     isLoading 
   } = useAppContext();
+  
   const [isHabitDialogOpen, setIsHabitDialogOpen] = useState(false);
   const [isMetricDialogOpen, setIsMetricDialogOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<number | null>(null);
@@ -59,7 +60,7 @@ const HealthHabitsPage = () => {
     defaultValues: {
       title: "",
       completedDays: 0,
-      totalDays: 30,
+      targetDays: 30,
       isCompletedToday: false,
     },
   });
@@ -69,7 +70,7 @@ const HealthHabitsPage = () => {
     defaultValues: {
       name: "",
       value: "",
-      change: "",
+      change: null,
       icon: "heart-pulse",
     },
   });
@@ -82,10 +83,20 @@ const HealthHabitsPage = () => {
   const handleAddHabit = async (data: HabitFormValues) => {
     if (selectedHabit) {
       // Update existing habit
-      await updateHabit(selectedHabit, data);
+      await updateHabit(selectedHabit, {
+        title: data.title,
+        completedDays: data.completedDays,
+        targetDays: data.targetDays,
+        isCompletedToday: data.isCompletedToday,
+      });
     } else {
       // Add new habit
-      await addHabit(data);
+      await addHabit({
+        title: data.title,
+        completedDays: data.completedDays,
+        targetDays: data.targetDays,
+        isCompletedToday: data.isCompletedToday,
+      });
     }
     
     setIsHabitDialogOpen(false);
@@ -95,10 +106,20 @@ const HealthHabitsPage = () => {
   const handleAddHealthMetric = async (data: HealthMetricFormValues) => {
     if (selectedMetric) {
       // Update existing health metric
-      await updateHealthMetric(selectedMetric, data);
+      await updateHealthMetric(selectedMetric, {
+        name: data.name,
+        value: data.value,
+        change: data.change,
+        icon: data.icon,
+      });
     } else {
       // Add new health metric
-      await addHealthMetric(data);
+      await addHealthMetric({
+        name: data.name,
+        value: data.value,
+        change: data.change,
+        icon: data.icon,
+      });
     }
     
     setIsMetricDialogOpen(false);
@@ -126,9 +147,9 @@ const HealthHabitsPage = () => {
     setSelectedHabit(habit.id);
     habitForm.reset({
       title: habit.title,
-      completedDays: habit.completedDays,
-      totalDays: habit.totalDays,
-      isCompletedToday: habit.isCompletedToday,
+      completedDays: habit.completedDays || 0,
+      targetDays: habit.targetDays || 30,
+      isCompletedToday: habit.isCompletedToday || false,
     });
     setIsHabitDialogOpen(true);
   };
@@ -138,7 +159,7 @@ const HealthHabitsPage = () => {
     metricForm.reset({
       name: metric.name,
       value: metric.value,
-      change: metric.change || "",
+      change: metric.change || null,
       icon: metric.icon || "heart-pulse",
     });
     setIsMetricDialogOpen(true);
@@ -167,7 +188,7 @@ const HealthHabitsPage = () => {
               habitForm.reset({
                 title: "",
                 completedDays: 0,
-                totalDays: 30,
+                targetDays: 30,
                 isCompletedToday: false,
               });
               setIsHabitDialogOpen(true);
@@ -183,7 +204,7 @@ const HealthHabitsPage = () => {
               metricForm.reset({
                 name: "",
                 value: "",
-                change: "",
+                change: null,
                 icon: "heart-pulse",
               });
               setIsMetricDialogOpen(true);
@@ -221,7 +242,7 @@ const HealthHabitsPage = () => {
                       habitForm.reset({
                         title: "",
                         completedDays: 0,
-                        totalDays: 30,
+                        targetDays: 30,
                         isCompletedToday: false,
                       });
                       setIsHabitDialogOpen(true);
@@ -231,103 +252,128 @@ const HealthHabitsPage = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {habits.map(habit => (
-                    <Card key={habit.id}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center mb-4">
-                          <button 
-                            className={`h-8 w-8 rounded-full border-2 ${
-                              habit.isCompletedToday 
-                                ? "border-success mr-3 flex items-center justify-center bg-success bg-opacity-10" 
-                                : "border-secondary mr-3 flex items-center justify-center"
-                            }`}
-                            onClick={() => handleToggleHabit(habit.id)}
-                          >
-                            {habit.isCompletedToday && (
-                              <i className="ri-check-line text-success"></i>
-                            )}
-                          </button>
-                          <div className="flex-1">
-                            <h3 className="font-inter font-medium">{habit.title}</h3>
-                          </div>
-                          <div className="flex">
+                <>
+                  {/* Monthly Calendar View */}
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4">Monthly Tracking</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {habits.map(habit => (
+                        <HabitCalendar 
+                          key={`calendar-${habit.id}`}
+                          habitId={habit.id} 
+                          habitName={habit.title}
+                          targetDays={habit.targetDays}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Habit Cards */}
+                  <h3 className="text-xl font-semibold mb-4">Daily Habits</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {habits.map(habit => (
+                      <Card key={habit.id}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
                             <button 
-                              className="text-secondary hover:text-primary transition-colors mr-2"
-                              onClick={() => openEditHabitDialog(habit)}
+                              className={`h-8 w-8 rounded-full border-2 ${
+                                habit.isCompletedToday 
+                                  ? "border-success mr-3 flex items-center justify-center bg-success bg-opacity-10" 
+                                  : "border-secondary mr-3 flex items-center justify-center"
+                              }`}
+                              onClick={() => handleToggleHabit(habit.id)}
                             >
-                              <i className="ri-edit-line"></i>
+                              {habit.isCompletedToday && (
+                                <i className="ri-check-line text-success"></i>
+                              )}
                             </button>
-                            <button 
-                              className="text-secondary hover:text-destructive transition-colors"
-                              onClick={() => {
-                                setDeleteType('habit');
-                                setSelectedItem(habit.id);
-                                setIsDeleteDialogOpen(true);
+                            <div className="flex-1">
+                              <h3 className="font-inter font-medium">{habit.title}</h3>
+                            </div>
+                            <div className="flex">
+                              <button 
+                                className="text-secondary hover:text-primary transition-colors mr-2"
+                                onClick={() => openEditHabitDialog(habit)}
+                              >
+                                <i className="ri-edit-line"></i>
+                              </button>
+                              <button 
+                                className="text-secondary hover:text-destructive transition-colors"
+                                onClick={() => {
+                                  setDeleteType('habit');
+                                  setSelectedItem(habit.id);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                              >
+                                <i className="ri-delete-bin-line"></i>
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-secondary">Progress</span>
+                            <span className={`text-sm ${
+                              (habit.completedDays || 0) / (habit.targetDays || 30) > 0.5 
+                                ? "text-success" 
+                                : "text-secondary"
+                            }`}>
+                              {habit.completedDays || 0}/{habit.targetDays || 30} days
+                            </span>
+                          </div>
+                          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${
+                                (habit.completedDays || 0) / (habit.targetDays || 30) > 0.5 
+                                  ? "bg-success" 
+                                  : "bg-secondary"
+                              } rounded-full`}
+                              style={{ 
+                                width: `${((habit.completedDays || 0) / (habit.targetDays || 30)) * 100}%` 
                               }}
-                            >
-                              <i className="ri-delete-bin-line"></i>
-                            </button>
+                            ></div>
                           </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-secondary">Progress</span>
-                          <span className={`text-sm ${
-                            habit.completedDays / habit.totalDays > 0.5 ? "text-success" : "text-secondary"
-                          }`}>
-                            {habit.completedDays}/{habit.totalDays} days
-                          </span>
-                        </div>
-                        <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${
-                              habit.completedDays / habit.totalDays > 0.5 ? "bg-success" : "bg-secondary"
-                            } rounded-full`}
-                            style={{ width: `${(habit.completedDays / habit.totalDays) * 100}%` }}
-                          ></div>
-                        </div>
-                        
-                        <div className="mt-4 text-sm text-center">
-                          {habit.isCompletedToday ? (
-                            <span className="text-success">
-                              <i className="ri-check-double-line mr-1"></i>
-                              Completed today
-                            </span>
-                          ) : (
-                            <span className="text-secondary">
-                              <i className="ri-time-line mr-1"></i>
-                              Not completed today
-                            </span>
-                          )}
-                        </div>
+                          
+                          <div className="mt-4 text-sm text-center">
+                            {habit.isCompletedToday ? (
+                              <span className="text-success">
+                                <i className="ri-check-double-line mr-1"></i>
+                                Completed today
+                              </span>
+                            ) : (
+                              <span className="text-secondary">
+                                <i className="ri-time-line mr-1"></i>
+                                Not completed today
+                              </span>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {/* Add New Habit Card */}
+                    <Card className="border border-dashed border-gray-300 bg-gray-50">
+                      <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+                        <Button 
+                          variant="ghost" 
+                          className="flex flex-col items-center p-8 h-auto w-full"
+                          onClick={() => {
+                            setSelectedHabit(null);
+                            habitForm.reset({
+                              title: "",
+                              completedDays: 0,
+                              targetDays: 30,
+                              isCompletedToday: false,
+                            });
+                            setIsHabitDialogOpen(true);
+                          }}
+                        >
+                          <i className="ri-add-line text-3xl text-secondary mb-2"></i>
+                          <span className="text-secondary font-medium">Add New Habit</span>
+                        </Button>
                       </CardContent>
                     </Card>
-                  ))}
-                  
-                  {/* Add New Habit Card */}
-                  <Card className="border border-dashed border-gray-300 bg-gray-50">
-                    <CardContent className="p-6 flex flex-col items-center justify-center h-full">
-                      <Button 
-                        variant="ghost" 
-                        className="flex flex-col items-center p-8 h-auto w-full"
-                        onClick={() => {
-                          setSelectedHabit(null);
-                          habitForm.reset({
-                            title: "",
-                            completedDays: 0,
-                            totalDays: 30,
-                            isCompletedToday: false,
-                          });
-                          setIsHabitDialogOpen(true);
-                        }}
-                      >
-                        <i className="ri-add-line text-3xl text-secondary mb-2"></i>
-                        <span className="text-secondary font-medium">Add New Habit</span>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
+                  </div>
+                </>
               )}
             </>
           )}
@@ -353,7 +399,7 @@ const HealthHabitsPage = () => {
                       metricForm.reset({
                         name: "",
                         value: "",
-                        change: "",
+                        change: null,
                         icon: "heart-pulse",
                       });
                       setIsMetricDialogOpen(true);
@@ -417,7 +463,7 @@ const HealthHabitsPage = () => {
                           metricForm.reset({
                             name: "",
                             value: "",
-                            change: "",
+                            change: null,
                             icon: "heart-pulse",
                           });
                           setIsMetricDialogOpen(true);
@@ -480,10 +526,10 @@ const HealthHabitsPage = () => {
                 
                 <FormField
                   control={habitForm.control}
-                  name="totalDays"
+                  name="targetDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total Days</FormLabel>
+                      <FormLabel>Target Days</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -570,9 +616,14 @@ const HealthHabitsPage = () => {
                 name="change"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Change (optional)</FormLabel>
+                    <FormLabel>Change/Trend (optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter change (e.g. +0.5, -1,200)" {...field} />
+                      <Input 
+                        placeholder="e.g. +10%, -0.5, etc." 
+                        {...field} 
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -586,13 +637,13 @@ const HealthHabitsPage = () => {
                   <FormItem>
                     <FormLabel>Icon</FormLabel>
                     <FormControl>
-                      <select
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                      <select 
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         {...field}
                       >
-                        {iconOptions.map((icon) => (
-                          <option key={icon.value} value={icon.value}>
-                            {icon.label}
+                        {iconOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
                           </option>
                         ))}
                       </select>
@@ -616,13 +667,13 @@ const HealthHabitsPage = () => {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete {deleteType === 'habit' ? 'Habit' : 'Health Metric'}</DialogTitle>
+            <DialogTitle>Confirm Delete</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to delete this {deleteType === 'habit' ? 'habit' : 'health metric'}? This action cannot be undone.</p>
+          <p>Are you sure you want to delete this {deleteType}? This cannot be undone.</p>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button variant="destructive" onClick={handleDeleteItem}>
               Delete
             </Button>
