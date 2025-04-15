@@ -60,16 +60,24 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
     if (!isSameMonth(date, currentMonth)) return;
     
     try {
-      // Create a date string in YYYY-MM-DD format, which avoids timezone issues
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
+      // Create a new Date object based on the clicked date
+      // and add one day to compensate for timezone issues
+      const adjustedDate = new Date(date);
+      adjustedDate.setDate(adjustedDate.getDate() + 1);
+      
+      // Format as YYYY-MM-DD string
+      const year = adjustedDate.getFullYear();
+      const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(adjustedDate.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
       
-      // Create a new date object at current timezone (will be stored consistently on server)
-      const localDate = new Date(`${dateString}T12:00:00`);
+      console.log("Calendar day clicked:", date.toISOString());
+      console.log("Adjusted date string:", dateString);
       
-      await toggleHabitByDate(habitId, localDate);
+      // Create a date at noon to avoid any timezone issues
+      const fixedDate = new Date(`${dateString}T12:00:00Z`);
+      
+      await toggleHabitByDate(habitId, fixedDate);
       // After toggling, refetch the completions to update the UI
       const data = await getHabitCompletions(
         habitId, 
@@ -85,14 +93,20 @@ const HabitCalendar = ({ habitId, habitName, targetDays }: HabitCalendarProps) =
   // Check if a day is completed
   const isDayCompleted = (day: Date) => {
     return completions.some(completion => {
-      // Get the date part only in YYYY-MM-DD format for comparison
-      const dayYear = day.getFullYear();
-      const dayMonth = String(day.getMonth() + 1).padStart(2, '0');
-      const dayDate = String(day.getDate()).padStart(2, '0');
-      const dayString = `${dayYear}-${dayMonth}-${dayDate}`;
+      // Use the same date adjustment logic as when toggling
+      // Create a new adjusted date by adding 1 day to handle timezone
+      const adjustedDate = new Date(day);
+      adjustedDate.setDate(adjustedDate.getDate() + 1);
       
-      // Extract date part from completion date
+      // Format as YYYY-MM-DD string
+      const dayYear = adjustedDate.getFullYear();
+      const dayMonth = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+      const dayDay = String(adjustedDate.getDate()).padStart(2, '0');
+      const dayString = `${dayYear}-${dayMonth}-${dayDay}`;
+      
+      // Extract date part from completion date 
       const completionDate = new Date(completion.date);
+      // Use local date components for the server-stored dates
       const compYear = completionDate.getFullYear();
       const compMonth = String(completionDate.getMonth() + 1).padStart(2, '0');
       const compDate = String(completionDate.getDate()).padStart(2, '0');
