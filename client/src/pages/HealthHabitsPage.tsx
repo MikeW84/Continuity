@@ -129,7 +129,7 @@ const HealthHabitsPage = () => {
         // Update existing exercise
         await updateExercise(selectedExercise, {
           name: data.name,
-          date: data.date, // Send as string in YYYY-MM-DD format
+          date: new Date(`${data.date}T00:00:00.000Z`), // Convert to Date object with UTC midnight
           category: data.category,
           time: data.time,
           distance: data.distance,
@@ -144,7 +144,7 @@ const HealthHabitsPage = () => {
         // Add new exercise
         await addExercise({
           name: data.name,
-          date: data.date, // Send as string in YYYY-MM-DD format
+          date: new Date(`${data.date}T00:00:00.000Z`), // Convert to Date object with UTC midnight
           category: data.category,
           time: data.time,
           distance: data.distance,

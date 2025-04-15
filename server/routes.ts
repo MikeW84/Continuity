@@ -419,9 +419,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If date is a string in YYYY-MM-DD format, create a proper Date object
       if (typeof exerciseData.date === 'string' && exerciseData.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const [year, month, day] = exerciseData.date.split('-').map(Number);
-        // Create a date with just year, month, day components (month is 0-indexed in JS Date)
-        exerciseData.date = new Date(year, month - 1, day);
+        // Use ISO format with T00:00:00.000Z to avoid timezone issues
+        exerciseData.date = new Date(`${exerciseData.date}T00:00:00.000Z`);
       }
       
       const updatedExercise = await storage.updateExercise(id, exerciseData);

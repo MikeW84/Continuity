@@ -66,8 +66,10 @@ const ExerciseCalendar: React.FC = () => {
     
     // Fill in exercise data
     exercises.forEach(exercise => {
-      const exerciseDate = new Date(exercise.date);
-      const dayOfMonth = exerciseDate.getDate();
+      // Create date in UTC to avoid timezone issues
+      const dateStr = new Date(exercise.date).toISOString().split('T')[0];
+      const [yearStr, monthStr, dayStr] = dateStr.split('-');
+      const dayOfMonth = parseInt(dayStr, 10);
       
       if (days[dayOfMonth - 1]) {
         days[dayOfMonth - 1].hasExercises = true;
