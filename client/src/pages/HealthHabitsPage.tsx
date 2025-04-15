@@ -162,7 +162,7 @@ const HealthHabitsPage = () => {
     if (deleteType === 'habit') {
       await deleteHabit(selectedItem);
     } else {
-      await deleteHealthMetric(selectedItem);
+      await deleteExercise(selectedItem);
     }
     
     setIsDeleteDialogOpen(false);
@@ -184,15 +184,22 @@ const HealthHabitsPage = () => {
     setIsHabitDialogOpen(true);
   };
 
-  const openEditMetricDialog = (metric: any) => {
-    setSelectedMetric(metric.id);
-    metricForm.reset({
-      name: metric.name,
-      value: metric.value,
-      change: metric.change || null,
-      icon: metric.icon || "heart-pulse",
+  const openEditExerciseDialog = (exercise: any) => {
+    setSelectedExercise(exercise.id);
+    exerciseForm.reset({
+      name: exercise.name,
+      date: exercise.date ? new Date(exercise.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      category: exercise.category || "Cardio",
+      time: exercise.time || null,
+      distance: exercise.distance || null,
+      heartRate: exercise.heartRate || null,
+      weight: exercise.weight || null,
+      reps: exercise.reps || null,
+      sets: exercise.sets || null,
+      duration: exercise.duration || null,
+      musclesWorked: exercise.musclesWorked || null,
     });
-    setIsMetricDialogOpen(true);
+    setIsExerciseDialogOpen(true);
   };
 
   // Common icons for health metrics
@@ -230,18 +237,25 @@ const HealthHabitsPage = () => {
           <Button 
             className="bg-accent text-white"
             onClick={() => {
-              setSelectedMetric(null);
-              metricForm.reset({
+              setSelectedExercise(null);
+              exerciseForm.reset({
                 name: "",
-                value: "",
-                change: null,
-                icon: "heart-pulse",
+                date: new Date().toISOString().split('T')[0],
+                category: "Cardio",
+                time: null,
+                distance: null,
+                heartRate: null,
+                weight: null,
+                reps: null,
+                sets: null,
+                duration: null,
+                musclesWorked: null,
               });
-              setIsMetricDialogOpen(true);
+              setIsExerciseDialogOpen(true);
             }}
           >
-            <i className="ri-heart-pulse-line mr-2"></i>
-            New Health Metric
+            <i className="ri-run-line mr-2"></i>
+            New Exercise
           </Button>
         </div>
       </div>
@@ -249,7 +263,7 @@ const HealthHabitsPage = () => {
       <Tabs defaultValue="habits" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="habits">Daily Habits</TabsTrigger>
-          <TabsTrigger value="metrics">Health Metrics</TabsTrigger>
+          <TabsTrigger value="exercises">Exercise Tracking</TabsTrigger>
         </TabsList>
         
         <TabsContent value="habits">
@@ -350,7 +364,7 @@ const HealthHabitsPage = () => {
           )}
         </TabsContent>
         
-        <TabsContent value="metrics">
+        <TabsContent value="exercises">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -359,92 +373,144 @@ const HealthHabitsPage = () => {
             </div>
           ) : (
             <>
-              {healthMetrics.length === 0 ? (
+              {exercises.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <i className="ri-heart-pulse-line text-4xl text-secondary mb-3"></i>
-                  <h3 className="text-xl font-medium mb-2">No health metrics tracked yet</h3>
-                  <p className="text-secondary mb-4">Track important health indicators to monitor your wellbeing</p>
+                  <i className="ri-run-line text-4xl text-secondary mb-3"></i>
+                  <h3 className="text-xl font-medium mb-2">No exercises tracked yet</h3>
+                  <p className="text-secondary mb-4">Start tracking your physical activities to monitor your fitness journey</p>
                   <Button 
                     onClick={() => {
-                      setSelectedMetric(null);
-                      metricForm.reset({
+                      setSelectedExercise(null);
+                      exerciseForm.reset({
                         name: "",
-                        value: "",
-                        change: null,
-                        icon: "heart-pulse",
+                        date: new Date().toISOString().split('T')[0],
+                        category: "Cardio",
+                        time: null,
+                        distance: null,
+                        heartRate: null,
+                        weight: null,
+                        reps: null,
+                        sets: null,
+                        duration: null,
+                        musclesWorked: null,
                       });
-                      setIsMetricDialogOpen(true);
+                      setIsExerciseDialogOpen(true);
                     }}
                   >
-                    <i className="ri-add-line mr-1"></i> Add Your First Health Metric
+                    <i className="ri-add-line mr-1"></i> Add Your First Exercise
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {healthMetrics.map(metric => (
-                    <Card key={metric.id}>
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center">
-                            <div className="h-10 w-10 rounded-full bg-accent bg-opacity-10 flex items-center justify-center mr-3">
-                              <i className={`ri-${metric.icon}-line text-accent text-lg`}></i>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold mb-4">Exercise Tracking</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {exercises.map((exercise) => (
+                      <Card key={exercise.id} className={
+                        exercise.category === "Cardio" 
+                          ? "border-blue-300 border-2" 
+                          : exercise.category === "Strength" 
+                            ? "border-red-300 border-2" 
+                            : "border-green-300 border-2"
+                      }>
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center">
+                              <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-3 ${
+                                exercise.category === "Cardio" 
+                                  ? "bg-blue-100 text-blue-600" 
+                                  : exercise.category === "Strength" 
+                                    ? "bg-red-100 text-red-600" 
+                                    : "bg-green-100 text-green-600"
+                              }`}>
+                                <i className={`ri-${
+                                  exercise.category === "Cardio" 
+                                    ? "heart-pulse" 
+                                    : exercise.category === "Strength" 
+                                      ? "dumbbell" 
+                                      : "yoga"
+                                }-line text-lg`}></i>
+                              </div>
+                              <div>
+                                <h3 className="font-inter font-medium">{exercise.name}</h3>
+                                <p className="text-sm text-secondary">{new Date(exercise.date).toLocaleDateString()}</p>
+                              </div>
                             </div>
-                            <h3 className="font-inter font-medium">{metric.name}</h3>
+                            <div className="flex">
+                              <button 
+                                className="text-secondary hover:text-primary transition-colors mr-2"
+                                onClick={() => openEditExerciseDialog(exercise)}
+                              >
+                                <i className="ri-edit-line"></i>
+                              </button>
+                              <button 
+                                className="text-secondary hover:text-destructive transition-colors"
+                                onClick={() => {
+                                  setDeleteType('exercise');
+                                  setSelectedItem(exercise.id);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                              >
+                                <i className="ri-delete-bin-line"></i>
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex">
-                            <button 
-                              className="text-secondary hover:text-primary transition-colors mr-2"
-                              onClick={() => openEditMetricDialog(metric)}
-                            >
-                              <i className="ri-edit-line"></i>
-                            </button>
-                            <button 
-                              className="text-secondary hover:text-destructive transition-colors"
-                              onClick={() => {
-                                setDeleteType('metric');
-                                setSelectedItem(metric.id);
-                                setIsDeleteDialogOpen(true);
-                              }}
-                            >
-                              <i className="ri-delete-bin-line"></i>
-                            </button>
+                          
+                          <div className="border-t pt-3 mt-2">
+                            {exercise.category === "Cardio" && (
+                              <div className="grid grid-cols-3 gap-2 text-sm">
+                                {exercise.time && <div><span className="text-secondary">Time:</span> {exercise.time} min</div>}
+                                {exercise.distance && <div><span className="text-secondary">Distance:</span> {exercise.distance} km</div>}
+                                {exercise.heartRate && <div><span className="text-secondary">HR:</span> {exercise.heartRate} bpm</div>}
+                              </div>
+                            )}
+                            {exercise.category === "Strength" && (
+                              <div className="grid grid-cols-3 gap-2 text-sm">
+                                {exercise.weight && <div><span className="text-secondary">Weight:</span> {exercise.weight} kg</div>}
+                                {exercise.reps && <div><span className="text-secondary">Reps:</span> {exercise.reps}</div>}
+                                {exercise.sets && <div><span className="text-secondary">Sets:</span> {exercise.sets}</div>}
+                              </div>
+                            )}
+                            {exercise.category === "Flexibility" && (
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                {exercise.duration && <div><span className="text-secondary">Duration:</span> {exercise.duration} min</div>}
+                                {exercise.musclesWorked && <div><span className="text-secondary">Muscles:</span> {exercise.musclesWorked}</div>}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <span className="text-3xl font-inter font-semibold">{metric.value}</span>
-                          {metric.change && (
-                            <span className="text-xs text-success bg-success bg-opacity-10 py-1 px-2 rounded">
-                              {metric.change}
-                            </span>
-                          )}
-                        </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {/* Add New Exercise Card */}
+                    <Card className="border border-dashed border-gray-300 bg-gray-50">
+                      <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+                        <Button 
+                          variant="ghost" 
+                          className="flex flex-col items-center p-8 h-auto w-full"
+                          onClick={() => {
+                            setSelectedExercise(null);
+                            exerciseForm.reset({
+                              name: "",
+                              date: new Date().toISOString().split('T')[0],
+                              category: "Cardio",
+                              time: null,
+                              distance: null,
+                              heartRate: null,
+                              weight: null,
+                              reps: null,
+                              sets: null,
+                              duration: null,
+                              musclesWorked: null,
+                            });
+                            setIsExerciseDialogOpen(true);
+                          }}
+                        >
+                          <i className="ri-add-line text-3xl text-secondary mb-2"></i>
+                          <span className="text-secondary font-medium">Add New Exercise</span>
+                        </Button>
                       </CardContent>
                     </Card>
-                  ))}
-                  
-                  {/* Add New Health Metric Card */}
-                  <Card className="border border-dashed border-gray-300 bg-gray-50">
-                    <CardContent className="p-6 flex flex-col items-center justify-center h-full">
-                      <Button 
-                        variant="ghost" 
-                        className="flex flex-col items-center p-8 h-auto w-full"
-                        onClick={() => {
-                          setSelectedMetric(null);
-                          metricForm.reset({
-                            name: "",
-                            value: "",
-                            change: null,
-                            icon: "heart-pulse",
-                          });
-                          setIsMetricDialogOpen(true);
-                        }}
-                      >
-                        <i className="ri-add-line text-3xl text-secondary mb-2"></i>
-                        <span className="text-secondary font-medium">Add New Health Metric</span>
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  </div>
                 </div>
               )}
             </>
@@ -545,23 +611,23 @@ const HealthHabitsPage = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Add/Edit Health Metric Dialog */}
-      <Dialog open={isMetricDialogOpen} onOpenChange={setIsMetricDialogOpen}>
+      {/* Add/Edit Exercise Dialog */}
+      <Dialog open={isExerciseDialogOpen} onOpenChange={setIsExerciseDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedMetric ? "Edit Health Metric" : "Add New Health Metric"}</DialogTitle>
+            <DialogTitle>{selectedExercise ? "Edit Exercise" : "Add New Exercise"}</DialogTitle>
           </DialogHeader>
           
-          <Form {...metricForm}>
-            <form onSubmit={metricForm.handleSubmit(handleAddHealthMetric)} className="space-y-4">
+          <Form {...exerciseForm}>
+            <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)} className="space-y-4">
               <FormField
-                control={metricForm.control}
+                control={exerciseForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Metric Name</FormLabel>
+                    <FormLabel>Exercise Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter metric name (e.g. Sleep, Steps)" {...field} />
+                      <Input placeholder="Enter exercise name (e.g. Morning Run, Bench Press)" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -569,13 +635,13 @@ const HealthHabitsPage = () => {
               />
               
               <FormField
-                control={metricForm.control}
-                name="value"
+                control={exerciseForm.control}
+                name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Value</FormLabel>
+                    <FormLabel>Date</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter value (e.g. 7.5, 10,000)" {...field} />
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -583,40 +649,43 @@ const HealthHabitsPage = () => {
               />
               
               <FormField
-                control={metricForm.control}
-                name="change"
+                control={exerciseForm.control}
+                name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Change/Trend (optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="e.g. +10%, -0.5, etc." 
-                        {...field} 
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value || null)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={metricForm.control}
-                name="icon"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Icon</FormLabel>
+                    <FormLabel>Category</FormLabel>
                     <FormControl>
                       <select 
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          // Reset category-specific fields when category changes
+                          if (e.target.value === "Cardio") {
+                            exerciseForm.setValue("weight", null);
+                            exerciseForm.setValue("reps", null);
+                            exerciseForm.setValue("sets", null);
+                            exerciseForm.setValue("duration", null);
+                            exerciseForm.setValue("musclesWorked", null);
+                          } else if (e.target.value === "Strength") {
+                            exerciseForm.setValue("time", null);
+                            exerciseForm.setValue("distance", null);
+                            exerciseForm.setValue("heartRate", null);
+                            exerciseForm.setValue("duration", null);
+                            exerciseForm.setValue("musclesWorked", null);
+                          } else if (e.target.value === "Flexibility") {
+                            exerciseForm.setValue("time", null);
+                            exerciseForm.setValue("distance", null);
+                            exerciseForm.setValue("heartRate", null);
+                            exerciseForm.setValue("weight", null);
+                            exerciseForm.setValue("reps", null);
+                            exerciseForm.setValue("sets", null);
+                          }
+                        }}
                       >
-                        {iconOptions.map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
+                        <option value="Cardio">Cardio</option>
+                        <option value="Strength">Strength</option>
+                        <option value="Flexibility">Flexibility</option>
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -624,9 +693,185 @@ const HealthHabitsPage = () => {
                 )}
               />
               
+              {/* Cardio Fields */}
+              {exerciseForm.watch("category") === "Cardio" && (
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={exerciseForm.control}
+                    name="time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Time (minutes)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={exerciseForm.control}
+                    name="distance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Distance (km)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            step="0.01"
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={exerciseForm.control}
+                    name="heartRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Peak HR (bpm)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+              
+              {/* Strength Fields */}
+              {exerciseForm.watch("category") === "Strength" && (
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={exerciseForm.control}
+                    name="weight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Weight (kg)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            step="0.5"
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={exerciseForm.control}
+                    name="reps"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Reps</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={exerciseForm.control}
+                    name="sets"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sets</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+              
+              {/* Flexibility Fields */}
+              {exerciseForm.watch("category") === "Flexibility" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={exerciseForm.control}
+                    name="duration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Duration (minutes)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={exerciseForm.control}
+                    name="musclesWorked"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Muscles Worked</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g. Hamstrings, Lower back" 
+                            {...field} 
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value || null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+              
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">
-                  {selectedMetric ? "Update Metric" : "Add Metric"}
+                  {selectedExercise ? "Update Exercise" : "Add Exercise"}
                 </Button>
               </DialogFooter>
             </form>
