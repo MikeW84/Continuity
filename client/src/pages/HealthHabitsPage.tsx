@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppContext } from "@/context/AppContext";
+import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -166,6 +167,16 @@ const HealthHabitsPage = () => {
       
       setIsExerciseDialogOpen(false);
       exerciseForm.reset();
+      
+      // Invalidate exercise queries to update the calendar
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
+      
+      // Invalidate both general exercises and calendar-specific query
+      queryClient.invalidateQueries({ queryKey: ['/api/exercises'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/exercises', year, month] });
+      
       // Make sure to fetch the latest data
       await fetchExercises();
     } catch (error) {
@@ -184,6 +195,15 @@ const HealthHabitsPage = () => {
         await fetchHabits();
       } else {
         await deleteExercise(selectedItem);
+        
+        // Invalidate exercise queries to update the calendar
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1;
+        
+        queryClient.invalidateQueries({ queryKey: ['/api/exercises'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/exercises', year, month] });
+        
         // Refresh exercises data
         await fetchExercises();
       }

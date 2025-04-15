@@ -31,7 +31,8 @@ const ExerciseCalendar: React.FC = () => {
   
   // Fetch exercises for the current month
   const { data: exercises = [] } = useQuery({
-    queryKey: ['/api/exercises'],
+    queryKey: ['/api/exercises', year, month],
+    refetchOnWindowFocus: true,
     select: (data: Exercise[]) => {
       // Filter exercises for the current month and year only
       return data.filter(exercise => {
