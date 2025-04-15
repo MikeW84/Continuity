@@ -35,11 +35,10 @@ const ExerciseCalendar: React.FC = () => {
     select: (data: Exercise[]) => {
       // Filter exercises for the current month and year only
       return data.filter(exercise => {
-        const exerciseDate = new Date(exercise.date);
-        return (
-          exerciseDate.getFullYear() === year && 
-          exerciseDate.getMonth() + 1 === month
-        );
+        // Parse the date with UTC to avoid timezone issues
+        const dateStr = new Date(exercise.date).toISOString().split('T')[0];
+        const [exerciseYear, exerciseMonth] = dateStr.split('-').map(Number);
+        return exerciseYear === year && exerciseMonth === month;
       });
     }
   });

@@ -434,7 +434,7 @@ const HealthHabitsPage = () => {
                       </p>
                       
                       <div className="max-w-lg mx-auto">
-                        <ExerciseCalendar />
+                        <ExerciseCalendar key={exercises.length} />
                       </div>
                     </div>
                   </div>
@@ -469,7 +469,7 @@ const HealthHabitsPage = () => {
                               </div>
                               <div>
                                 <h3 className="font-inter font-medium">{exercise.name}</h3>
-                                <p className="text-sm text-secondary">{new Date(exercise.date).toLocaleDateString()}</p>
+                                <p className="text-sm text-secondary">{new Date(`${new Date(exercise.date).toISOString().split('T')[0]}T00:00:00.000Z`).toLocaleDateString()}</p>
                               </div>
                             </div>
                             <div className="flex">
