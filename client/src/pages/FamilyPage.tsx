@@ -101,7 +101,7 @@ const FamilyPage = () => {
         date: data.date ? new Date(data.date) : null,
       });
     }
-    
+
     setIsDateDialogOpen(false);
     dateForm.reset();
   };
@@ -114,20 +114,20 @@ const FamilyPage = () => {
       // Add new parenting task
       await addParentingTask(data);
     }
-    
+
     setIsTaskDialogOpen(false);
     taskForm.reset();
   };
 
   const handleDeleteItem = async () => {
     if (!selectedItem) return;
-    
+
     if (deleteType === 'date') {
       await deleteDateIdea(selectedItem);
     } else {
       await deleteParentingTask(selectedItem);
     }
-    
+
     setIsDeleteDialogOpen(false);
     setSelectedItem(null);
   };
@@ -195,17 +195,17 @@ const FamilyPage = () => {
           </Button>
         </div>
       </div>
-      
+
       <Tabs defaultValue="dates" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="dates">Date Planning</TabsTrigger>
           <TabsTrigger value="parenting">Parenting</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="dates">
           <div className="mb-6">
             <h3 className="text-xl font-medium mb-4">Date with Bekah</h3>
-            
+
             {isLoading ? (
               <div className="h-48 bg-gray-100 animate-pulse rounded-lg mb-6"></div>
             ) : (
@@ -216,7 +216,7 @@ const FamilyPage = () => {
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-inter font-medium text-lg">Upcoming Date</h4>
                         <div className="flex items-center">
-                          <span className="text-sm bg-accent bg-opacity-20 text-accent py-1 px-2 rounded mr-4">
+                          <span className="text-sm bg-accent text-white py-1 px-2 rounded mr-4">
                             {scheduledDate.date ? format(new Date(scheduledDate.date), 'MMMM do') : 'Not scheduled'}
                           </span>
                           <div className="flex">
@@ -278,9 +278,9 @@ const FamilyPage = () => {
                 )}
               </>
             )}
-            
+
             <h3 className="text-lg font-medium mb-4">Date Ideas</h3>
-            
+
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(3)].map((_, i) => (
@@ -335,11 +335,11 @@ const FamilyPage = () => {
                               </button>
                             </div>
                           </div>
-                          
+
                           {idea.description && (
                             <p className="text-sm text-secondary mt-1 mb-3">{idea.description}</p>
                           )}
-                          
+
                           <Button 
                             size="sm" 
                             className="mt-2"
@@ -355,7 +355,7 @@ const FamilyPage = () => {
                         </CardContent>
                       </Card>
                     ))}
-                    
+
                     {/* Add New Date Idea Card */}
                     <Card className="border border-dashed border-gray-300 bg-gray-50">
                       <CardContent className="p-4 flex items-center justify-center h-full">
@@ -384,11 +384,11 @@ const FamilyPage = () => {
             )}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="parenting">
           <div className="mb-6">
             <h3 className="text-xl font-medium mb-4">Parenting Tasks</h3>
-            
+
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[...Array(4)].map((_, i) => (
@@ -466,7 +466,7 @@ const FamilyPage = () => {
                         </CardContent>
                       </Card>
                     ))}
-                    
+
                     {/* Add New Parenting Task Card */}
                     <Card className="border border-dashed border-gray-300 bg-gray-50">
                       <CardContent className="p-4 flex items-center justify-center h-full">
@@ -495,14 +495,14 @@ const FamilyPage = () => {
           </div>
         </TabsContent>
       </Tabs>
-      
+
       {/* Add/Edit Date Idea Dialog */}
       <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedDate ? "Edit Date Idea" : "Add New Date Idea"}</DialogTitle>
           </DialogHeader>
-          
+
           <Form {...dateForm}>
             <form onSubmit={dateForm.handleSubmit(handleAddDateIdea)} className="space-y-4">
               <FormField
@@ -518,7 +518,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={dateForm.control}
                 name="description"
@@ -532,7 +532,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={dateForm.control}
                 name="date"
@@ -546,7 +546,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={dateForm.control}
                 name="isScheduled"
@@ -569,7 +569,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">
                   {selectedDate ? "Update Date Idea" : "Add Date Idea"}
@@ -579,14 +579,14 @@ const FamilyPage = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Add/Edit Parenting Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{selectedTask ? "Edit Parenting Task" : "Add New Parenting Task"}</DialogTitle>
           </DialogHeader>
-          
+
           <Form {...taskForm}>
             <form onSubmit={taskForm.handleSubmit(handleAddParentingTask)} className="space-y-4">
               <FormField
@@ -602,7 +602,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={taskForm.control}
                 name="description"
@@ -616,7 +616,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={taskForm.control}
                 name="isCompleted"
@@ -634,7 +634,7 @@ const FamilyPage = () => {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="submit" className="bg-accent text-white">
                   {selectedTask ? "Update Task" : "Add Task"}
@@ -644,7 +644,7 @@ const FamilyPage = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
