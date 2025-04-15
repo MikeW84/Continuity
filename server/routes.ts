@@ -384,37 +384,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post("/api/exercises", async (req: Request, res: Response) => {
-    const exerciseData = validateRequest(insertExerciseSchema, {
-      ...req.body,
-      userId: req.body.userId || TEMP_USER_ID
-    });
-    
-    const newExercise = await storage.createExercise(exerciseData);
-    res.status(201).json(newExercise);
+    try {
+      const exerciseData = validateRequest(insertExerciseSchema, {
+        ...req.body,
+        userId: req.body.userId || TEMP_USER_ID
+      });
+      
+      const newExercise = await storage.createExercise(exerciseData);
+      res.status(201).json(newExercise);
+    } catch (error) {
+      console.error('Error creating exercise:', error);
+      res.status(500).json({ 
+        message: "Failed to create exercise",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
   });
   
   app.patch("/api/exercises/:id", async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id);
-    const exerciseData = req.body;
-    
-    const updatedExercise = await storage.updateExercise(id, exerciseData);
-    
-    if (!updatedExercise) {
-      return res.status(404).json({ message: "Exercise not found" });
+    try {
+      const id = parseInt(req.params.id);
+      const exerciseData = req.body;
+      
+      const updatedExercise = await storage.updateExercise(id, exerciseData);
+      
+      if (!updatedExercise) {
+        return res.status(404).json({ message: "Exercise not found" });
+      }
+      
+      res.json(updatedExercise);
+    } catch (error) {
+      console.error('Error updating exercise:', error);
+      res.status(500).json({ 
+        message: "Failed to update exercise",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
-    
-    res.json(updatedExercise);
   });
   
   app.delete("/api/exercises/:id", async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id);
-    const success = await storage.deleteExercise(id);
-    
-    if (!success) {
-      return res.status(404).json({ message: "Exercise not found" });
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteExercise(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Exercise not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting exercise:', error);
+      res.status(500).json({ 
+        message: "Failed to delete exercise",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
-    
-    res.status(204).send();
   });
   
   // Exercise Completion endpoints
