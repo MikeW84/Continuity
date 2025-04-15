@@ -232,10 +232,10 @@ const MiniHabitCalendar = ({ habitId, onToggleDay }: MiniHabitCalendarProps) => 
               className={`
                 h-6 w-6 flex items-center justify-center rounded-full text-xs 
                 ${!day ? 'invisible' : ''}
-                ${day === currentDay ? 'border border-blue-500' : ''}
-                ${pendingDays.has(day || 0) ? 'animate-pulse' : ''}
+                ${day === currentDay && !completedDays.has(day || 0) ? 'border border-blue-500' : ''}
+                ${pendingDays.has(day || 0) ? 'animate-pulse opacity-70' : ''}
                 ${completedDays.has(day || 0) 
-                  ? 'bg-success bg-opacity-20 text-success font-medium cursor-pointer hover:bg-opacity-30' 
+                  ? 'bg-primary text-white font-medium cursor-pointer hover:bg-primary-600' 
                   : day 
                     ? 'hover:bg-primary hover:bg-opacity-10 cursor-pointer' 
                     : ''
