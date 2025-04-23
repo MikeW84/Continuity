@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ProjectTasksDialog from "@/components/projects/ProjectTasksDialog";
+import ProjectTasksSummary from "@/components/projects/ProjectTasksSummary";
 
 // Form schema
 const projectFormSchema = z.object({
@@ -46,6 +48,10 @@ const ProjectsPage = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  // Task management states
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [taskProjectId, setTaskProjectId] = useState<number | null>(null);
+  const [taskProjectTitle, setTaskProjectTitle] = useState<string>("");
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
@@ -173,6 +179,12 @@ const ProjectsPage = () => {
       dreamIds: project.dreamIds || [],
     });
     setIsAddDialogOpen(true);
+  };
+  
+  const openTasksDialog = (project: any) => {
+    setTaskProjectId(project.id);
+    setTaskProjectTitle(project.title);
+    setIsTaskDialogOpen(true);
   };
 
   if (isLoading) {
@@ -380,9 +392,15 @@ const ProjectsPage = () => {
                 ></div>
               </div>
               
-              <div className="text-sm text-secondary">
+              <div className="text-sm text-secondary mb-2">
                 {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
               </div>
+              
+              {/* Project Tasks Summary */}
+              <ProjectTasksSummary 
+                projectId={project.id} 
+                onManageTasks={() => openTasksDialog(project)} 
+              />
             </CardContent>
           </Card>
         ))}
