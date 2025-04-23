@@ -29,13 +29,16 @@ interface AppContextProps {
   values: Value[];
   dreams: Dream[];
   priorityProject: Project | null;
+  showArchivedProjects: boolean;
   
   // Projects
-  fetchProjects: () => Promise<void>;
+  fetchProjects: (showArchived?: boolean) => Promise<void>;
   addProject: (project: Omit<Project, 'id' | 'userId'> & { valueIds?: number[], dreamIds?: number[] }) => Promise<void>;
   updateProject: (id: number, project: Partial<Project> & { valueIds?: number[], dreamIds?: number[] }) => Promise<void>;
   deleteProject: (id: number) => Promise<void>;
   setPriorityProject: (id: number) => Promise<void>;
+  toggleProjectArchive: (id: number) => Promise<void>;
+  setShowArchivedProjects: (show: boolean) => void;
   
   // Ideas
   fetchIdeas: () => Promise<void>;
@@ -109,6 +112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   // Data states
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showArchivedProjects, setShowArchivedProjects] = useState<boolean>(false);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [learningItems, setLearningItems] = useState<LearningItem[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -123,10 +127,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const priorityProject = projects.find(project => project.isPriority) || null;
   
   // All fetch methods with useCallback
-  const fetchProjects = useCallback(async () => {
+  const fetchProjects = useCallback(async (archived?: boolean) => {
     try {
-      console.log('Fetching projects...');
-      const res = await fetch('/api/projects');
+      console.log('Fetching projects...', archived ? '(including archived)' : '(active only)');
+      const showArchived = archived !== undefined ? archived : showArchivedProjects;
+      const res = await fetch(`/api/projects?showArchived=${showArchived}`);
       if (!res.ok) throw new Error('Failed to fetch projects');
       const data = await res.json();
       console.log('Projects data received:', data);
@@ -135,7 +140,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('Error fetching projects:', error);
       throw error;
     }
-  }, []);
+  }, [showArchivedProjects]);
   
   const fetchIdeas = useCallback(async () => {
     try {
@@ -365,6 +370,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
       console.error('Error setting priority project:', error);
+      throw error;
+    }
+  };
+  
+  const toggleProjectArchive = async (id: number) => {
+    try {
+      await apiRequest('POST', `/api/projects/${id}/archive`, {});
+      await fetchProjects();
+      toast({
+        title: "Project Archived",
+        description: "Project archive status has been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to archive project",
+        description: "There was a problem updating the project archive status.",
+        variant: "destructive"
+      });
+      console.error('Error archiving project:', error);
       throw error;
     }
   };
