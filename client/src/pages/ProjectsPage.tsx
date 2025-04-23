@@ -305,7 +305,7 @@ const ProjectsPage = () => {
                     ></div>
                   </div>
                   
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <span className="text-sm bg-gray-100 py-1 px-2 rounded text-secondary">
                       {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
                     </span>
@@ -317,6 +317,12 @@ const ProjectsPage = () => {
                       Update Progress
                     </Button>
                   </div>
+                  
+                  {/* Priority Project Tasks Summary */}
+                  <ProjectTasksSummary 
+                    projectId={priorityProject.id} 
+                    onManageTasks={() => openTasksDialog(priorityProject)} 
+                  />
                 </>
               ) : (
                 <div className="text-center py-8">
@@ -641,6 +647,14 @@ const ProjectsPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Project Tasks Dialog */}
+      <ProjectTasksDialog
+        projectId={taskProjectId || 0}
+        projectTitle={taskProjectTitle}
+        open={isTaskDialogOpen}
+        onOpenChange={setIsTaskDialogOpen}
+      />
     </div>
   );
 };
