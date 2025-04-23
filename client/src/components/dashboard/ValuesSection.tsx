@@ -78,9 +78,9 @@ const ValuesSection = () => {
                   <h4 className="font-inter font-medium mb-2">{dream.title}</h4>
                   <p className="text-sm text-secondary mb-2">{dream.description}</p>
 
-                  <div className="flex items-center text-xs text-primary flex-wrap">
+                  <div className="flex items-center text-xs text-white flex-wrap">
                     {dream.tags?.map((tag, index) => (
-                      <span key={index} className="bg-primary bg-opacity-10 py-1 px-2 rounded mr-2 mb-1">
+                      <span key={index} className="bg-primary bg-opacity-20 py-1 px-2 rounded mr-2 mb-1">
                         {tag}
                       </span>
                     ))}
