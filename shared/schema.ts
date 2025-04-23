@@ -30,6 +30,7 @@ export const projects = pgTable("projects", {
   progress: integer("progress").default(0),
   dueDate: timestamp("due_date"),
   isPriority: boolean("is_priority").default(false),
+  isArchived: boolean("is_archived").default(false),
   userId: integer("user_id").notNull(),
 });
 
@@ -53,6 +54,7 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
   progress: true,
   dueDate: true,
   isPriority: true,
+  isArchived: true,
   userId: true,
 });
 

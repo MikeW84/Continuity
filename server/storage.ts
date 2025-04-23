@@ -43,6 +43,7 @@ export interface IStorage {
   updateProject(id: number, project: Partial<ProjectWithRelations>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
   setPriorityProject(id: number, userId: number): Promise<Project | undefined>;
+  toggleProjectArchive(id: number): Promise<Project | undefined>;
   
   // Idea methods
   getIdeas(userId: number): Promise<Idea[]>;
@@ -269,6 +270,16 @@ export class MemStorage implements IStorage {
     if (!project) return undefined;
     
     project.isPriority = true;
+    this.projects.set(id, project);
+    return project;
+  }
+  
+  async toggleProjectArchive(id: number): Promise<Project | undefined> {
+    const project = this.projects.get(id);
+    if (!project) return undefined;
+    
+    // Toggle the isArchived status
+    project.isArchived = !project.isArchived;
     this.projects.set(id, project);
     return project;
   }
