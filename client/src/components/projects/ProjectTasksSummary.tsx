@@ -54,7 +54,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
     return (
       <div className="mt-2 text-xs text-destructive">
         Error loading tasks. 
-        <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={loadTasks}>
+        <Button variant="link" size="sm" className="p-0 h-auto text-xs text-primary" onClick={loadTasks}>
           Retry
         </Button>
       </div>
@@ -71,7 +71,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
           className="h-7 text-xs text-primary"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1" />
+          <ClipboardList className="h-3 w-3 mr-1 text-primary" />
           Add Tasks
         </Button>
       </div>
@@ -90,7 +90,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
           className="h-7 text-xs text-primary"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1" />
+          <ClipboardList className="h-3 w-3 mr-1 text-primary" />
           Manage
         </Button>
       </div>
