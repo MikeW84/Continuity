@@ -14,7 +14,6 @@ import { z } from "zod";
 const ideaFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  resources: z.string().optional(),
   tags: z.string().optional(),
 });
 
@@ -32,7 +31,6 @@ const IdeasPage = () => {
     defaultValues: {
       title: "",
       description: "",
-      resources: "",
       tags: "",
     },
   });
@@ -47,7 +45,6 @@ const IdeasPage = () => {
       form.reset({
         title: "",
         description: "",
-        resources: "",
         tags: "",
       });
       setIsAddDialogOpen(true);
@@ -97,7 +94,6 @@ const IdeasPage = () => {
     form.reset({
       title: idea.title,
       description: idea.description || "",
-      resources: idea.resources || "",
       tags: idea.tags ? idea.tags.join(', ') : "",
     });
     setIsAddDialogOpen(true);
@@ -128,7 +124,6 @@ const IdeasPage = () => {
             form.reset({
               title: "",
               description: "",
-              resources: "",
               tags: "",
             });
             setIsAddDialogOpen(true);
@@ -194,7 +189,6 @@ const IdeasPage = () => {
                   form.reset({
                     title: "",
                     description: "",
-                    resources: "",
                     tags: "",
                   });
                   setIsAddDialogOpen(true);
@@ -291,7 +285,6 @@ const IdeasPage = () => {
                       form.reset({
                         title: "",
                         description: "",
-                        resources: "",
                         tags: "",
                       });
                       setIsAddDialogOpen(true);
