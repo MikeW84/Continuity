@@ -21,6 +21,7 @@ const projectFormSchema = z.object({
   description: z.string().optional(),
   progress: z.number().min(0).max(100).default(0),
   dueDate: z.string().optional(),
+  impact: z.enum(["High", "Medium", "Low"]).default("Medium"),
   valueIds: z.array(z.number()).optional(),
   dreamIds: z.array(z.number()).optional(),
 });
@@ -60,6 +61,7 @@ const ProjectsPage = () => {
       description: "",
       progress: 0,
       dueDate: "",
+      impact: "Medium",
       valueIds: [],
       dreamIds: [],
     },
@@ -79,6 +81,7 @@ const ProjectsPage = () => {
         description: "",
         progress: 0,
         dueDate: "",
+        impact: "Medium",
         valueIds: [],
         dreamIds: []
       });
@@ -175,6 +178,7 @@ const ProjectsPage = () => {
       description: project.description || "",
       progress: project.progress,
       dueDate: project.dueDate ? format(new Date(project.dueDate), 'yyyy-MM-dd') : undefined,
+      impact: project.impact || "Medium",
       valueIds: project.valueIds || [],
       dreamIds: project.dreamIds || [],
     });
@@ -237,6 +241,7 @@ const ProjectsPage = () => {
               description: "",
               progress: 0,
               dueDate: "",
+              impact: "Medium",
               valueIds: [],
               dreamIds: [],
             });
@@ -420,6 +425,7 @@ const ProjectsPage = () => {
                     description: "",
                     progress: 0,
                     dueDate: "",
+                    impact: "Medium",
                     valueIds: [],
                     dreamIds: [],
                   });
@@ -482,6 +488,33 @@ const ProjectsPage = () => {
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="impact"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Impact</FormLabel>
+                    <div className="flex gap-4">
+                      {["High", "Medium", "Low"].map((value) => (
+                        <FormItem key={value} className="flex items-center space-x-2">
+                          <FormControl>
+                            <input
+                              type="radio"
+                              className="form-radio h-4 w-4 text-accent"
+                              checked={field.value === value}
+                              value={value}
+                              onChange={() => field.onChange(value)}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal cursor-pointer">{value}</FormLabel>
+                        </FormItem>
+                      ))}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

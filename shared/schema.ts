@@ -31,6 +31,7 @@ export const projects = pgTable("projects", {
   dueDate: timestamp("due_date"),
   isPriority: boolean("is_priority").default(false),
   isArchived: boolean("is_archived").default(false),
+  impact: text("impact").default("Medium"), // New field for Impact: High, Medium, Low
   userId: integer("user_id").notNull(),
 });
 
@@ -64,6 +65,7 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
   dueDate: true,
   isPriority: true,
   isArchived: true,
+  impact: true,
   userId: true,
 });
 
