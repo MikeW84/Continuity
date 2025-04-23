@@ -111,6 +111,7 @@ const ProjectsPage = () => {
         title: data.title,
         description: data.description || "",
         progress: data.progress,
+        impact: data.impact,
         // Only set isPriority and isArchived to false for new projects, preserve them when editing
         isPriority: currentProject ? currentProject.isPriority : false,
         isArchived: currentProject ? currentProject.isArchived : false,
@@ -138,7 +139,8 @@ const ProjectsPage = () => {
         // New project
         await addProject({
           ...projectData,
-          dueDate
+          dueDate,
+          impact: data.impact
         });
       }
       
@@ -313,8 +315,15 @@ const ProjectsPage = () => {
                     <span className="text-sm bg-gray-100 py-1 px-2 rounded text-secondary">
                       {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
                     </span>
-                    
-
+                    <span className={`text-sm py-1 px-2 rounded ${
+                      priorityProject.impact === "High" 
+                        ? "bg-red-100 text-red-600" 
+                        : priorityProject.impact === "Medium" 
+                          ? "bg-amber-100 text-amber-600" 
+                          : "bg-blue-100 text-blue-600"
+                    }`}>
+                      {priorityProject.impact} Impact
+                    </span>
                   </div>
                   
                   {/* Priority Project Tasks Summary */}
@@ -398,8 +407,19 @@ const ProjectsPage = () => {
                 ></div>
               </div>
               
-              <div className="text-sm text-secondary mb-2">
-                {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-secondary">
+                  {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
+                </span>
+                <span className={`text-sm py-1 px-2 rounded ${
+                  project.impact === "High" 
+                    ? "bg-red-100 text-red-600" 
+                    : project.impact === "Medium" 
+                      ? "bg-amber-100 text-amber-600" 
+                      : "bg-blue-100 text-blue-600"
+                }`}>
+                  {project.impact} Impact
+                </span>
               </div>
               
               {/* Project Tasks Summary */}
