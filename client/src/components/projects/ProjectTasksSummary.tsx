@@ -11,7 +11,7 @@ interface ProjectTasksSummaryProps {
 
 const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryProps) => {
   const { fetchProjectTasks } = useAppContext();
-
+  
   const [tasks, setTasks] = useState<ProjectTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -22,10 +22,10 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
 
   const loadTasks = async () => {
     if (!projectId) return;
-
+    
     setIsLoading(true);
     setError(false);
-
+    
     try {
       const projectTasks = await fetchProjectTasks(projectId);
       setTasks(projectTasks);
@@ -68,10 +68,10 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-7 text-xs text-white hover:text-accent-foreground"
+          className="h-7 text-xs"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1 group-hover:text-accent-foreground" />
+          <ClipboardList className="h-3 w-3 mr-1" />
           Add Tasks
         </Button>
       </div>
@@ -87,10 +87,10 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-7 text-xs text-secondary hover:text-accent-foreground"
+          className="h-7 text-xs"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1 text-secondary hover:text-accent-foreground" />
+          <ClipboardList className="h-3 w-3 mr-1" />
           Manage
         </Button>
       </div>
