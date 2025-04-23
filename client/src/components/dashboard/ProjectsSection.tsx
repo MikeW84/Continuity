@@ -92,8 +92,8 @@ const ProjectsSection = () => {
             </div>
           )}
 
-          {/* Other Projects */}
-          {otherProjects.map(project => (
+          {/* Other Projects (limited to 3) */}
+          {otherProjects.slice(0, 3).map(project => (
             <div 
               key={project.id} 
               className="mb-4 p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-colors"
