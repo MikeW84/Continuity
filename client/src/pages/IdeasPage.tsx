@@ -339,27 +339,6 @@ const IdeasPage = () => {
               
               <FormField
                 control={form.control}
-                name="resources"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Resources</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Add links, books, or other resources related to this idea" 
-                        {...field} 
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Add links to websites, books, tools, or other resources that can help with this idea
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
