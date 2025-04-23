@@ -90,7 +90,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
           className="h-7 text-xs"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1" />
+          <ClipboardList className="h-3 w-3 mr-1 text-secondary hover:text-accent-foreground" />
           Manage
         </Button>
       </div>
