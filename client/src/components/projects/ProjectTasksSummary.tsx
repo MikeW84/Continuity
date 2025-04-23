@@ -80,10 +80,9 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
 
   return (
     <div className="mt-2">
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between">
         <div className="text-xs">
           <span className="font-medium">{completedTasks}/{totalTasks} Tasks Completed</span>
-          <span className="text-muted-foreground ml-1">({completionPercentage}%)</span>
         </div>
         <Button 
           variant="outline" 
@@ -94,12 +93,6 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
           <ClipboardList className="h-3 w-3 mr-1" />
           Manage
         </Button>
-      </div>
-      <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-blue-500"
-          style={{ width: `${completionPercentage}%` }}
-        ></div>
       </div>
     </div>
   );
