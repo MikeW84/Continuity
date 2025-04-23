@@ -87,10 +87,10 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-7 text-xs"
+          className="h-7 text-xs text-secondary hover:text-accent-foreground"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1 text-secondary hover:text-accent-foreground" />
+          <ClipboardList className="h-3 w-3 mr-1" />
           Manage
         </Button>
       </div>
