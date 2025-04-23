@@ -759,6 +759,22 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
   
+  async toggleProjectArchive(id: number): Promise<Project | undefined> {
+    // Get the current project to check its archived status
+    const [existingProject] = await db.select().from(projects).where(eq(projects.id, id));
+    
+    if (!existingProject) return undefined;
+    
+    // Toggle the isArchived status
+    const [updatedProject] = await db
+      .update(projects)
+      .set({ isArchived: !existingProject.isArchived })
+      .where(eq(projects.id, id))
+      .returning();
+      
+    return updatedProject;
+  }
+  
   // Idea methods
   async getIdeas(userId: number): Promise<Idea[]> {
     return await db.select().from(ideas).where(eq(ideas.userId, userId));

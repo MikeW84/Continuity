@@ -45,11 +45,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Projects endpoints
   app.get("/api/projects", async (req: Request, res: Response) => {
+    // Get showArchived query parameter, defaults to false
+    const showArchived = req.query.showArchived === 'true';
+    
     const projects = await storage.getProjects(TEMP_USER_ID);
+    
+    // Filter projects based on archive status
+    const filteredProjects = showArchived 
+      ? projects 
+      : projects.filter(project => !project.isArchived);
     
     // Get values and dreams for each project
     const projectsWithRelations = await Promise.all(
-      projects.map(async (project) => {
+      filteredProjects.map(async (project) => {
         // Get the associated value IDs
         const projectValueItems = await db.select().from(projectValues)
           .where(eq(projectValues.projectId, project.id));
@@ -140,6 +148,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/projects/:id/priority", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const project = await storage.setPriorityProject(id, TEMP_USER_ID);
+    
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+    
+    res.json(project);
+  });
+  
+  // Toggle project archive status
+  app.post("/api/projects/:id/archive", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const project = await storage.toggleProjectArchive(id);
     
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
