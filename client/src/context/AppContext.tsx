@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  Project, Idea, LearningItem, Habit, Exercise, ExerciseCompletion,
+  Project, ProjectTask, Idea, LearningItem, Habit, Exercise, ExerciseCompletion,
   DateIdea, ParentingTask, Value, Dream 
 } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -39,6 +39,13 @@ interface AppContextProps {
   setPriorityProject: (id: number) => Promise<void>;
   toggleProjectArchive: (id: number) => Promise<void>;
   setShowArchivedProjects: (show: boolean) => void;
+  
+  // Project Tasks
+  fetchProjectTasks: (projectId: number) => Promise<ProjectTask[]>;
+  addProjectTask: (task: Omit<ProjectTask, 'id' | 'createdAt'>) => Promise<void>;
+  updateProjectTask: (id: number, task: Partial<ProjectTask>) => Promise<void>;
+  deleteProjectTask: (id: number) => Promise<void>;
+  toggleProjectTaskCompletion: (id: number) => Promise<void>;
   
   // Ideas
   fetchIdeas: () => Promise<void>;

@@ -7,6 +7,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import {
   insertProjectSchema,
+  insertProjectTaskSchema,
   insertIdeaSchema,
   insertLearningItemSchema,
   insertHabitSchema,
