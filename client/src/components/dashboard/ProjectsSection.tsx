@@ -44,7 +44,18 @@ const ProjectsSection = () => {
 
   console.log('ProjectsSection: raw projects =', projects);
   const priorityProject = projects.find(p => p.isPriority);
-  const otherProjects = projects.filter(p => !p.isPriority);
+  
+  // Sort projects by impact (High > Medium > Low)
+  const impactOrder: Record<string, number> = { "High": 1, "Medium": 2, "Low": 3 };
+  const otherProjects = projects
+    .filter(p => !p.isPriority)
+    .sort((a, b) => {
+      // Sort by impact
+      const impactA = a.impact || "Medium";
+      const impactB = b.impact || "Medium";
+      return impactOrder[impactA] - impactOrder[impactB];
+    });
+    
   console.log('ProjectsSection: priorityProject =', priorityProject);
   console.log('ProjectsSection: otherProjects =', otherProjects);
 
@@ -69,7 +80,7 @@ const ProjectsSection = () => {
                 <h3 className="font-inter font-medium">{priorityProject.title}</h3>
               </div>
               <p className="text-sm text-secondary mb-3">{priorityProject.description}</p>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
                     <div 
@@ -84,6 +95,17 @@ const ProjectsSection = () => {
                     {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
                   </span>
                 </div>
+              </div>
+              <div className="flex justify-end">
+                <span className={`text-xs py-1 px-2 rounded ${
+                  priorityProject.impact === "High" 
+                    ? "bg-red-100 text-red-600" 
+                    : priorityProject.impact === "Medium" 
+                      ? "bg-amber-100 text-amber-600" 
+                      : "bg-blue-100 text-blue-600"
+                }`}>
+                  {priorityProject.impact} Impact
+                </span>
               </div>
             </div>
           ) : (
@@ -108,7 +130,7 @@ const ProjectsSection = () => {
                 </button>
               </div>
               <p className="text-sm text-secondary mb-3">{project.description}</p>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
                     <div 
@@ -126,6 +148,17 @@ const ProjectsSection = () => {
                     {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
                   </span>
                 </div>
+              </div>
+              <div className="flex justify-end">
+                <span className={`text-xs py-1 px-2 rounded ${
+                  project.impact === "High" 
+                    ? "bg-red-100 text-red-600" 
+                    : project.impact === "Medium" 
+                      ? "bg-amber-100 text-amber-600" 
+                      : "bg-blue-100 text-blue-600"
+                }`}>
+                  {project.impact} Impact
+                </span>
               </div>
             </div>
           ))}

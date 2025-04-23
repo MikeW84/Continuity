@@ -100,7 +100,17 @@ const ProjectsPage = () => {
   
   // Separate priority project from others (only applied to active projects)
   const priorityProject = filteredProjects.find(p => p.isPriority && !p.isArchived);
-  const otherProjects = filteredProjects.filter(p => (p !== priorityProject));
+  
+  // Sort projects by impact (High > Medium > Low)
+  const impactOrder: Record<string, number> = { "High": 1, "Medium": 2, "Low": 3 };
+  const otherProjects = filteredProjects
+    .filter(p => (p !== priorityProject))
+    .sort((a, b) => {
+      // Sort by impact
+      const impactA = a.impact || "Medium";
+      const impactB = b.impact || "Medium";
+      return impactOrder[impactA] - impactOrder[impactB];
+    });
 
   const handleAddProject = async (data: ProjectFormValues) => {
     try {
