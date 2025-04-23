@@ -168,6 +168,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(project);
   });
   
+  // Project Task endpoints
+  // Get all tasks for a project
+  app.get("/api/projects/:projectId/tasks", async (req: Request, res: Response) => {
+    const projectId = parseInt(req.params.projectId);
+    const tasks = await storage.getProjectTasks(projectId);
+    res.json(tasks);
+  });
+  
+  // Get a specific task
+  app.get("/api/project-tasks/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const task = await storage.getProjectTask(id);
+    
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    
+    res.json(task);
+  });
+  
+  // Create a new task
+  app.post("/api/project-tasks", async (req: Request, res: Response) => {
+    try {
+      const taskData = validateRequest(insertProjectTaskSchema, req.body);
+      const task = await storage.createProjectTask(taskData);
+      res.status(201).json(task);
+    } catch (error: any) {
+      res.status(error.status || 500).json({ message: error.message });
+    }
+  });
+  
+  // Update a task
+  app.patch("/api/project-tasks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const taskData = validateRequest(insertProjectTaskSchema.partial(), req.body);
+      const task = await storage.updateProjectTask(id, taskData);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
+      res.json(task);
+    } catch (error: any) {
+      res.status(error.status || 500).json({ message: error.message });
+    }
+  });
+  
+  // Delete a task
+  app.delete("/api/project-tasks/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const success = await storage.deleteProjectTask(id);
+    
+    if (!success) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    
+    res.status(204).send();
+  });
+  
+  // Toggle task completion status
+  app.post("/api/project-tasks/:id/toggle", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const task = await storage.toggleProjectTaskCompletion(id);
+    
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    
+    res.json(task);
+  });
+  
   // Ideas endpoints
   app.get("/api/ideas", async (req: Request, res: Response) => {
     const ideas = await storage.getIdeas(TEMP_USER_ID);

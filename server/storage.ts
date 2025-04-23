@@ -877,6 +877,120 @@ export class DatabaseStorage implements IStorage {
     return updatedProject;
   }
   
+  // Project Task methods
+  async getProjectTasks(projectId: number): Promise<ProjectTask[]> {
+    return await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.projectId, projectId));
+  }
+  
+  async getProjectTask(id: number): Promise<ProjectTask | undefined> {
+    const [task] = await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.id, id));
+    
+    return task;
+  }
+  
+  async createProjectTask(task: InsertProjectTask): Promise<ProjectTask> {
+    const [newTask] = await db
+      .insert(projectTasks)
+      .values(task)
+      .returning();
+    
+    // Update the project progress after adding a task
+    await this.updateProjectProgress(task.projectId);
+    
+    return newTask;
+  }
+  
+  async updateProjectTask(id: number, task: Partial<InsertProjectTask>): Promise<ProjectTask | undefined> {
+    // First, get the existing task to get the project ID
+    const [existingTask] = await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.id, id));
+    
+    if (!existingTask) return undefined;
+    
+    // Update the task
+    const [updatedTask] = await db
+      .update(projectTasks)
+      .set(task)
+      .where(eq(projectTasks.id, id))
+      .returning();
+    
+    // Update the project progress
+    await this.updateProjectProgress(existingTask.projectId);
+    
+    return updatedTask;
+  }
+  
+  async deleteProjectTask(id: number): Promise<boolean> {
+    // First, get the task to get the project ID
+    const [task] = await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.id, id));
+    
+    if (!task) return false;
+    
+    // Delete the task
+    await db
+      .delete(projectTasks)
+      .where(eq(projectTasks.id, id));
+    
+    // Update the project progress
+    await this.updateProjectProgress(task.projectId);
+    
+    return true;
+  }
+  
+  async toggleProjectTaskCompletion(id: number): Promise<ProjectTask | undefined> {
+    // First, get the task to get its current completion status and project ID
+    const [task] = await db
+      .select()
+      .from(projectTasks)
+      .where(eq(projectTasks.id, id));
+    
+    if (!task) return undefined;
+    
+    // Toggle the completion status
+    const [updatedTask] = await db
+      .update(projectTasks)
+      .set({ isCompleted: !task.isCompleted })
+      .where(eq(projectTasks.id, id))
+      .returning();
+    
+    // Update the project progress
+    await this.updateProjectProgress(task.projectId);
+    
+    return updatedTask;
+  }
+  
+  async updateProjectProgress(projectId: number): Promise<Project | undefined> {
+    // Get all tasks for this project
+    const tasks = await this.getProjectTasks(projectId);
+    
+    let progress = 0;
+    if (tasks.length > 0) {
+      // Calculate the percentage of completed tasks
+      const completedTasks = tasks.filter(task => task.isCompleted).length;
+      progress = Math.round((completedTasks / tasks.length) * 100);
+    }
+    
+    // Update the project progress
+    const [updatedProject] = await db
+      .update(projects)
+      .set({ progress })
+      .where(eq(projects.id, projectId))
+      .returning();
+    
+    return updatedProject;
+  }
+  
   // Idea methods
   async getIdeas(userId: number): Promise<Idea[]> {
     return await db.select().from(ideas).where(eq(ideas.userId, userId));
