@@ -312,9 +312,9 @@ const ProjectsPage = () => {
                     
                     <Button
                       className="text-sm bg-accent text-white"
-                      onClick={() => openEditDialog(priorityProject)}
+                      onClick={() => openTasksDialog(priorityProject)}
                     >
-                      Update Progress
+                      Manage Tasks
                     </Button>
                   </div>
                   

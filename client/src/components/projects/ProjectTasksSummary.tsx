@@ -64,7 +64,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
   if (totalTasks === 0) {
     return (
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-xs text-white">No tasks</span>
+        <span className="text-xs text-muted-foreground">No tasks</span>
         <Button 
           variant="outline" 
           size="sm" 
@@ -87,7 +87,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-7 text-xs text-secondary"
+          className="h-7 text-xs"
           onClick={onManageTasks}
         >
           <ClipboardList className="h-3 w-3 mr-1" />
