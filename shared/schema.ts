@@ -34,6 +34,15 @@ export const projects = pgTable("projects", {
   userId: integer("user_id").notNull(),
 });
 
+// Project Tasks Schema
+export const projectTasks = pgTable("project_tasks", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  isCompleted: boolean("is_completed").default(false),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Project-Value Relations
 export const projectValues = pgTable("project_values", {
   id: serial("id").primaryKey(),
@@ -61,10 +70,29 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 
+// Add insert schema for project tasks
+export const insertProjectTaskSchema = createInsertSchema(projectTasks).pick({
+  title: true,
+  isCompleted: true,
+  projectId: true,
+});
+
+export type InsertProjectTask = z.infer<typeof insertProjectTaskSchema>;
+export type ProjectTask = typeof projectTasks.$inferSelect;
+
 // Define relations for projects
 export const projectsRelations = relations(projects, ({ many }) => ({
   projectValues: many(projectValues),
-  projectDreams: many(projectDreams)
+  projectDreams: many(projectDreams),
+  tasks: many(projectTasks)
+}));
+
+// Define relations for project tasks
+export const projectTasksRelations = relations(projectTasks, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectTasks.projectId],
+    references: [projects.id]
+  })
 }));
 
 // Define relations for values through project_values
@@ -100,6 +128,14 @@ export const projectWithRelationsSchema = insertProjectSchema.extend({
     z.date(),
     z.string().transform((str) => str ? new Date(str) : null)
   ]).optional().nullable(),
+  // Include tasks in the response
+  tasks: z.array(z.object({
+    id: z.number(),
+    title: z.string(),
+    isCompleted: z.boolean(),
+    projectId: z.number(),
+    createdAt: z.date().nullable().optional()
+  })).optional(),
 });
 
 export type ProjectWithRelations = z.infer<typeof projectWithRelationsSchema>;

@@ -1,6 +1,7 @@
 import {
   type User, type InsertUser,
   type Project, type InsertProject, type ProjectWithRelations,
+  type ProjectTask, type InsertProjectTask,
   type Idea, type InsertIdea,
   type LearningItem, type InsertLearningItem,
   type Habit, type InsertHabit,
@@ -13,6 +14,7 @@ import {
   type Dream, type InsertDream,
   users,
   projects,
+  projectTasks,
   ideas,
   learningItems,
   habits,
@@ -44,6 +46,15 @@ export interface IStorage {
   deleteProject(id: number): Promise<boolean>;
   setPriorityProject(id: number, userId: number): Promise<Project | undefined>;
   toggleProjectArchive(id: number): Promise<Project | undefined>;
+  
+  // Project Task methods
+  getProjectTasks(projectId: number): Promise<ProjectTask[]>;
+  getProjectTask(id: number): Promise<ProjectTask | undefined>;
+  createProjectTask(task: InsertProjectTask): Promise<ProjectTask>;
+  updateProjectTask(id: number, task: Partial<InsertProjectTask>): Promise<ProjectTask | undefined>;
+  deleteProjectTask(id: number): Promise<boolean>;
+  toggleProjectTaskCompletion(id: number): Promise<ProjectTask | undefined>;
+  updateProjectProgress(projectId: number): Promise<Project | undefined>;
   
   // Idea methods
   getIdeas(userId: number): Promise<Idea[]>;
@@ -112,6 +123,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private projects: Map<number, Project>;
+  private projectTasks: Map<number, ProjectTask>;
   private ideas: Map<number, Idea>;
   private learningItems: Map<number, LearningItem>;
   private habits: Map<number, Habit>;
@@ -124,6 +136,7 @@ export class MemStorage implements IStorage {
   
   private userId: number;
   private projectId: number;
+  private projectTaskId: number;
   private ideaId: number;
   private learningItemId: number;
   private habitId: number;
@@ -137,6 +150,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.projects = new Map();
+    this.projectTasks = new Map();
     this.ideas = new Map();
     this.learningItems = new Map();
     this.habits = new Map();
@@ -149,6 +163,7 @@ export class MemStorage implements IStorage {
     
     this.userId = 1;
     this.projectId = 1;
+    this.projectTaskId = 1;
     this.ideaId = 1;
     this.learningItemId = 1;
     this.habitId = 1;
@@ -281,6 +296,93 @@ export class MemStorage implements IStorage {
     // Toggle the isArchived status
     project.isArchived = !project.isArchived;
     this.projects.set(id, project);
+    return project;
+  }
+
+  // Project Task methods
+  async getProjectTasks(projectId: number): Promise<ProjectTask[]> {
+    return Array.from(this.projectTasks.values()).filter(
+      (task) => task.projectId === projectId
+    );
+  }
+  
+  async getProjectTask(id: number): Promise<ProjectTask | undefined> {
+    return this.projectTasks.get(id);
+  }
+  
+  async createProjectTask(task: InsertProjectTask): Promise<ProjectTask> {
+    const id = this.projectTaskId++;
+    const createdAt = new Date();
+    const newTask: ProjectTask = { ...task, id, createdAt };
+    this.projectTasks.set(id, newTask);
+    
+    // Update the project progress after adding a task
+    await this.updateProjectProgress(task.projectId);
+    
+    return newTask;
+  }
+  
+  async updateProjectTask(id: number, task: Partial<InsertProjectTask>): Promise<ProjectTask | undefined> {
+    const existingTask = this.projectTasks.get(id);
+    if (!existingTask) return undefined;
+    
+    const updatedTask = { ...existingTask, ...task };
+    this.projectTasks.set(id, updatedTask);
+    
+    // Update the project progress after modifying a task
+    await this.updateProjectProgress(existingTask.projectId);
+    
+    return updatedTask;
+  }
+  
+  async deleteProjectTask(id: number): Promise<boolean> {
+    const task = this.projectTasks.get(id);
+    if (!task) return false;
+    
+    const projectId = task.projectId;
+    const result = this.projectTasks.delete(id);
+    
+    // Update the project progress after deleting a task
+    if (result) {
+      await this.updateProjectProgress(projectId);
+    }
+    
+    return result;
+  }
+  
+  async toggleProjectTaskCompletion(id: number): Promise<ProjectTask | undefined> {
+    const task = this.projectTasks.get(id);
+    if (!task) return undefined;
+    
+    // Toggle completion status
+    const isCompleted = !task.isCompleted;
+    const updatedTask = { ...task, isCompleted };
+    this.projectTasks.set(id, updatedTask);
+    
+    // Update the project progress after toggling completion
+    await this.updateProjectProgress(task.projectId);
+    
+    return updatedTask;
+  }
+  
+  async updateProjectProgress(projectId: number): Promise<Project | undefined> {
+    const project = this.projects.get(projectId);
+    if (!project) return undefined;
+    
+    // Get all tasks for this project
+    const tasks = await this.getProjectTasks(projectId);
+    if (tasks.length === 0) {
+      // If there are no tasks, set progress to 0
+      project.progress = 0;
+    } else {
+      // Calculate the percentage of completed tasks
+      const completedTasks = tasks.filter(task => task.isCompleted).length;
+      const progress = Math.round((completedTasks / tasks.length) * 100);
+      project.progress = progress;
+    }
+    
+    // Update the project
+    this.projects.set(projectId, project);
     return project;
   }
   

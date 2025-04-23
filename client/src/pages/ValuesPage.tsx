@@ -327,12 +327,12 @@ const ValuesPage = () => {
 
                         <div className="flex flex-wrap items-center gap-2">
                           {dream.timeframe && (
-                            <span className="text-xs bg-primary/20 text-white inline-block px-2 py-0.5 rounded">
+                            <span className="text-xs bg-primary text-white inline-block px-2 py-1 rounded-md">
                               {dream.timeframe}
                             </span>
                           )}
                           {dream.tags?.map((tag, index) => (
-                            <span key={index} className="text-xs bg-primary bg-opacity-10 text-primary py-1 px-2 rounded-md">
+                            <span key={index} className="text-xs bg-primary bg-opacity-10 text-white py-1 px-2 rounded-md">
                               {tag}
                             </span>
                           ))}
