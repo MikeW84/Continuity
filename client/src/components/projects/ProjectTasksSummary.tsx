@@ -68,7 +68,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-7 text-xs"
+          className="h-7 text-xs text-primary"
           onClick={onManageTasks}
         >
           <ClipboardList className="h-3 w-3 mr-1" />
@@ -87,7 +87,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-7 text-xs"
+          className="h-7 text-xs text-primary"
           onClick={onManageTasks}
         >
           <ClipboardList className="h-3 w-3 mr-1" />
