@@ -9,7 +9,7 @@ const Sidebar = () => {
     { path: "/", label: "Dashboard", icon: "ri-dashboard-line" },
     { path: "/projects", label: "Projects", icon: "ri-task-line" },
     { path: "/ideas", label: "Ideas", icon: "ri-lightbulb-line" },
-    { path: "/learning", label: "Learning", icon: "ri-book-open-line" },
+    { path: "/learning", label: "Learning & Resources", icon: "ri-book-open-line" },
     { path: "/health-habits", label: "Health & Habits", icon: "ri-heart-pulse-line" },
     { path: "/family", label: "Family", icon: "ri-user-heart-line" },
     { path: "/values", label: "Values & Dreams", icon: "ri-compass-3-line" },

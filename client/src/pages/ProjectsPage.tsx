@@ -17,7 +17,6 @@ import { z } from "zod";
 const projectFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  resources: z.string().optional(),
   progress: z.number().min(0).max(100).default(0),
   dueDate: z.string().optional(),
   valueIds: z.array(z.number()).optional(),
@@ -50,7 +49,6 @@ const ProjectsPage = () => {
     defaultValues: {
       title: "",
       description: "",
-      resources: "",
       progress: 0,
       dueDate: "",
       valueIds: [],
@@ -70,7 +68,6 @@ const ProjectsPage = () => {
       form.reset({
         title: "",
         description: "",
-        resources: "",
         progress: 0,
         dueDate: "",
         valueIds: [],
@@ -92,7 +89,6 @@ const ProjectsPage = () => {
       const projectData = {
         title: data.title,
         description: data.description || "",
-        resources: data.resources || "",
         progress: data.progress,
         // Only set isPriority to false for new projects, preserve it when editing
         isPriority: currentProject ? currentProject.isPriority : false,
@@ -158,7 +154,6 @@ const ProjectsPage = () => {
     form.reset({
       title: project.title,
       description: project.description || "",
-      resources: project.resources || "",
       progress: project.progress,
       dueDate: project.dueDate ? format(new Date(project.dueDate), 'yyyy-MM-dd') : undefined,
       valueIds: project.valueIds || [],
@@ -196,7 +191,6 @@ const ProjectsPage = () => {
             form.reset({
               title: "",
               description: "",
-              resources: "",
               progress: 0,
               dueDate: "",
               valueIds: [],
@@ -346,7 +340,6 @@ const ProjectsPage = () => {
                 form.reset({
                   title: "",
                   description: "",
-                  resources: "",
                   progress: 0,
                   dueDate: "",
                   valueIds: [],
