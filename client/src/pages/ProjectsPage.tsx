@@ -321,7 +321,8 @@ const ProjectsPage = () => {
                   {/* Priority Project Tasks Summary */}
                   <ProjectTasksSummary 
                     projectId={priorityProject.id} 
-                    onManageTasks={() => openTasksDialog(priorityProject)} 
+                    onManageTasks={() => openTasksDialog(priorityProject)}
+                    isDarkBackground={true}
                   />
                 </>
               ) : (
