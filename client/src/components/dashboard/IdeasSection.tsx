@@ -45,7 +45,10 @@ const IdeasSection = () => {
             <p>No ideas yet. Add your first idea!</p>
           </div>
         ) : (
-          ideas.map(idea => (
+          [...ideas]
+            .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0))
+            .slice(0, 3)
+            .map(idea => (
             <div 
               key={idea.id} 
               className="mb-4 p-4 border border-gray-100 rounded-lg hover:border-gray-200 transition-colors"
