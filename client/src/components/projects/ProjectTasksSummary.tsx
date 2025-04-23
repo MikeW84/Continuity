@@ -11,7 +11,7 @@ interface ProjectTasksSummaryProps {
 
 const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryProps) => {
   const { fetchProjectTasks } = useAppContext();
-  
+
   const [tasks, setTasks] = useState<ProjectTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -22,10 +22,10 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
 
   const loadTasks = async () => {
     if (!projectId) return;
-    
+
     setIsLoading(true);
     setError(false);
-    
+
     try {
       const projectTasks = await fetchProjectTasks(projectId);
       setTasks(projectTasks);
@@ -71,7 +71,7 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
           className="h-7 text-xs text-secondary hover:text-accent-foreground"
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1" />
+          <ClipboardList className="h-3 w-3 mr-1 text-secondary group-hover:text-accent-foreground" />
           Add Tasks
         </Button>
       </div>
