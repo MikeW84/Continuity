@@ -21,7 +21,7 @@ const Header = ({ title, subtitle }: HeaderProps) => {
       case "ideas":
         return "Ideas";
       case "learning":
-        return "Learning";
+        return "Learning & Resources";
       case "health-habits":
         return "Health & Habits";
       case "family":
@@ -42,15 +42,15 @@ const Header = ({ title, subtitle }: HeaderProps) => {
       case "projects":
         return "Prioritize and focus";
       case "ideas":
-        return "Capture and revisit your ideas";
+        return "Capture and revisit good ideas";
       case "learning":
-        return "Track current and future learning";
+        return "Learn things that will make a difference";
       case "health-habits":
-        return "Monitor exercise and daily habits";
+        return "Make good choices every day";
       case "family":
-        return "Family and parenting";
+        return "Stay Connected with those who matter the most";
       case "values":
-        return "Align my actions with your values";
+        return "Begin with the end in mind";
       default:
         return "Build and Keep Momentum";
     }

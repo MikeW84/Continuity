@@ -139,7 +139,6 @@ const ValuesPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-inter font-bold text-primary">Values & Dreams</h2>
         <div className="flex gap-2">
           <Button 
             className="bg-primary text-white"

@@ -209,7 +209,6 @@ const ProjectsPage = () => {
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-inter font-bold text-primary">Project Management</h2>
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <Button 
               variant={showArchivedProjects ? "ghost" : "default"}
