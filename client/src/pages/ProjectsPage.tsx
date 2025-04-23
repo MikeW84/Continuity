@@ -310,12 +310,7 @@ const ProjectsPage = () => {
                       {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
                     </span>
                     
-                    <Button
-                      className="text-sm bg-accent text-white"
-                      onClick={() => openTasksDialog(priorityProject)}
-                    >
-                      Manage Tasks
-                    </Button>
+
                   </div>
                   
                   {/* Priority Project Tasks Summary */}

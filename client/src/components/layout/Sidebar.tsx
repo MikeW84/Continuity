@@ -19,9 +19,9 @@ const Sidebar = () => {
     <aside className="fixed left-0 top-0 bottom-0 w-16 md:w-64 bg-primary text-white flex flex-col z-10">
       <div className="p-4 md:p-6 flex items-center justify-center md:justify-start">
         <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center md:mr-3">
-          <span className="font-inter font-bold text-primary">2B</span>
+          <span className="font-inter font-bold text-primary"></span>
         </div>
-        <h1 className="hidden md:block font-inter font-bold text-xl">2nd Brain</h1>
+        <h1 className="hidden md:block font-inter font-bold text-xl">Continuity</h1>
       </div>
       
       <nav className="mt-8 flex-1">

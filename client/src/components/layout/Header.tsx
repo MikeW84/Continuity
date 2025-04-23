@@ -38,21 +38,21 @@ const Header = ({ title, subtitle }: HeaderProps) => {
     
     switch (title) {
       case "dashboard":
-        return "Your life at a glance";
+        return "Build and Keep Momentum";
       case "projects":
-        return "Manage your important initiatives";
+        return "Prioritize and focus";
       case "ideas":
-        return "Capture and vote on your ideas";
+        return "Capture and revisit your ideas";
       case "learning":
         return "Track current and future learning";
       case "health-habits":
-        return "Monitor your health and daily habits";
+        return "Monitor exercise and daily habits";
       case "family":
-        return "Family planning and parenting";
+        return "Family and parenting";
       case "values":
-        return "Align your actions with your values";
+        return "Align my actions with your values";
       default:
-        return "Your life at a glance";
+        return "Build and Keep Momentum";
     }
   }
 
