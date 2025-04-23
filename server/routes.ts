@@ -44,6 +44,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Helper function to calculate project progress based on tasks
+  const calculateProjectProgress = async (projectId: number): Promise<number> => {
+    const tasks = await storage.getProjectTasks(projectId);
+    if (!tasks || tasks.length === 0) {
+      return 0; // If no tasks, progress is 0%
+    }
+    
+    const completedTasks = tasks.filter(task => task.isCompleted).length;
+    return Math.round((completedTasks / tasks.length) * 100);
+  };
+
   // Projects endpoints
   app.get("/api/projects", async (req: Request, res: Response) => {
     // Get showArchived query parameter, defaults to false
@@ -56,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ? projects 
       : projects.filter(project => !project.isArchived);
     
-    // Get values and dreams for each project
+    // Get values, dreams, and calculate progress for each project
     const projectsWithRelations = await Promise.all(
       filteredProjects.map(async (project) => {
         // Get the associated value IDs
@@ -69,7 +80,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(projectDreams.projectId, project.id));
         const dreamIds = projectDreamItems.map(pd => pd.dreamId);
         
-        return { ...project, valueIds, dreamIds };
+        // Calculate current progress based on completed tasks
+        const progress = await calculateProjectProgress(project.id);
+        
+        return { ...project, valueIds, dreamIds, progress };
       })
     );
     
@@ -94,7 +108,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(eq(projectDreams.projectId, project.id));
     const dreamIds = projectDreamItems.map(pd => pd.dreamId);
     
-    const projectWithRelations = { ...project, valueIds, dreamIds };
+    // Calculate current progress based on completed tasks
+    const progress = await calculateProjectProgress(id);
+    
+    const projectWithRelations = { ...project, valueIds, dreamIds, progress };
     
     res.json(projectWithRelations);
   });
@@ -194,6 +211,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const taskData = validateRequest(insertProjectTaskSchema, req.body);
       const task = await storage.createProjectTask(taskData);
+      
+      // Calculate and update the project's progress
+      const progress = await calculateProjectProgress(task.projectId);
+      
+      // Update the project's progress in the database
+      await db.update(projects)
+        .set({ progress })
+        .where(eq(projects.id, task.projectId));
+      
       res.status(201).json(task);
     } catch (error: any) {
       res.status(error.status || 500).json({ message: error.message });
@@ -220,11 +246,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete a task
   app.delete("/api/project-tasks/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
+    
+    // Get the task first to know which project to update
+    const task = await storage.getProjectTask(id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    
+    const projectId = task.projectId;
     const success = await storage.deleteProjectTask(id);
     
     if (!success) {
       return res.status(404).json({ message: "Task not found" });
     }
+    
+    // Calculate and update the project's progress after deletion
+    const progress = await calculateProjectProgress(projectId);
+    
+    // Update the project's progress in the database
+    await db.update(projects)
+      .set({ progress })
+      .where(eq(projects.id, projectId));
     
     res.status(204).send();
   });
@@ -237,6 +279,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+    
+    // Calculate the updated progress for the project after toggling the task
+    const progress = await calculateProjectProgress(task.projectId);
+    
+    // Update the project's progress in the database (silently)
+    await db.update(projects)
+      .set({ progress })
+      .where(eq(projects.id, task.projectId));
     
     res.json(task);
   });

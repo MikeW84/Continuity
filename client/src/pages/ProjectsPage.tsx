@@ -312,9 +312,9 @@ const ProjectsPage = () => {
                     
                     <Button
                       className="text-sm bg-accent text-white"
-                      onClick={() => openEditDialog(priorityProject)}
+                      onClick={() => openTasksDialog(priorityProject)}
                     >
-                      Update Progress
+                      Manage Tasks
                     </Button>
                   </div>
                   
@@ -476,26 +476,7 @@ const ProjectsPage = () => {
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="progress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Progress ({field.value}%)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        step="5" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Progress is now automatically calculated from tasks */}
               
               <FormField
                 control={form.control}
