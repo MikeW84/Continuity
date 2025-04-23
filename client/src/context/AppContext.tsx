@@ -400,6 +400,103 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Project Task methods
+  const fetchProjectTasks = async (projectId: number): Promise<ProjectTask[]> => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}/tasks`);
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      return await res.json();
+    } catch (error) {
+      console.error('Error fetching project tasks:', error);
+      toast({
+        title: "Failed to load tasks",
+        description: "There was a problem loading project tasks.",
+        variant: "destructive"
+      });
+      return [];
+    }
+  };
+  
+  const addProjectTask = async (task: Omit<ProjectTask, 'id' | 'createdAt'>) => {
+    try {
+      await apiRequest('POST', '/api/project-tasks', task);
+      // After adding a task, refetch the project to update progress
+      await fetchProjects();
+      toast({
+        title: "Task Added",
+        description: "Your task has been added successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to add task",
+        description: "There was a problem adding your task.",
+        variant: "destructive"
+      });
+      console.error('Error adding project task:', error);
+      throw error;
+    }
+  };
+  
+  const updateProjectTask = async (id: number, task: Partial<ProjectTask>) => {
+    try {
+      await apiRequest('PATCH', `/api/project-tasks/${id}`, task);
+      // After updating a task, refetch the project to update progress
+      await fetchProjects();
+      toast({
+        title: "Task Updated",
+        description: "Your task has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to update task",
+        description: "There was a problem updating your task.",
+        variant: "destructive"
+      });
+      console.error('Error updating project task:', error);
+      throw error;
+    }
+  };
+  
+  const deleteProjectTask = async (id: number) => {
+    try {
+      await apiRequest('DELETE', `/api/project-tasks/${id}`);
+      // After deleting a task, refetch the project to update progress
+      await fetchProjects();
+      toast({
+        title: "Task Deleted",
+        description: "Your task has been deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to delete task",
+        description: "There was a problem deleting your task.",
+        variant: "destructive"
+      });
+      console.error('Error deleting project task:', error);
+      throw error;
+    }
+  };
+  
+  const toggleProjectTaskCompletion = async (id: number) => {
+    try {
+      await apiRequest('POST', `/api/project-tasks/${id}/toggle`, {});
+      // After toggling a task, refetch the project to update progress
+      await fetchProjects();
+      toast({
+        title: "Task Updated",
+        description: "Your task completion status has been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to update task",
+        description: "There was a problem updating your task completion status.",
+        variant: "destructive"
+      });
+      console.error('Error toggling project task completion:', error);
+      throw error;
+    }
+  };
+  
   const addIdea = async (idea: Omit<Idea, 'id' | 'userId'>) => {
     try {
       await apiRequest('POST', '/api/ideas', { ...idea, userId: user?.id || 1 });
@@ -1013,6 +1110,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPriorityProject,
     toggleProjectArchive,
     setShowArchivedProjects,
+    
+    // Project Tasks methods
+    fetchProjectTasks,
+    addProjectTask,
+    updateProjectTask,
+    deleteProjectTask,
+    toggleProjectTaskCompletion,
     
     // Ideas methods
     fetchIdeas,
