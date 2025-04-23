@@ -7,9 +7,10 @@ import { ProjectTask } from "@shared/schema";
 interface ProjectTasksSummaryProps {
   projectId: number;
   onManageTasks: () => void;
+  isDarkBackground?: boolean; // Indicates if this component is rendered on a dark background
 }
 
-const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryProps) => {
+const ProjectTasksSummary = ({ projectId, onManageTasks, isDarkBackground = false }: ProjectTasksSummaryProps) => {
   const { fetchProjectTasks } = useAppContext();
   
   const [tasks, setTasks] = useState<ProjectTask[]>([]);
@@ -54,7 +55,12 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
     return (
       <div className="mt-2 text-xs text-destructive">
         Error loading tasks. 
-        <Button variant="link" size="sm" className="p-0 h-auto text-xs text-primary" onClick={loadTasks}>
+        <Button 
+          variant="link" 
+          size="sm" 
+          className={`p-0 h-auto text-xs ${isDarkBackground ? "text-white" : "text-primary"}`} 
+          onClick={loadTasks}
+        >
           Retry
         </Button>
       </div>
@@ -66,12 +72,12 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
       <div className="mt-2 flex items-center justify-between">
         <span className="text-xs text-muted-foreground">No tasks</span>
         <Button 
-          variant="outline" 
+          variant={isDarkBackground ? "secondary" : "outline"}
           size="sm" 
-          className="h-7 text-xs text-primary"
+          className={`h-7 text-xs ${isDarkBackground ? "text-white" : "text-primary"}`}
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1 text-primary" />
+          <ClipboardList className={`h-3 w-3 mr-1 ${isDarkBackground ? "text-white" : "text-primary"}`} />
           Add Tasks
         </Button>
       </div>
@@ -85,12 +91,12 @@ const ProjectTasksSummary = ({ projectId, onManageTasks }: ProjectTasksSummaryPr
           <span className="font-medium">{completedTasks}/{totalTasks} Tasks Completed</span>
         </div>
         <Button 
-          variant="outline" 
+          variant={isDarkBackground ? "secondary" : "outline"}
           size="sm" 
-          className="h-7 text-xs text-primary"
+          className={`h-7 text-xs ${isDarkBackground ? "text-white" : "text-primary"}`}
           onClick={onManageTasks}
         >
-          <ClipboardList className="h-3 w-3 mr-1 text-primary" />
+          <ClipboardList className={`h-3 w-3 mr-1 ${isDarkBackground ? "text-white" : "text-primary"}`} />
           Manage
         </Button>
       </div>
