@@ -46,7 +46,7 @@ const ValuesSection = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-6">
           <div>
             <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3">Core Values</h3>
 
