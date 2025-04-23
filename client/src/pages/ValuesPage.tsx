@@ -327,7 +327,7 @@ const ValuesPage = () => {
 
                         <div className="flex flex-wrap items-center gap-2">
                           {dream.timeframe && (
-                            <span className="text-xs bg-primary bg-opacity-10 text-primary py-1 px-2 rounded-md">
+                            <span className="text-xs bg-primary/20 text-white inline-block px-2 py-0.5 rounded">
                               {dream.timeframe}
                             </span>
                           )}
