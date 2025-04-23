@@ -996,6 +996,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     values,
     dreams,
     priorityProject,
+    showArchivedProjects,
     
     // Projects methods
     fetchProjects,
@@ -1003,6 +1004,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updateProject,
     deleteProject,
     setPriorityProject,
+    toggleProjectArchive,
+    setShowArchivedProjects,
     
     // Ideas methods
     fetchIdeas,

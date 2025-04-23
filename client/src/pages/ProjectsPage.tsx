@@ -33,6 +33,9 @@ const ProjectsPage = () => {
     updateProject, 
     deleteProject, 
     setPriorityProject, 
+    toggleProjectArchive,
+    showArchivedProjects,
+    setShowArchivedProjects,
     isLoading,
     values,
     fetchValues,
@@ -77,9 +80,18 @@ const ProjectsPage = () => {
       sessionStorage.removeItem('openAddDialog');
     }
   }, [fetchProjects, fetchValues, fetchDreams, form]);
+  
+  // Refetch when archive state changes
+  useEffect(() => {
+    fetchProjects();
+  }, [showArchivedProjects, fetchProjects]);
 
-  const priorityProject = projects.find(p => p.isPriority);
-  const otherProjects = projects.filter(p => !p.isPriority);
+  // Filter projects based on archive status
+  const filteredProjects = projects.filter(p => showArchivedProjects ? p.isArchived : !p.isArchived);
+  
+  // Separate priority project from others (only applied to active projects)
+  const priorityProject = filteredProjects.find(p => p.isPriority && !p.isArchived);
+  const otherProjects = filteredProjects.filter(p => (p !== priorityProject));
 
   const handleAddProject = async (data: ProjectFormValues) => {
     try {
@@ -90,8 +102,9 @@ const ProjectsPage = () => {
         title: data.title,
         description: data.description || "",
         progress: data.progress,
-        // Only set isPriority to false for new projects, preserve it when editing
+        // Only set isPriority and isArchived to false for new projects, preserve them when editing
         isPriority: currentProject ? currentProject.isPriority : false,
+        isArchived: currentProject ? currentProject.isArchived : false,
         valueIds: data.valueIds || [],
         dreamIds: data.dreamIds || [],
       };
@@ -183,7 +196,27 @@ const ProjectsPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-inter font-bold text-primary">Project Management</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-inter font-bold text-primary">Project Management</h2>
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <Button 
+              variant={showArchivedProjects ? "ghost" : "default"}
+              size="sm"
+              className={!showArchivedProjects ? "text-white" : "text-gray-700"}
+              onClick={() => setShowArchivedProjects(false)}
+            >
+              Active
+            </Button>
+            <Button 
+              variant={showArchivedProjects ? "default" : "ghost"}
+              size="sm"
+              className={showArchivedProjects ? "text-white" : "text-gray-700"}
+              onClick={() => setShowArchivedProjects(true)}
+            >
+              Archived
+            </Button>
+          </div>
+        </div>
         <Button 
           className="bg-accent text-white"
           onClick={() => {
@@ -205,94 +238,119 @@ const ProjectsPage = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Priority Project Card */}
-        <Card className="bg-primary bg-opacity-5 border-l-4 border-accent">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="bg-accent text-white p-1 rounded text-xs font-inter font-medium mr-2">
-                  PRIORITY
+        {/* Priority Project Card - Hide when viewing archived projects */}
+        {!showArchivedProjects && (
+          <Card className="bg-primary bg-opacity-5 border-l-4 border-accent">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <div className="bg-accent text-white p-1 rounded text-xs font-inter font-medium mr-2">
+                    PRIORITY
+                  </div>
+                  <h3 className="font-inter font-semibold text-lg">The One Thing</h3>
                 </div>
-                <h3 className="font-inter font-semibold text-lg">The One Thing</h3>
+                {priorityProject && (
+                  <div className="flex">
+                    <button 
+                      className="text-secondary hover:text-primary transition-colors mr-2"
+                      onClick={() => openEditDialog(priorityProject)}
+                    >
+                      <i className="ri-edit-line"></i>
+                    </button>
+                    <button 
+                      className="text-secondary hover:text-blue-500 transition-colors mr-2"
+                      onClick={() => toggleProjectArchive(priorityProject.id)}
+                      title="Archive"
+                    >
+                      <i className="ri-archive-line"></i>
+                    </button>
+                    <button 
+                      className="text-secondary hover:text-destructive transition-colors"
+                      onClick={() => {
+                        setSelectedProject(priorityProject.id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <i className="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                )}
               </div>
-              {priorityProject && (
-                <div className="flex">
-                  <button 
-                    className="text-secondary hover:text-primary transition-colors mr-2"
-                    onClick={() => openEditDialog(priorityProject)}
-                  >
-                    <i className="ri-edit-line"></i>
-                  </button>
-                  <button 
-                    className="text-secondary hover:text-destructive transition-colors"
-                    onClick={() => {
-                      setSelectedProject(priorityProject.id);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                  >
-                    <i className="ri-delete-bin-line"></i>
-                  </button>
+              
+              {priorityProject ? (
+                <>
+                  <h4 className="font-inter font-medium text-xl mb-2">{priorityProject.title}</h4>
+                  <p className="text-secondary mb-4">{priorityProject.description}</p>
+                  
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-secondary">Progress</span>
+                    <span className="text-sm font-medium">{priorityProject.progress}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
+                    <div 
+                      className="h-full bg-accent"
+                      style={{ width: `${priorityProject.progress}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm bg-gray-100 py-1 px-2 rounded text-secondary">
+                      {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
+                    </span>
+                    
+                    <Button
+                      className="text-sm bg-accent text-white"
+                      onClick={() => openEditDialog(priorityProject)}
+                    >
+                      Update Progress
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-secondary mb-4">No priority project set</p>
+                  <p className="text-sm text-muted-foreground">Set a project as priority using the "Make Priority" button</p>
                 </div>
               )}
-            </div>
-            
-            {priorityProject ? (
-              <>
-                <h4 className="font-inter font-medium text-xl mb-2">{priorityProject.title}</h4>
-                <p className="text-secondary mb-4">{priorityProject.description}</p>
-                
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-secondary">Progress</span>
-                  <span className="text-sm font-medium">{priorityProject.progress}%</span>
-                </div>
-                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
-                  <div 
-                    className="h-full bg-accent"
-                    style={{ width: `${priorityProject.progress}%` }}
-                  ></div>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm bg-gray-100 py-1 px-2 rounded text-secondary">
-                    {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
-                  </span>
-                  
-                  <Button
-                    className="text-sm bg-accent text-white"
-                    onClick={() => openEditDialog(priorityProject)}
-                  >
-                    Update Progress
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-secondary mb-4">No priority project set</p>
-                <p className="text-sm text-muted-foreground">Set a project as priority using the "Make Priority" button</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Other Projects */}
         {otherProjects.map(project => (
-          <Card key={project.id} className="border border-gray-200">
+          <Card key={project.id} className={`border ${project.isArchived ? 'border-gray-300 bg-gray-50' : 'border-gray-200'}`}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-inter font-medium text-lg">{project.title}</h4>
+                <div className="flex items-center">
+                  <h4 className="font-inter font-medium text-lg">{project.title}</h4>
+                  {project.isArchived && (
+                    <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
+                      Archived
+                    </span>
+                  )}
+                </div>
                 <div className="flex">
-                  <button 
-                    className="text-secondary hover:text-accent transition-colors mr-3"
-                    onClick={() => handleSetPriority(project.id)}
-                  >
-                    <i className="ri-star-line mr-1"></i>
-                    Priority
-                  </button>
+                  {!project.isArchived && (
+                    <button 
+                      className="text-secondary hover:text-accent transition-colors mr-3"
+                      onClick={() => handleSetPriority(project.id)}
+                    >
+                      <i className="ri-star-line mr-1"></i>
+                      Priority
+                    </button>
+                  )}
                   <button 
                     className="text-secondary hover:text-primary transition-colors mr-2"
                     onClick={() => openEditDialog(project)}
                   >
                     <i className="ri-edit-line"></i>
+                  </button>
+                  <button 
+                    className="text-secondary hover:text-blue-500 transition-colors mr-2"
+                    onClick={() => toggleProjectArchive(project.id)}
+                    title={project.isArchived ? "Unarchive" : "Archive"}
+                  >
+                    <i className={`${project.isArchived ? 'ri-inbox-unarchive-line' : 'ri-archive-line'}`}></i>
                   </button>
                   <button 
                     className="text-secondary hover:text-destructive transition-colors"
@@ -329,30 +387,32 @@ const ProjectsPage = () => {
           </Card>
         ))}
         
-        {/* Add New Project Card */}
-        <Card className="border border-dashed border-gray-300 bg-gray-50">
-          <CardContent className="p-6 flex flex-col items-center justify-center h-full">
-            <Button 
-              variant="ghost" 
-              className="flex flex-col items-center p-8 h-auto w-full"
-              onClick={() => {
-                setSelectedProject(null);
-                form.reset({
-                  title: "",
-                  description: "",
-                  progress: 0,
-                  dueDate: "",
-                  valueIds: [],
-                  dreamIds: [],
-                });
-                setIsAddDialogOpen(true);
-              }}
-            >
-              <i className="ri-add-line text-3xl text-secondary mb-2"></i>
-              <span className="text-secondary font-medium">Add New Project</span>
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Add New Project Card - Hide when viewing archived projects */}
+        {!showArchivedProjects && (
+          <Card className="border border-dashed border-gray-300 bg-gray-50">
+            <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+              <Button 
+                variant="ghost" 
+                className="flex flex-col items-center p-8 h-auto w-full"
+                onClick={() => {
+                  setSelectedProject(null);
+                  form.reset({
+                    title: "",
+                    description: "",
+                    progress: 0,
+                    dueDate: "",
+                    valueIds: [],
+                    dreamIds: [],
+                  });
+                  setIsAddDialogOpen(true);
+                }}
+              >
+                <i className="ri-add-line text-3xl text-secondary mb-2"></i>
+                <span className="text-secondary font-medium">Add New Project</span>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
       
       {/* Add/Edit Project Dialog */}
