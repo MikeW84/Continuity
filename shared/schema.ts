@@ -27,7 +27,6 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  resources: text("resources"),
   progress: integer("progress").default(0),
   dueDate: timestamp("due_date"),
   isPriority: boolean("is_priority").default(false),
@@ -51,7 +50,6 @@ export const projectDreams = pgTable("project_dreams", {
 export const insertProjectSchema = createInsertSchema(projects).pick({
   title: true,
   description: true,
-  resources: true,
   progress: true,
   dueDate: true,
   isPriority: true,
@@ -109,7 +107,6 @@ export const ideas = pgTable("ideas", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  resources: text("resources"),
   votes: integer("votes").default(0),
   tags: text("tags").array(),
   userId: integer("user_id").notNull(),
@@ -118,7 +115,6 @@ export const ideas = pgTable("ideas", {
 export const insertIdeaSchema = createInsertSchema(ideas).pick({
   title: true,
   description: true,
-  resources: true,
   votes: true,
   tags: true,
   userId: true,
@@ -127,7 +123,7 @@ export const insertIdeaSchema = createInsertSchema(ideas).pick({
 export type InsertIdea = z.infer<typeof insertIdeaSchema>;
 export type Idea = typeof ideas.$inferSelect;
 
-// Learning Schema
+// Learning and Resources Schema
 export const learningItems = pgTable("learning_items", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
