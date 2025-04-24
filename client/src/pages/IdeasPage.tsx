@@ -116,7 +116,6 @@ const IdeasPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-inter font-bold text-primary">Idea Bank</h2>
         <Button 
           className="bg-accent text-white"
           onClick={() => {
