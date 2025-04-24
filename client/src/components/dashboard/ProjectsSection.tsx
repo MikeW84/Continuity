@@ -80,23 +80,19 @@ const ProjectsSection = () => {
                 <h3 className="font-inter font-medium">{priorityProject.title}</h3>
               </div>
               <p className="text-sm text-secondary mb-3">{priorityProject.description}</p>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-accent" 
-                      style={{ width: `${priorityProject.progress}%` }}
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-xs text-secondary">{priorityProject.progress}%</span>
+              <div className="flex items-center mb-2">
+                <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-accent" 
+                    style={{ width: `${priorityProject.progress}%` }}
+                  ></div>
                 </div>
-                <div>
-                  <span className="text-xs text-secondary bg-gray-100 py-1 px-2 rounded">
-                    {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
-                  </span>
-                </div>
+                <span className="ml-2 text-xs text-secondary">{priorityProject.progress}%</span>
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0">
+                <span className="text-xs text-secondary bg-gray-100 py-1 px-2 rounded">
+                  {priorityProject.dueDate ? getDueInDays(new Date(priorityProject.dueDate)) : "No due date"}
+                </span>
                 <span className={`text-xs py-1 px-2 rounded ${
                   priorityProject.impact === "High" 
                     ? "bg-red-100 text-red-600" 
@@ -130,26 +126,22 @@ const ProjectsSection = () => {
                 </button>
               </div>
               <p className="text-sm text-secondary mb-3">{project.description}</p>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full" 
-                      style={{ 
-                        width: `${project.progress}%`,
-                        backgroundColor: "hsl(184, 22%, 65%)" /* Use the --success color directly */
-                      }}
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-xs text-secondary">{project.progress}%</span>
+              <div className="flex items-center mb-2">
+                <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full" 
+                    style={{ 
+                      width: `${project.progress}%`,
+                      backgroundColor: "hsl(184, 22%, 65%)" /* Use the --success color directly */
+                    }}
+                  ></div>
                 </div>
-                <div>
-                  <span className="text-xs text-secondary bg-muted/80 py-1 px-2 rounded font-medium">
-                    {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
-                  </span>
-                </div>
+                <span className="ml-2 text-xs text-secondary">{project.progress}%</span>
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0">
+                <span className="text-xs text-secondary bg-muted/80 py-1 px-2 rounded font-medium">
+                  {project.dueDate ? getDueInDays(new Date(project.dueDate)) : "No due date"}
+                </span>
                 <span className={`text-xs py-1 px-2 rounded ${
                   project.impact === "High" 
                     ? "bg-red-100 text-red-600" 
