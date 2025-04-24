@@ -64,12 +64,6 @@ const Header = ({ title, subtitle }: HeaderProps) => {
       </div>
       
       <div className="flex items-center space-x-4">
-        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <i className="ri-notification-3-line text-secondary text-xl"></i>
-        </button>
-        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <i className="ri-search-line text-secondary text-xl"></i>
-        </button>
         <Button 
           className="hidden md:flex items-center bg-accent hover:bg-opacity-90 text-white" 
           onClick={() => setIsAddMenuOpen(true)}
