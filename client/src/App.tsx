@@ -9,6 +9,8 @@ import ProjectsPage from "@/pages/ProjectsPage";
 import IdeasPage from "@/pages/IdeasPage";
 import LearningPage from "@/pages/LearningPage";
 import HealthHabitsPage from "@/pages/HealthHabitsPage";
+import HabitsPage from "@/pages/HabitsPage";
+import ExercisePage from "@/pages/ExercisePage";
 import FamilyPage from "@/pages/FamilyPage";
 import ValuesPage from "@/pages/ValuesPage";
 import AuthPage from "@/pages/AuthPage";
@@ -29,6 +31,8 @@ function App() {
                 <ProtectedRoute path="/ideas" component={IdeasPage} />
                 <ProtectedRoute path="/learning" component={LearningPage} />
                 <ProtectedRoute path="/health-habits" component={HealthHabitsPage} />
+                <ProtectedRoute path="/habits" component={HabitsPage} />
+                <ProtectedRoute path="/exercise" component={ExercisePage} />
                 <ProtectedRoute path="/family" component={FamilyPage} />
                 <ProtectedRoute path="/values" component={ValuesPage} />
                 <Route component={NotFound} />
