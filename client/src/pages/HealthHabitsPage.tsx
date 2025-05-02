@@ -63,7 +63,7 @@ const exerciseFormSchema = z.object({
 
 type ExerciseFormValues = z.infer<typeof exerciseFormSchema>;
 
-const HealthHabitsPage = () => {
+const HealthManagementPage = () => {
   const {
     habits,
     exercises,
@@ -365,10 +365,11 @@ const HealthHabitsPage = () => {
         </div>
       </div>
 
+      <h1 className="text-2xl font-semibold mb-6">Health Management</h1>
       <Tabs defaultValue="habits" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="habits">Daily Habits</TabsTrigger>
-          <TabsTrigger value="exercises">Exercise Tracking</TabsTrigger>
+          <TabsTrigger value="habits">Habits</TabsTrigger>
+          <TabsTrigger value="exercises">Exercise</TabsTrigger>
         </TabsList>
 
         <TabsContent value="habits">
@@ -413,7 +414,7 @@ const HealthHabitsPage = () => {
                   {/* Monthly Calendar View */}
                   <div className="mb-8">
                     <h3 className="text-xl font-semibold mb-4">
-                      Monthly Tracking
+                      Habit Tracking
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {habits.map((habit) => (
@@ -528,7 +529,7 @@ const HealthHabitsPage = () => {
               ) : (
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold mb-4">
-                    Exercise Tracking
+                    Exercise Overview
                   </h3>
 
                   {/* Exercise Calendar */}
@@ -1225,4 +1226,4 @@ const HealthHabitsPage = () => {
   );
 };
 
-export default HealthHabitsPage;
+export default HealthManagementPage;

@@ -81,14 +81,16 @@ const HealthHabitsSection = () => {
     <Card className="h-full">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-inter font-semibold text-primary">Health & Habits</h2>
+          <h2 className="text-xl font-inter font-semibold text-primary">Health Management</h2>
           <button className="text-secondary hover:text-primary transition-colors">
             <i className="ri-more-2-fill"></i>
           </button>
         </div>
         
         <div className="mb-6">
-          <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3">Daily Habits</h3>
+          <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3 flex items-center">
+            <i className="ri-calendar-check-line mr-2"></i> Habits
+          </h3>
           
           {habits.length === 0 ? (
             <div className="text-center py-3 text-secondary">
@@ -148,7 +150,9 @@ const HealthHabitsSection = () => {
         </div>
         
         <div>
-          <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3">Exercise Tracker</h3>
+          <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3 flex items-center">
+            <i className="ri-run-line mr-2"></i> Exercise
+          </h3>
           
           {exercises.length === 0 ? (
             <div className="text-center py-3 text-secondary">
