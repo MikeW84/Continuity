@@ -33,6 +33,8 @@ const taskFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   isPriority: z.boolean().default(false),
   notes: z.string().optional().nullable(),
+  date: z.date().optional(), // Will be set automatically if not provided
+  userId: z.number().optional(), // Will be set by the server
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -50,6 +52,8 @@ const TodayPage = () => {
       title: "",
       isPriority: false,
       notes: "",
+      date: new Date(),
+      userId: 1,
     },
   });
 
@@ -74,10 +78,15 @@ const TodayPage = () => {
 
   // Reset form when opening dialog
   const handleAddTaskClick = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     form.reset({
       title: "",
       isPriority: false,
       notes: "",
+      date: today,
+      userId: 1,
     });
     setIsAddTaskOpen(true);
   };
@@ -85,10 +94,14 @@ const TodayPage = () => {
   // Set form values when editing a task
   useEffect(() => {
     if (editingTask) {
+      const taskDate = new Date(editingTask.date);
+      
       form.reset({
         title: editingTask.title,
         isPriority: editingTask.isPriority,
         notes: editingTask.notes || "",
+        date: taskDate,
+        userId: editingTask.userId,
       });
     }
   }, [editingTask, form]);
@@ -96,12 +109,22 @@ const TodayPage = () => {
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (data: TaskFormValues) => {
+      // Add today's date and user ID
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const taskData = {
+        ...data,
+        date: today,
+        userId: 1, // Default user ID
+      };
+      
       const response = await fetch("/api/today-tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(taskData),
       });
       
       if (!response.ok) {
