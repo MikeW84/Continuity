@@ -6,8 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const HealthHabitsSection = () => {
-  const { habits, exercises: unsortedExercises, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
-const exercises = [...unsortedExercises].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const { habits, exercises, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
   const [expandedHabit, setExpandedHabit] = useState<number | null>(null);
   const { toast } = useToast();
 
@@ -161,8 +160,8 @@ const exercises = [...unsortedExercises].sort((a, b) => new Date(b.date).getTime
                 // Define category-specific icons and colors
                 const categoryInfo = {
                   'Cardio': { icon: 'heart-pulse', color: 'text-blue-500', bgColor: 'bg-blue-100' },
-                  'Strength': { icon: 'shield-star', color: 'text-red-500', bgColor: 'bg-red-100' },
-                  'Flexibility': { icon: 'walk', color: 'text-green-500', bgColor: 'bg-green-100' },
+                  'Strength': { icon: 'fitness', color: 'text-red-500', bgColor: 'bg-red-100' },
+                  'Flexibility': { icon: 'yoga', color: 'text-green-500', bgColor: 'bg-green-100' },
                 }[exercise.category] || { icon: 'heart-pulse', color: 'text-primary', bgColor: 'bg-primary-100' };
                 
                 // Format date
