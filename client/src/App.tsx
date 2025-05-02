@@ -13,6 +13,7 @@ import HabitsPage from "@/pages/HabitsPage";
 import ExercisePage from "@/pages/ExercisePage";
 import FamilyPage from "@/pages/FamilyPage";
 import ValuesPage from "@/pages/ValuesPage";
+import TodayPage from "@/pages/TodayPage";
 import AuthPage from "@/pages/AuthPage";
 import { AppProvider } from "./context/AppContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -27,6 +28,7 @@ function App() {
             <Layout>
               <Switch>
                 <ProtectedRoute path="/" component={DashboardPage} />
+                <ProtectedRoute path="/today" component={TodayPage} />
                 <ProtectedRoute path="/projects" component={ProjectsPage} />
                 <ProtectedRoute path="/ideas" component={IdeasPage} />
                 <ProtectedRoute path="/learning" component={LearningPage} />

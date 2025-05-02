@@ -7,6 +7,7 @@ const Sidebar = () => {
   
   const navItems = [
     { path: "/", label: "Dashboard", icon: "ri-dashboard-line" },
+    { path: "/today", label: "Today", icon: "ri-calendar-todo-line" },
     { path: "/projects", label: "Projects", icon: "ri-task-line" },
     { path: "/ideas", label: "Ideas", icon: "ri-lightbulb-line" },
     { path: "/learning", label: "Learning", icon: "ri-book-open-line" },
