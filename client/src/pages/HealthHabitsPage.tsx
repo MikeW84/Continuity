@@ -49,7 +49,9 @@ const exerciseFormSchema = z.object({
   date: z.string().min(1, "Date is required"),
   category: z.enum(["Cardio", "Strength", "Flexibility"]),
   // Optional fields based on category
-  time: z.number().nullable().default(null),
+  time: z.number().nullable().default(null), // Total seconds
+  timeMinutes: z.number().nullable().default(null), // For UI only
+  timeSeconds: z.number().nullable().default(null), // For UI only
   distance: z.number().nullable().default(null),
   heartRate: z.number().nullable().default(null),
   weight: z.number().nullable().default(null),
@@ -109,6 +111,8 @@ const HealthHabitsPage = () => {
       date: getNoonDate(),
       category: "Cardio",
       time: null,
+      timeMinutes: null,
+      timeSeconds: null,
       distance: null,
       heartRate: null,
       weight: null,
@@ -910,29 +914,75 @@ const HealthHabitsPage = () => {
               {/* Cardio Fields */}
               {exerciseForm.watch("category") === "Cardio" && (
                 <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={exerciseForm.control}
-                    name="time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Time (minutes)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            {...field}
-                            value={field.value || ""}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? Number(e.target.value) : null,
-                              )
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <FormLabel>Time</FormLabel>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <FormField
+                          control={exerciseForm.control}
+                          name="timeMinutes"
+                          render={({ field }) => (
+                            <FormItem className="space-y-1">
+                              <FormLabel className="text-xs">Minutes</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const minValue = e.target.value ? Number(e.target.value) : 0;
+                                    field.onChange(minValue);
+                                    
+                                    // Convert minutes and seconds to total seconds
+                                    const seconds = exerciseForm.getValues("timeSeconds") || 0;
+                                    const totalSeconds = (minValue * 60) + seconds;
+                                    exerciseForm.setValue("time", totalSeconds);
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <FormField
+                          control={exerciseForm.control}
+                          name="timeSeconds"
+                          render={({ field }) => (
+                            <FormItem className="space-y-1">
+                              <FormLabel className="text-xs">Seconds</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="59"
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const secValue = e.target.value ? Number(e.target.value) : 0;
+                                    field.onChange(secValue);
+                                    
+                                    // Convert minutes and seconds to total seconds
+                                    const minutes = exerciseForm.getValues("timeMinutes") || 0;
+                                    const totalSeconds = (minutes * 60) + secValue;
+                                    exerciseForm.setValue("time", totalSeconds);
+                                  }}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div className="h-4">
+                      {exerciseForm.formState.errors.time && (
+                        <p className="text-xs font-medium text-destructive">
+                          {exerciseForm.formState.errors.time.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
                   <FormField
                     control={exerciseForm.control}
