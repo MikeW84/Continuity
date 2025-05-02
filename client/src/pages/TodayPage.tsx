@@ -1,70 +1,63 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, CheckIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { PlusIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 
-// Task type definition
-type TodayTask = {
+// Define the task type based on the actual database columns
+interface Task {
   id: number;
   title: string;
-  date: string;
-  isCompleted: boolean;
-  isPriority: boolean;
-  position: number;
   notes: string | null;
+  isPriority: boolean;
+  isCompleted: boolean;
+  position: number;
+  date: string;
   userId: number;
-};
+}
 
-// Form schema for creating/editing tasks
+// Schema for task form validation
 const taskFormSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  notes: z.string().nullable().optional(),
+  title: z.string().min(1, "Title is required"),
   isPriority: z.boolean().default(false),
+  notes: z.string().optional().nullable(),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 
-export default function TodayPage() {
-  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<TodayTask | null>(null);
+const TodayPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const today = new Date().toISOString().split("T")[0];
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  // Query for all today's tasks
-  const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ["/api/today-tasks", today],
+  // Form setup
+  const form = useForm<TaskFormValues>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      title: "",
+      isPriority: false,
+      notes: "",
+    },
+  });
+
+  // Fetch tasks
+  const { data: tasks = [], isLoading } = useQuery<Task[]>({
+    queryKey: ["/api/today-tasks"],
     queryFn: async () => {
-      const response = await fetch(`/api/today-tasks?date=${today}`);
+      const response = await fetch("/api/today-tasks");
       if (!response.ok) {
         throw new Error("Failed to fetch tasks");
       }
@@ -72,43 +65,30 @@ export default function TodayPage() {
     },
   });
 
-  // Separate priority and regular tasks
-  const priorityTasks = tasks
-    .filter((task: TodayTask) => task.isPriority)
-    .sort((a: TodayTask, b: TodayTask) => a.position - b.position);
+  // Separate tasks into priority and regular
+  const priorityTasks = tasks.filter((task: Task) => task.isPriority)
+    .sort((a: Task, b: Task) => a.position - b.position);
+    
+  const regularTasks = tasks.filter((task: Task) => !task.isPriority)
+    .sort((a: Task, b: Task) => a.position - b.position);
 
-  const regularTasks = tasks
-    .filter((task: TodayTask) => !task.isPriority)
-    .sort((a: TodayTask, b: TodayTask) => a.position - b.position);
-
-  // Form setup
-  const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskFormSchema),
-    defaultValues: {
+  // Reset form when opening dialog
+  const handleAddTaskClick = () => {
+    form.reset({
       title: "",
-      notes: "",
       isPriority: false,
-    },
-  });
-
-  // Reset form when dialog opens/closes
-  useEffect(() => {
-    if (isAddTaskOpen) {
-      form.reset({
-        title: "",
-        notes: "",
-        isPriority: false,
-      });
-    }
-  }, [isAddTaskOpen, form]);
+      notes: "",
+    });
+    setIsAddTaskOpen(true);
+  };
 
   // Set form values when editing a task
   useEffect(() => {
     if (editingTask) {
       form.reset({
         title: editingTask.title,
-        notes: editingTask.notes || "",
         isPriority: editingTask.isPriority,
+        notes: editingTask.notes || "",
       });
     }
   }, [editingTask, form]);
@@ -116,11 +96,19 @@ export default function TodayPage() {
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (data: TaskFormValues) => {
-      const response = await apiRequest("/api/today-tasks", {
+      const response = await fetch("/api/today-tasks", {
         method: "POST",
-        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to create task");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/today-tasks"] });
@@ -148,11 +136,19 @@ export default function TodayPage() {
       id: number;
       data: Partial<TaskFormValues>;
     }) => {
-      const response = await apiRequest(`/api/today-tasks/${id}`, {
+      const response = await fetch(`/api/today-tasks/${id}`, {
         method: "PATCH",
-        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to update task");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/today-tasks"] });
@@ -174,10 +170,18 @@ export default function TodayPage() {
   // Toggle task completion mutation
   const toggleTaskMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest(`/api/today-tasks/${id}/toggle`, {
+      const response = await fetch(`/api/today-tasks/${id}/toggle`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to toggle task completion");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/today-tasks"] });
@@ -200,11 +204,19 @@ export default function TodayPage() {
       id: number;
       isPriority: boolean;
     }) => {
-      const response = await apiRequest(`/api/today-tasks/${id}/priority`, {
+      const response = await fetch(`/api/today-tasks/${id}/priority`, {
         method: "POST",
-        data: { isPriority },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isPriority }),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to update task priority");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/today-tasks"] });
@@ -221,10 +233,15 @@ export default function TodayPage() {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest(`/api/today-tasks/${id}`, {
+      const response = await fetch(`/api/today-tasks/${id}`, {
         method: "DELETE",
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete task");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/today-tasks"] });
@@ -245,11 +262,19 @@ export default function TodayPage() {
   // Reorder tasks mutation
   const reorderTasksMutation = useMutation({
     mutationFn: async (taskIds: number[]) => {
-      const response = await apiRequest("/api/today-tasks/reorder", {
+      const response = await fetch("/api/today-tasks/reorder", {
         method: "POST",
-        data: { taskIds },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ taskIds }),
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to reorder tasks");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/today-tasks"] });
@@ -273,7 +298,7 @@ export default function TodayPage() {
   };
 
   // Handle drag and drop
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const { source, destination, draggableId } = result;
@@ -349,7 +374,7 @@ export default function TodayPage() {
                       className="space-y-2"
                     >
                       {priorityTasks.length > 0 ? (
-                        priorityTasks.map((task, index) => (
+                        priorityTasks.map((task: Task, index: number) => (
                           <Draggable
                             key={`task-${task.id}`}
                             draggableId={`task-${task.id}`}
@@ -382,9 +407,9 @@ export default function TodayPage() {
                                     >
                                       {task.title}
                                     </p>
-                                    {task.notes && (
+                                    {task.description && (
                                       <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                        {task.notes}
+                                        {task.description}
                                       </p>
                                     )}
                                   </div>
@@ -452,7 +477,7 @@ export default function TodayPage() {
                       className="space-y-2"
                     >
                       {regularTasks.length > 0 ? (
-                        regularTasks.map((task, index) => (
+                        regularTasks.map((task: Task, index: number) => (
                           <Draggable
                             key={`task-${task.id}`}
                             draggableId={`task-${task.id}`}
@@ -485,9 +510,9 @@ export default function TodayPage() {
                                     >
                                       {task.title}
                                     </p>
-                                    {task.notes && (
+                                    {task.description && (
                                       <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                        {task.notes}
+                                        {task.description}
                                       </p>
                                     )}
                                   </div>
@@ -530,10 +555,8 @@ export default function TodayPage() {
                         ))
                       ) : (
                         <div className="text-center py-6 text-muted-foreground">
-                          <p>No other tasks for today.</p>
-                          <p className="text-sm">
-                            Add a regular task to see it here.
-                          </p>
+                          <p>No tasks for today.</p>
+                          <p className="text-sm">Add a task to get started.</p>
                         </div>
                       )}
                       {provided.placeholder}
@@ -547,15 +570,12 @@ export default function TodayPage() {
       )}
 
       {/* Add/Edit Task Dialog */}
-      <Dialog
-        open={isAddTaskOpen || editingTask !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsAddTaskOpen(false);
-            setEditingTask(null);
-          }
-        }}
-      >
+      <Dialog open={isAddTaskOpen || editingTask !== null} onOpenChange={(open) => {
+        if (!open) {
+          setIsAddTaskOpen(false);
+          setEditingTask(null);
+        }
+      }}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
@@ -563,24 +583,27 @@ export default function TodayPage() {
             </DialogTitle>
             <DialogDescription>
               {editingTask
-                ? "Update your task details below."
-                : "Enter the details of your new task."}
+                ? "Update the details of your task."
+                : "Add a new task for today."}
             </DialogDescription>
           </DialogHeader>
 
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 pt-4"
+              className="space-y-4 py-2"
             >
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Task Title</FormLabel>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter task title" {...field} />
+                      <Input
+                        placeholder="Enter task title"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -592,10 +615,10 @@ export default function TodayPage() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes (Optional)</FormLabel>
+                    <FormLabel>Notes (optional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Add any additional details"
+                        placeholder="Add notes or details about this task"
                         {...field}
                         value={field.value || ""}
                       />
@@ -609,64 +632,44 @@ export default function TodayPage() {
                 control={form.control}
                 name="isPriority"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>Priority Task</FormLabel>
+                      <FormDescription>
+                        Mark as one of your top 3 priorities for today.
+                      </FormDescription>
+                    </div>
                     <FormControl>
-                      <Checkbox
+                      <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
                         disabled={
-                          priorityTasks.length >= MAX_PRIORITY_TASKS &&
                           !editingTask?.isPriority &&
-                          field.value
+                          priorityTasks.length >= MAX_PRIORITY_TASKS
                         }
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Mark as priority (Top {MAX_PRIORITY_TASKS} tasks)
-                      </FormLabel>
-                      {priorityTasks.length >= MAX_PRIORITY_TASKS &&
-                        !editingTask?.isPriority &&
-                        field.value && (
-                          <p className="text-sm text-destructive">
-                            You can only have {MAX_PRIORITY_TASKS} priority tasks
-                          </p>
-                        )}
-                    </div>
+                    {!editingTask?.isPriority &&
+                      priorityTasks.length >= MAX_PRIORITY_TASKS && (
+                        <FormMessage>
+                          You already have {MAX_PRIORITY_TASKS} priority tasks.
+                        </FormMessage>
+                      )}
                   </FormItem>
                 )}
               />
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsAddTaskOpen(false);
-                    setEditingTask(null);
-                  }}
-                >
-                  Cancel
+              <DialogFooter>
+                <Button type="submit">
+                  {editingTask ? "Update Task" : "Add Task"}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={
-                    createTaskMutation.isPending || updateTaskMutation.isPending
-                  }
-                >
-                  {createTaskMutation.isPending || updateTaskMutation.isPending ? (
-                    "Saving..."
-                  ) : editingTask ? (
-                    "Update Task"
-                  ) : (
-                    "Add Task"
-                  )}
-                </Button>
-              </div>
+              </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
     </div>
   );
-}
+};
+
+export default TodayPage;
