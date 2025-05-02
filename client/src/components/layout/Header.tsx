@@ -21,7 +21,7 @@ const Header = ({ title, subtitle }: HeaderProps) => {
       case "ideas":
         return "Ideas";
       case "learning":
-        return "Learning & Resources";
+        return "Learning";
       case "health-habits":
         return "Health & Habits";
       case "family":

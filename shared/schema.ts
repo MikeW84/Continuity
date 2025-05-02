@@ -404,3 +404,41 @@ export type Dream = typeof dreams.$inferSelect;
 export const dreamsRelations = relations(dreams, ({ many }) => ({
   projectDreams: many(projectDreams)
 }));
+
+// Today Tasks Schema
+export const todayTasks = pgTable("today_tasks", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  isPriority: boolean("is_priority").default(false), // True if part of "Top 3"
+  isCompleted: boolean("is_completed").default(false),
+  timeEstimate: integer("time_estimate"), // in minutes
+  linkedProjectId: integer("linked_project_id").references(() => projects.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  position: integer("position").default(0), // For ordering tasks
+  date: timestamp("date").notNull(), // The date this task is for
+  userId: integer("user_id").notNull(),
+});
+
+export const insertTodayTaskSchema = createInsertSchema(todayTasks).pick({
+  title: true,
+  description: true,
+  isPriority: true,
+  isCompleted: true,
+  timeEstimate: true,
+  linkedProjectId: true,
+  position: true,
+  date: true,
+  userId: true,
+});
+
+export type InsertTodayTask = z.infer<typeof insertTodayTaskSchema>;
+export type TodayTask = typeof todayTasks.$inferSelect;
+
+// Define relations for today tasks
+export const todayTasksRelations = relations(todayTasks, ({ one }) => ({
+  linkedProject: one(projects, {
+    fields: [todayTasks.linkedProjectId],
+    references: [projects.id]
+  })
+}));

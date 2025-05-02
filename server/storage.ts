@@ -12,6 +12,7 @@ import {
   type ParentingTask, type InsertParentingTask,
   type Value, type InsertValue,
   type Dream, type InsertDream,
+  type TodayTask, type InsertTodayTask,
   users,
   projects,
   projectTasks,
@@ -26,7 +27,8 @@ import {
   values,
   dreams,
   projectValues,
-  projectDreams
+  projectDreams,
+  todayTasks
 } from "@shared/schema";
 
 import { db } from "./db";
@@ -118,6 +120,18 @@ export interface IStorage {
   createDream(dream: InsertDream): Promise<Dream>;
   updateDream(id: number, dream: Partial<InsertDream>): Promise<Dream | undefined>;
   deleteDream(id: number): Promise<boolean>;
+  
+  // Today Task methods
+  getTodayTasks(userId: number, date?: Date): Promise<TodayTask[]>;
+  getTodayTask(id: number): Promise<TodayTask | undefined>;
+  createTodayTask(task: InsertTodayTask): Promise<TodayTask>;
+  updateTodayTask(id: number, task: Partial<InsertTodayTask>): Promise<TodayTask | undefined>;
+  deleteTodayTask(id: number): Promise<boolean>;
+  toggleTodayTaskCompletion(id: number): Promise<TodayTask | undefined>;
+  updateTodayTaskPositions(taskIds: number[]): Promise<boolean>;
+  getPriorityTasks(userId: number, date?: Date): Promise<TodayTask[]>;
+  getRegularTasks(userId: number, date?: Date): Promise<TodayTask[]>;
+  setTaskPriority(id: number, isPriority: boolean): Promise<TodayTask | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -1459,6 +1473,215 @@ export class DatabaseStorage implements IStorage {
   async deleteDream(id: number): Promise<boolean> {
     await db.delete(dreams).where(eq(dreams.id, id));
     return true;
+  }
+  
+  // Today Task methods
+  async getTodayTasks(userId: number, date?: Date): Promise<TodayTask[]> {
+    const today = date || new Date();
+    
+    // Set time to beginning of day for comparison
+    today.setHours(0, 0, 0, 0);
+    
+    return await db
+      .select()
+      .from(todayTasks)
+      .where(
+        and(
+          eq(todayTasks.userId, userId),
+          gte(todayTasks.date, today)
+        )
+      )
+      .orderBy(todayTasks.position);
+  }
+  
+  async getTodayTask(id: number): Promise<TodayTask | undefined> {
+    const [task] = await db.select().from(todayTasks).where(eq(todayTasks.id, id));
+    return task;
+  }
+  
+  async createTodayTask(task: InsertTodayTask): Promise<TodayTask> {
+    // If a date is not provided, use today's date
+    if (!task.date) {
+      task.date = new Date();
+      task.date.setHours(0, 0, 0, 0);
+    }
+    
+    // Check if priority spot is available (max 3 priority tasks)
+    if (task.isPriority) {
+      const priorityTasks = await this.getPriorityTasks(task.userId);
+      if (priorityTasks.length >= 3) {
+        // If there are already 3 priority tasks, make this a non-priority task
+        task.isPriority = false;
+      }
+    }
+    
+    // Get highest position value to set new task at the end
+    const [lastTask] = await db
+      .select()
+      .from(todayTasks)
+      .where(
+        and(
+          eq(todayTasks.userId, task.userId),
+          eq(todayTasks.isPriority, task.isPriority)
+        )
+      )
+      .orderBy(desc(todayTasks.position))
+      .limit(1);
+    
+    const position = lastTask ? lastTask.position + 1 : 0;
+    task.position = position;
+    
+    const [newTask] = await db.insert(todayTasks).values(task).returning();
+    return newTask;
+  }
+  
+  async updateTodayTask(id: number, task: Partial<InsertTodayTask>): Promise<TodayTask | undefined> {
+    // Check if trying to make a task priority
+    if (task.isPriority) {
+      const original = await this.getTodayTask(id);
+      
+      // If changing from non-priority to priority, check if there's space
+      if (original && !original.isPriority) {
+        const priorityTasks = await this.getPriorityTasks(original.userId);
+        if (priorityTasks.length >= 3) {
+          // If there are already 3 priority tasks, don't make this priority
+          task.isPriority = false;
+        }
+      }
+    }
+    
+    const [updatedTask] = await db
+      .update(todayTasks)
+      .set(task)
+      .where(eq(todayTasks.id, id))
+      .returning();
+      
+    return updatedTask;
+  }
+  
+  async deleteTodayTask(id: number): Promise<boolean> {
+    await db.delete(todayTasks).where(eq(todayTasks.id, id));
+    return true;
+  }
+  
+  async toggleTodayTaskCompletion(id: number): Promise<TodayTask | undefined> {
+    const task = await this.getTodayTask(id);
+    if (!task) return undefined;
+    
+    const [updatedTask] = await db
+      .update(todayTasks)
+      .set({ isCompleted: !task.isCompleted })
+      .where(eq(todayTasks.id, id))
+      .returning();
+      
+    return updatedTask;
+  }
+  
+  async updateTodayTaskPositions(taskIds: number[]): Promise<boolean> {
+    // Update positions based on the order of IDs in the array
+    try {
+      for (let i = 0; i < taskIds.length; i++) {
+        await db
+          .update(todayTasks)
+          .set({ position: i })
+          .where(eq(todayTasks.id, taskIds[i]));
+      }
+      return true;
+    } catch (error) {
+      console.error("Error updating task positions:", error);
+      return false;
+    }
+  }
+  
+  async getPriorityTasks(userId: number, date?: Date): Promise<TodayTask[]> {
+    const today = date || new Date();
+    
+    // Set time to beginning of day for comparison
+    today.setHours(0, 0, 0, 0);
+    
+    return await db
+      .select()
+      .from(todayTasks)
+      .where(
+        and(
+          eq(todayTasks.userId, userId),
+          eq(todayTasks.isPriority, true),
+          gte(todayTasks.date, today)
+        )
+      )
+      .orderBy(todayTasks.position)
+      .limit(3); // Enforce the 3 priority task limit
+  }
+  
+  async getRegularTasks(userId: number, date?: Date): Promise<TodayTask[]> {
+    const today = date || new Date();
+    
+    // Set time to beginning of day for comparison
+    today.setHours(0, 0, 0, 0);
+    
+    return await db
+      .select()
+      .from(todayTasks)
+      .where(
+        and(
+          eq(todayTasks.userId, userId),
+          eq(todayTasks.isPriority, false),
+          gte(todayTasks.date, today)
+        )
+      )
+      .orderBy(todayTasks.position);
+  }
+  
+  async setTaskPriority(id: number, isPriority: boolean): Promise<TodayTask | undefined> {
+    const task = await this.getTodayTask(id);
+    if (!task) return undefined;
+    
+    // Check if there's space in the priority list if trying to promote
+    if (isPriority && !task.isPriority) {
+      const priorityTasks = await this.getPriorityTasks(task.userId);
+      if (priorityTasks.length >= 3) {
+        // No space in priority list
+        return task; // Return unchanged task
+      }
+    }
+    
+    // Get highest position in the destination list
+    const [lastTask] = isPriority 
+      ? await db
+          .select()
+          .from(todayTasks)
+          .where(
+            and(
+              eq(todayTasks.userId, task.userId),
+              eq(todayTasks.isPriority, true)
+            )
+          )
+          .orderBy(desc(todayTasks.position))
+          .limit(1)
+      : await db
+          .select()
+          .from(todayTasks)
+          .where(
+            and(
+              eq(todayTasks.userId, task.userId),
+              eq(todayTasks.isPriority, false)
+            )
+          )
+          .orderBy(desc(todayTasks.position))
+          .limit(1);
+    
+    const position = lastTask ? lastTask.position + 1 : 0;
+    
+    const [updatedTask] = await db
+      .update(todayTasks)
+      .set({ 
+        isPriority, 
+        position // Set to end of destination list
+      })
+      .where(eq(todayTasks.id, id))
+      .returning();
+      
+    return updatedTask;
   }
 }
 
