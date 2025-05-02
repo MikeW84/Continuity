@@ -85,7 +85,7 @@ const TodayPage = () => {
       title: "",
       isPriority: false,
       notes: "",
-      date: today,
+      date: today, // Keep as Date object for form
       userId: 1,
     });
     setIsAddTaskOpen(true);
@@ -115,7 +115,7 @@ const TodayPage = () => {
       
       const taskData = {
         ...data,
-        date: today,
+        date: today.toISOString(), // Convert Date to ISO string for JSON serialization
         userId: 1, // Default user ID
       };
       
@@ -128,7 +128,9 @@ const TodayPage = () => {
       });
       
       if (!response.ok) {
-        throw new Error("Failed to create task");
+        const errorData = await response.json();
+        console.error("Task creation error:", errorData);
+        throw new Error(errorData.error || "Failed to create task");
       }
       
       return response.json();
@@ -159,16 +161,25 @@ const TodayPage = () => {
       id: number;
       data: Partial<TaskFormValues>;
     }) => {
+      // If data contains a Date object, convert it to ISO string
+      const taskData = {
+        ...data,
+        // Convert date to ISO string if it exists and is a Date object
+        ...(data.date && { date: data.date instanceof Date ? data.date.toISOString() : data.date }),
+      };
+      
       const response = await fetch(`/api/today-tasks/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(taskData),
       });
       
       if (!response.ok) {
-        throw new Error("Failed to update task");
+        const errorData = await response.json();
+        console.error("Task update error:", errorData);
+        throw new Error(errorData.error || "Failed to update task");
       }
       
       return response.json();

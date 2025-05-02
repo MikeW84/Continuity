@@ -417,7 +417,8 @@ export const todayTasks = pgTable("today_tasks", {
   userId: integer("user_id").notNull(),
 });
 
-export const insertTodayTaskSchema = createInsertSchema(todayTasks).pick({
+// Create base schema
+const baseTodayTaskSchema = createInsertSchema(todayTasks).pick({
   title: true,
   notes: true,
   isPriority: true,
@@ -425,6 +426,15 @@ export const insertTodayTaskSchema = createInsertSchema(todayTasks).pick({
   position: true,
   date: true,
   userId: true,
+});
+
+// Extend it to handle date strings
+export const insertTodayTaskSchema = baseTodayTaskSchema.extend({
+  // Accept either a Date object or a date string
+  date: z.union([
+    z.date(),
+    z.string().transform((str) => str ? new Date(str) : new Date())
+  ])
 });
 
 export type InsertTodayTask = z.infer<typeof insertTodayTaskSchema>;
