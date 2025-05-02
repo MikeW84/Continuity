@@ -374,10 +374,9 @@ const TodayPage = () => {
   const MAX_PRIORITY_TASKS = 3;
 
   return (
-    <div className="container py-6">
+    <div className="p-6">
       <div className="flex flex-col space-y-2 mb-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-primary">Today's Tasks</h1>
           <Button onClick={handleAddTaskClick}>
             <PlusIcon className="mr-2 h-4 w-4" /> Add Task
           </Button>

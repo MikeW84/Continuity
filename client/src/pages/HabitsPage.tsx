@@ -119,7 +119,6 @@ const HabitsPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Habits Tracking</h1>
         <Button
           className="bg-accent text-white"
           onClick={() => {
