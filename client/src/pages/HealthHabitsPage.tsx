@@ -523,7 +523,9 @@ const HealthHabitsPage = () => {
 
                   <h4 className="text-lg font-medium mb-3">Exercise History</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {exercises.map((exercise) => (
+                    {[...exercises]
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .map((exercise) => (
                       <Card
                         key={exercise.id}
                         className={

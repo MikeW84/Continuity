@@ -156,7 +156,9 @@ const HealthHabitsSection = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 mb-4">
-              {exercises.map(exercise => {
+              {[...exercises]
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map(exercise => {
                 // Define category-specific icons and colors
                 const categoryInfo = {
                   'Cardio': { icon: 'heart-pulse', color: 'text-blue-500', bgColor: 'bg-blue-100' },
