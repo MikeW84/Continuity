@@ -160,8 +160,8 @@ const HealthHabitsSection = () => {
                 // Define category-specific icons and colors
                 const categoryInfo = {
                   'Cardio': { icon: 'heart-pulse', color: 'text-blue-500', bgColor: 'bg-blue-100' },
-                  'Strength': { icon: 'boxing-line', color: 'text-red-500', bgColor: 'bg-red-100' },
-                  'Flexibility': { icon: 'user-heart-line', color: 'text-green-500', bgColor: 'bg-green-100' },
+                  'Strength': { icon: 'dumbbell', color: 'text-red-500', bgColor: 'bg-red-100' },
+                  'Flexibility': { icon: 'mental-health', color: 'text-green-500', bgColor: 'bg-green-100' },
                 }[exercise.category] || { icon: 'heart-pulse', color: 'text-primary', bgColor: 'bg-primary-100' };
                 
                 // Format date
@@ -174,7 +174,7 @@ const HealthHabitsSection = () => {
                 return (
                   <div key={exercise.id} className={`p-3 rounded-lg flex items-center ${categoryInfo.bgColor} bg-opacity-30`}>
                     <div className={`h-10 w-10 rounded-full ${categoryInfo.bgColor} flex items-center justify-center mr-3`}>
-                      <i className={`ri-${categoryInfo.icon} ${categoryInfo.color}`}></i>
+                      <i className={`ri-${categoryInfo.icon}-line ${categoryInfo.color}`}></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between">

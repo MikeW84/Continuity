@@ -551,9 +551,9 @@ const HealthHabitsPage = () => {
                                     exercise.category === "Cardio"
                                       ? "heart-pulse"
                                       : exercise.category === "Strength"
-                                        ? "boxing-line"
-                                        : "user-heart-line"
-                                  } text-lg`}
+                                        ? "dumbbell"
+                                        : "mental-health"
+                                  }-line text-lg`}
                                 ></i>
                               </div>
                               <div>
