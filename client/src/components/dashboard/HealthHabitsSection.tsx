@@ -149,6 +149,8 @@ const HealthHabitsSection = () => {
           )}
         </div>
         
+        <div className="w-full h-px bg-gray-200 my-4"></div>
+        
         <div>
           <h3 className="font-inter font-medium text-sm uppercase text-secondary mb-3 flex items-center">
             <i className="ri-run-line mr-2"></i> Exercise
