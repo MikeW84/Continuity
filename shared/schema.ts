@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, real, doublePrecision } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -247,9 +247,9 @@ export const exercises = pgTable("exercises", {
   category: text("category").notNull(), // 'Cardio', 'Strength', 'Flexibility'
   // Optional fields that depend on the category
   time: integer("time"), // in minutes - for Cardio
-  distance: integer("distance"), // in meters - for Cardio
+  distance: doublePrecision("distance"), // in miles - for Cardio
   heartRate: integer("heart_rate"), // peak heart rate - for Cardio
-  weight: integer("weight"), // in kg - for Strength
+  weight: doublePrecision("weight"), // in kg - for Strength
   reps: integer("reps"), // for Strength
   sets: integer("sets"), // for Strength
   duration: integer("duration"), // in minutes - for Flexibility
