@@ -63,8 +63,8 @@ type ExerciseFormValues = z.infer<typeof exerciseFormSchema>;
 
 const HealthHabitsPage = () => {
   const {
+    exercises: unsortedExercises,
     habits,
-    exercises,
     fetchHabits,
     fetchExercises,
     addHabit,
@@ -76,6 +76,8 @@ const HealthHabitsPage = () => {
     deleteExercise,
     isLoading,
   } = useAppContext();
+
+  const exercises = [...unsortedExercises].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const [isHabitDialogOpen, setIsHabitDialogOpen] = useState(false);
   const [isExerciseDialogOpen, setIsExerciseDialogOpen] = useState(false);
@@ -1042,7 +1044,7 @@ const HealthHabitsPage = () => {
                       <FormItem>
                         <FormLabel>Sets</FormLabel>
                         <FormControl>
-                          <Input
+                          <Input                          <Input
                             type="number"
                             min="0"
                             {...field}

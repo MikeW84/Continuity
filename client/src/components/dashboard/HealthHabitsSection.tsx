@@ -6,7 +6,8 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const HealthHabitsSection = () => {
-  const { habits, exercises, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
+  const { habits, exercises: unsortedExercises, toggleHabit, toggleHabitDay, isLoading } = useAppContext();
+const exercises = [...unsortedExercises].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const [expandedHabit, setExpandedHabit] = useState<number | null>(null);
   const { toast } = useToast();
 
