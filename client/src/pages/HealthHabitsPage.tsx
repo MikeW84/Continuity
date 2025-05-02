@@ -155,6 +155,14 @@ const HealthHabitsPage = () => {
     try {
       // Pass the date string directly to the server
       // The server will handle the conversion to a Date object
+      
+      // Calculate total seconds from minutes and seconds if they exist
+      let timeValue = data.time;
+      if (data.timeMinutes !== null || data.timeSeconds !== null) {
+        const minutes = data.timeMinutes || 0;
+        const seconds = data.timeSeconds || 0;
+        timeValue = (minutes * 60) + seconds;
+      }
 
       if (selectedExercise) {
         // Update existing exercise
@@ -162,7 +170,7 @@ const HealthHabitsPage = () => {
           name: data.name,
           date: data.date, // Send date as string in YYYY-MM-DD format
           category: data.category,
-          time: data.time,
+          time: timeValue,
           distance: data.distance,
           heartRate: data.heartRate,
           weight: data.weight,
@@ -177,7 +185,7 @@ const HealthHabitsPage = () => {
           name: data.name,
           date: data.date, // Send date as string in YYYY-MM-DD format
           category: data.category,
-          time: data.time,
+          time: timeValue,
           distance: data.distance,
           heartRate: data.heartRate,
           weight: data.weight,
@@ -271,11 +279,22 @@ const HealthHabitsPage = () => {
       formattedDate = new Date(exercise.date).toISOString().split("T")[0];
     }
 
+    // Calculate minutes and seconds from total time (in seconds)
+    let timeMinutes = null;
+    let timeSeconds = null;
+    
+    if (exercise.time !== null && exercise.time !== undefined) {
+      timeMinutes = Math.floor(exercise.time / 60);
+      timeSeconds = exercise.time % 60;
+    }
+
     exerciseForm.reset({
       name: exercise.name,
       date: formattedDate,
       category: exercise.category || "Cardio",
       time: exercise.time || null,
+      timeMinutes: timeMinutes,
+      timeSeconds: timeSeconds,
       distance: exercise.distance || null,
       heartRate: exercise.heartRate || null,
       weight: exercise.weight || null,
@@ -327,6 +346,8 @@ const HealthHabitsPage = () => {
                 date: getNoonDate(),
                 category: "Cardio",
                 time: null,
+                timeMinutes: null,
+                timeSeconds: null,
                 distance: null,
                 heartRate: null,
                 weight: null,
@@ -488,6 +509,8 @@ const HealthHabitsPage = () => {
                         date: getNoonDate(),
                         category: "Cardio",
                         time: null,
+                        timeMinutes: null,
+                        timeSeconds: null,
                         distance: null,
                         heartRate: null,
                         weight: null,
@@ -605,7 +628,7 @@ const HealthHabitsPage = () => {
                                     <span className="text-secondary">
                                       Time:
                                     </span>{" "}
-                                    {exercise.time} min
+                                    {Math.floor(exercise.time / 60)}:{String(exercise.time % 60).padStart(2, '0')}
                                   </div>
                                 )}
                                 {exercise.distance && (
@@ -690,6 +713,8 @@ const HealthHabitsPage = () => {
                               date: getNoonDate(),
                               category: "Cardio",
                               time: null,
+                              timeMinutes: null,
+                              timeSeconds: null,
                               distance: null,
                               heartRate: null,
                               weight: null,

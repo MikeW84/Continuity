@@ -185,10 +185,13 @@ const HealthHabitsSection = () => {
                       </div>
                       <div className="text-xs text-secondary">
                         {exercise.category === 'Cardio' && (
-                          <span>{exercise.time} min • {exercise.distance ? `${exercise.distance}m` : 'No distance'}</span>
+                          <span>
+                            {exercise.time ? `${Math.floor(exercise.time / 60)}:${String(exercise.time % 60).padStart(2, '0')}` : 'No time'} 
+                            • {exercise.distance ? `${exercise.distance} mi` : 'No distance'}
+                          </span>
                         )}
                         {exercise.category === 'Strength' && (
-                          <span>{exercise.sets || 0} sets • {exercise.reps || 0} reps • {exercise.weight ? `${exercise.weight}kg` : 'No weight'}</span>
+                          <span>{exercise.sets || 0} sets • {exercise.reps || 0} reps • {exercise.weight ? `${exercise.weight} kg` : 'No weight'}</span>
                         )}
                         {exercise.category === 'Flexibility' && (
                           <span>{exercise.duration} min • {exercise.musclesWorked || 'General stretching'}</span>
