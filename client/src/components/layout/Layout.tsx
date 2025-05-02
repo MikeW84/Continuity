@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import FloatingActionButton from '../FloatingActionButton';
+//import FloatingActionButton from '../FloatingActionButton';
 import { useLocation } from 'wouter';
 
 interface LayoutProps {
@@ -24,7 +24,7 @@ const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
       
-      <FloatingActionButton />
+      {/*<FloatingActionButton />*/}
     </div>
   );
 };
