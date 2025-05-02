@@ -17,13 +17,15 @@ import {
   insertParentingTaskSchema,
   insertValueSchema,
   insertDreamSchema,
+  insertTodayTaskSchema,
   projectWithRelationsSchema,
   // Tables
   projects,
   projectValues,
   projectDreams,
   values,
-  dreams
+  dreams,
+  todayTasks
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -833,6 +835,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.status(204).send();
+  });
+  
+  // Today Tasks API endpoints
+  
+  // Get all today tasks
+  app.get("/api/today-tasks", async (req: Request, res: Response) => {
+    try {
+      const userId = TEMP_USER_ID;
+      const date = req.query.date ? new Date(req.query.date as string) : undefined;
+      const tasks = await storage.getTodayTasks(userId, date);
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error("Error getting today tasks:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Get priority tasks
+  app.get("/api/today-tasks/priority", async (req: Request, res: Response) => {
+    try {
+      const userId = TEMP_USER_ID;
+      const date = req.query.date ? new Date(req.query.date as string) : undefined;
+      const tasks = await storage.getPriorityTasks(userId, date);
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error("Error getting priority tasks:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Get regular tasks
+  app.get("/api/today-tasks/regular", async (req: Request, res: Response) => {
+    try {
+      const userId = TEMP_USER_ID;
+      const date = req.query.date ? new Date(req.query.date as string) : undefined;
+      const tasks = await storage.getRegularTasks(userId, date);
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error("Error getting regular tasks:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Get a specific today task
+  app.get("/api/today-tasks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getTodayTask(id);
+      
+      if (task) {
+        res.status(200).json(task);
+      } else {
+        res.status(404).json({ error: "Task not found" });
+      }
+    } catch (error) {
+      console.error("Error getting today task:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Create a new today task
+  app.post("/api/today-tasks", async (req: Request, res: Response) => {
+    try {
+      const taskData = validateRequest(insertTodayTaskSchema, {
+        ...req.body,
+        userId: req.body.userId || TEMP_USER_ID
+      });
+      
+      const task = await storage.createTodayTask(taskData);
+      res.status(201).json(task);
+    } catch (error: any) {
+      console.error("Error creating today task:", error);
+      res.status(error.status || 500).json({ error: error.message || "Internal server error" });
+    }
+  });
+  
+  // Update a today task
+  app.patch("/api/today-tasks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const taskData = validateRequest(insertTodayTaskSchema.partial(), req.body);
+      const task = await storage.updateTodayTask(id, taskData);
+      
+      if (task) {
+        res.status(200).json(task);
+      } else {
+        res.status(404).json({ error: "Task not found" });
+      }
+    } catch (error: any) {
+      console.error("Error updating today task:", error);
+      res.status(error.status || 500).json({ error: error.message || "Internal server error" });
+    }
+  });
+  
+  // Delete a today task
+  app.delete("/api/today-tasks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await storage.deleteTodayTask(id);
+      
+      if (result) {
+        res.status(200).json({ success: true });
+      } else {
+        res.status(404).json({ error: "Task not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting today task:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Toggle completion status of a today task
+  app.post("/api/today-tasks/:id/toggle", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.toggleTodayTaskCompletion(id);
+      
+      if (task) {
+        res.status(200).json(task);
+      } else {
+        res.status(404).json({ error: "Task not found" });
+      }
+    } catch (error) {
+      console.error("Error toggling today task completion:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Update priorities of today tasks
+  app.post("/api/today-tasks/:id/priority", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isPriority } = req.body;
+      
+      if (isPriority === undefined) {
+        return res.status(400).json({ error: "isPriority field is required" });
+      }
+      
+      const task = await storage.setTaskPriority(id, isPriority);
+      
+      if (task) {
+        res.status(200).json(task);
+      } else {
+        res.status(404).json({ error: "Task not found" });
+      }
+    } catch (error) {
+      console.error("Error updating today task priority:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Update order of today tasks
+  app.post("/api/today-tasks/reorder", async (req: Request, res: Response) => {
+    try {
+      const { taskIds } = req.body;
+      
+      if (!taskIds || !Array.isArray(taskIds)) {
+        return res.status(400).json({ error: "taskIds array is required" });
+      }
+      
+      const result = await storage.updateTodayTaskPositions(taskIds);
+      
+      if (result) {
+        res.status(200).json({ success: true });
+      } else {
+        res.status(500).json({ error: "Failed to update task positions" });
+      }
+    } catch (error) {
+      console.error("Error reordering today tasks:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
   const httpServer = createServer(app);
