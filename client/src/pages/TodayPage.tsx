@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -66,11 +66,11 @@ const TodayPage = () => {
   });
 
   // Separate tasks into priority and regular
-  const priorityTasks = tasks.filter((task: Task) => task.isPriority)
-    .sort((a: Task, b: Task) => a.position - b.position);
+  const priorityTasks = tasks.filter((task) => task.isPriority)
+    .sort((a, b) => a.position - b.position);
     
-  const regularTasks = tasks.filter((task: Task) => !task.isPriority)
-    .sort((a: Task, b: Task) => a.position - b.position);
+  const regularTasks = tasks.filter((task) => !task.isPriority)
+    .sort((a, b) => a.position - b.position);
 
   // Reset form when opening dialog
   const handleAddTaskClick = () => {
@@ -343,7 +343,7 @@ const TodayPage = () => {
     <div className="container py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Today</h1>
-        <Button onClick={() => setIsAddTaskOpen(true)}>
+        <Button onClick={handleAddTaskClick}>
           <PlusIcon className="mr-2 h-4 w-4" /> Add Task
         </Button>
       </div>
@@ -374,7 +374,7 @@ const TodayPage = () => {
                       className="space-y-2"
                     >
                       {priorityTasks.length > 0 ? (
-                        priorityTasks.map((task: Task, index: number) => (
+                        priorityTasks.map((task, index) => (
                           <Draggable
                             key={`task-${task.id}`}
                             draggableId={`task-${task.id}`}
@@ -407,9 +407,9 @@ const TodayPage = () => {
                                     >
                                       {task.title}
                                     </p>
-                                    {task.description && (
+                                    {task.notes && (
                                       <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                        {task.description}
+                                        {task.notes}
                                       </p>
                                     )}
                                   </div>
@@ -477,7 +477,7 @@ const TodayPage = () => {
                       className="space-y-2"
                     >
                       {regularTasks.length > 0 ? (
-                        regularTasks.map((task: Task, index: number) => (
+                        regularTasks.map((task, index) => (
                           <Draggable
                             key={`task-${task.id}`}
                             draggableId={`task-${task.id}`}
@@ -510,9 +510,9 @@ const TodayPage = () => {
                                     >
                                       {task.title}
                                     </p>
-                                    {task.description && (
+                                    {task.notes && (
                                       <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                        {task.description}
+                                        {task.notes}
                                       </p>
                                     )}
                                   </div>
@@ -636,7 +636,7 @@ const TodayPage = () => {
                     <div className="space-y-0.5">
                       <FormLabel>Priority Task</FormLabel>
                       <FormDescription>
-                        Mark as one of your top 3 priorities for today.
+                        Mark as one of your top {MAX_PRIORITY_TASKS} priorities for today.
                       </FormDescription>
                     </div>
                     <FormControl>
