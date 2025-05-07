@@ -15,6 +15,7 @@ const Sidebar = () => {
     { path: "/exercise", label: "Exercise", icon: "ri-run-line" },
     { path: "/family", label: "Family", icon: "ri-user-heart-line" },
     { path: "/values", label: "Values & Dreams", icon: "ri-compass-3-line" },
+    { path: "/settings", label: "Settings", icon: "ri-settings-line" },
   ];
 
   return (

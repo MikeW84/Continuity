@@ -1,0 +1,23 @@
+Warning: %s: Support for defaultProps will be removed from memo components in a future major release. Use JavaScript default parameters instead.%s Connect(Droppable) 
+    at div
+    at _c9 (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at Provider (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=d6e2b9e5:1738:20)
+    at App (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=d6e2b9e5:8281:25)
+    at ErrorBoundary2 (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=d6e2b9e5:2778:35)
+    at DragDropContext (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=d6e2b9e5:8401:19)
+    at div
+    at TodayPage (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/src/pages/TodayPage.tsx:46:21)
+    at Route (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=d6e2b9e5:323:16)
+    at ProtectedRoute (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/src/components/ProtectedRoute.tsx:20:34)
+    at Switch (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=d6e2b9e5:379:17)
+    at main
+    at div
+    at Layout (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/src/components/layout/Layout.tsx:21:19)
+    at Route (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=d6e2b9e5:323:16)
+    at Switch (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=d6e2b9e5:379:17)
+    at AppProvider (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/src/context/AppContext.tsx:22:31)
+    at QueryClientProvider (https://2d5d8e0e-34b3-4606-b52f-02519740038f-00-24tlqq8af66et.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=d6e2b9e5:2805:3)
+    at App

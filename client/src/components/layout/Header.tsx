@@ -34,6 +34,8 @@ const Header = ({ title, subtitle }: HeaderProps) => {
         return "Family";
       case "values":
         return "Values & Dreams";
+      case "settings":
+        return "Settings";
       default:
         return "Dashboard";
     }
@@ -52,9 +54,9 @@ const Header = ({ title, subtitle }: HeaderProps) => {
       case "learning":
         return "Learn things that will make a difference";
       case "today":
-        return "Plan your day by prioritizing your most important tasks";
+        return "Decide, commit and accomplish.";
       case "habits":
-        return "Consistency builds excellence";
+        return "Be consistent and make progress";
       case "exercise":
         return "Track your fitness and progress";
       case "health-habits":
@@ -63,6 +65,8 @@ const Header = ({ title, subtitle }: HeaderProps) => {
         return "Stay Connected with those who matter the most";
       case "values":
         return "Begin with the end in mind";
+      case "settings":
+        return "Customize your experience";
       default:
         return "Build and Keep Momentum";
     }
