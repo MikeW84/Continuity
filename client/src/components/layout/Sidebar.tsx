@@ -1,11 +1,25 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAppContext } from "@/context/AppContext";
+import { subscribeToEvents, AppEvent } from "@/lib/events";
+
+// Define the SectionVisibility interface
+interface SectionVisibility {
+  dashboard: boolean;
+  today: boolean;
+  projects: boolean;
+  ideas: boolean;
+  learning: boolean;
+  habits: boolean;
+  exercise: boolean;
+  family: boolean;
+  values: boolean;
+}
 
 const Sidebar = () => {
   const [location] = useLocation();
   const { user } = useAppContext();
-  const [visibleSections, setVisibleSections] = useState({
+  const [visibleSections, setVisibleSections] = useState<SectionVisibility>({
     dashboard: true,
     today: true,
     projects: true,
@@ -17,12 +31,23 @@ const Sidebar = () => {
     values: true
   });
   
-  // Load visibility settings from localStorage
+  // Load visibility settings from localStorage and listen for settings changes
   useEffect(() => {
+    // Load initial settings from localStorage
     const savedSettings = localStorage.getItem('visibilitySettings');
     if (savedSettings) {
       setVisibleSections(JSON.parse(savedSettings));
     }
+    
+    // Subscribe to visibility settings change events
+    const unsubscribe = subscribeToEvents((event: AppEvent) => {
+      if (event.type === 'VISIBILITY_SETTINGS_CHANGED') {
+        setVisibleSections(event.settings as SectionVisibility);
+      }
+    });
+    
+    // Cleanup subscription when component unmounts
+    return () => unsubscribe();
   }, []);
   
   // Define all navigation items

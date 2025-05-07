@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { publishEvent } from "@/lib/events";
 
 const SettingsPage = () => {
   const { toast } = useToast();
@@ -38,15 +39,27 @@ const SettingsPage = () => {
   }, []);
 
   const handleToggleSection = (section: keyof typeof visibilitySettings) => {
-    setVisibilitySettings(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
+    // Create updated settings
+    const updatedSettings = {
+      ...visibilitySettings,
+      [section]: !visibilitySettings[section]
+    };
+    
+    // Update state
+    setVisibilitySettings(updatedSettings);
+    
+    // Save to localStorage immediately
+    localStorage.setItem('visibilitySettings', JSON.stringify(updatedSettings));
+    
+    // Publish event for immediate application
+    publishEvent({
+      type: 'VISIBILITY_SETTINGS_CHANGED',
+      settings: updatedSettings
+    });
   };
 
   const handleSaveSettings = () => {
-    // Save settings to localStorage
-    localStorage.setItem('visibilitySettings', JSON.stringify(visibilitySettings));
+    // Save theme setting to localStorage
     localStorage.setItem('theme', theme);
     
     // In a real application with backend, this would also save to a database
