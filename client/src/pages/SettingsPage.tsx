@@ -1,20 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 const SettingsPage = () => {
   const { toast } = useToast();
   const [theme, setTheme] = useState("light");
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [taskReminders, setTaskReminders] = useState(false);
+  
+  // Section visibility states
+  const [visibilitySettings, setVisibilitySettings] = useState({
+    dashboard: true,
+    today: true,
+    projects: true,
+    ideas: true,
+    learning: true,
+    habits: true,
+    exercise: true,
+    family: true,
+    values: true
+  });
+
+  // Load saved settings from localStorage on component mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('visibilitySettings');
+    if (savedSettings) {
+      setVisibilitySettings(JSON.parse(savedSettings));
+    }
+    
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  const handleToggleSection = (section: keyof typeof visibilitySettings) => {
+    setVisibilitySettings(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const handleSaveSettings = () => {
-    // In a real application, this would save to a database
+    // Save settings to localStorage
+    localStorage.setItem('visibilitySettings', JSON.stringify(visibilitySettings));
+    localStorage.setItem('theme', theme);
+    
+    // In a real application with backend, this would also save to a database
     toast({
       title: "Settings Saved",
       description: "Your preferences have been updated successfully.",
@@ -60,71 +95,113 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Notification Settings */}
+        {/* Section Visibility Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-            <CardDescription>Manage your notification preferences</CardDescription>
+            <CardTitle>Section Visibility</CardTitle>
+            <CardDescription>Show or hide different sections in the sidebar</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="email-notifications">Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive email updates about your tasks and projects
-                </p>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="dashboard-visibility" className="font-medium">Dashboard</Label>
+                <Switch
+                  id="dashboard-visibility"
+                  checked={visibilitySettings.dashboard}
+                  onCheckedChange={() => handleToggleSection('dashboard')}
+                />
               </div>
-              <Switch
-                id="email-notifications"
-                checked={emailNotifications}
-                onCheckedChange={setEmailNotifications}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="task-reminders">Task Reminders</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive reminders for upcoming and due tasks
-                </p>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="today-visibility" className="font-medium">Today</Label>
+                <Switch
+                  id="today-visibility"
+                  checked={visibilitySettings.today}
+                  onCheckedChange={() => handleToggleSection('today')}
+                />
               </div>
-              <Switch
-                id="task-reminders"
-                checked={taskReminders}
-                onCheckedChange={setTaskReminders}
-              />
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="projects-visibility" className="font-medium">Projects</Label>
+                <Switch
+                  id="projects-visibility"
+                  checked={visibilitySettings.projects}
+                  onCheckedChange={() => handleToggleSection('projects')}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ideas-visibility" className="font-medium">Ideas</Label>
+                <Switch
+                  id="ideas-visibility"
+                  checked={visibilitySettings.ideas}
+                  onCheckedChange={() => handleToggleSection('ideas')}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="learning-visibility" className="font-medium">Learning</Label>
+                <Switch
+                  id="learning-visibility"
+                  checked={visibilitySettings.learning}
+                  onCheckedChange={() => handleToggleSection('learning')}
+                />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="habits-visibility" className="font-medium">Habits</Label>
+                <Switch
+                  id="habits-visibility"
+                  checked={visibilitySettings.habits}
+                  onCheckedChange={() => handleToggleSection('habits')}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="exercise-visibility" className="font-medium">Exercise</Label>
+                <Switch
+                  id="exercise-visibility"
+                  checked={visibilitySettings.exercise}
+                  onCheckedChange={() => handleToggleSection('exercise')}
+                />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="family-visibility" className="font-medium">Family</Label>
+                <Switch
+                  id="family-visibility"
+                  checked={visibilitySettings.family}
+                  onCheckedChange={() => handleToggleSection('family')}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="values-visibility" className="font-medium">Values & Dreams</Label>
+                <Switch
+                  id="values-visibility"
+                  checked={visibilitySettings.values}
+                  onCheckedChange={() => handleToggleSection('values')}
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Account Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Account</CardTitle>
-            <CardDescription>Manage your account settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="display-name">Display Name</Label>
-              <Input id="display-name" placeholder="Your Name" defaultValue="User" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Your Email" defaultValue="user@example.com" />
-            </div>
-            <Button variant="outline" className="w-full">Change Password</Button>
           </CardContent>
         </Card>
 
         {/* Data Management */}
-        <Card>
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Data Management</CardTitle>
             <CardDescription>Manage your personal data</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full">Export All Data</Button>
-            <Button variant="outline" className="w-full">Delete All Data</Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button variant="outline" className="w-full">Export All Data</Button>
+              <Button variant="outline" className="w-full text-destructive hover:text-destructive">Delete All Data</Button>
+            </div>
             <div className="pt-2">
               <p className="text-sm text-muted-foreground">
                 Data export includes all your tasks, projects, habits, and other personal information.

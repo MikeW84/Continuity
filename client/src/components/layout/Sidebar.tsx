@@ -1,22 +1,50 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAppContext } from "@/context/AppContext";
 
 const Sidebar = () => {
   const [location] = useLocation();
   const { user } = useAppContext();
+  const [visibleSections, setVisibleSections] = useState({
+    dashboard: true,
+    today: true,
+    projects: true,
+    ideas: true,
+    learning: true,
+    habits: true,
+    exercise: true,
+    family: true,
+    values: true
+  });
   
-  const navItems = [
-    { path: "/", label: "Dashboard", icon: "ri-dashboard-line" },
-    { path: "/today", label: "Today", icon: "ri-calendar-todo-line" },
-    { path: "/projects", label: "Projects", icon: "ri-task-line" },
-    { path: "/ideas", label: "Ideas", icon: "ri-lightbulb-line" },
-    { path: "/learning", label: "Learning", icon: "ri-book-open-line" },
-    { path: "/habits", label: "Habits", icon: "ri-calendar-check-line" },
-    { path: "/exercise", label: "Exercise", icon: "ri-run-line" },
-    { path: "/family", label: "Family", icon: "ri-user-heart-line" },
-    { path: "/values", label: "Values & Dreams", icon: "ri-compass-3-line" },
-    { path: "/settings", label: "Settings", icon: "ri-settings-line" },
+  // Load visibility settings from localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('visibilitySettings');
+    if (savedSettings) {
+      setVisibleSections(JSON.parse(savedSettings));
+    }
+  }, []);
+  
+  // Define all navigation items
+  const allNavItems = [
+    { path: "/", label: "Dashboard", icon: "ri-dashboard-line", key: "dashboard" },
+    { path: "/today", label: "Today", icon: "ri-calendar-todo-line", key: "today" },
+    { path: "/projects", label: "Projects", icon: "ri-task-line", key: "projects" },
+    { path: "/ideas", label: "Ideas", icon: "ri-lightbulb-line", key: "ideas" },
+    { path: "/learning", label: "Learning", icon: "ri-book-open-line", key: "learning" },
+    { path: "/habits", label: "Habits", icon: "ri-calendar-check-line", key: "habits" },
+    { path: "/exercise", label: "Exercise", icon: "ri-run-line", key: "exercise" },
+    { path: "/family", label: "Family", icon: "ri-user-heart-line", key: "family" },
+    { path: "/values", label: "Values & Dreams", icon: "ri-compass-3-line", key: "values" },
+    { path: "/settings", label: "Settings", icon: "ri-settings-line", key: "settings" },
   ];
+  
+  // Filter out sections that should be hidden
+  const navItems = allNavItems.filter(item => {
+    // Settings is always visible, can't be turned off
+    if (item.key === "settings") return true;
+    return visibleSections[item.key as keyof typeof visibleSections];
+  });
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-16 md:w-64 bg-primary text-white flex flex-col z-10">
