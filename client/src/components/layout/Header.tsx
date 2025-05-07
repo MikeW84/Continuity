@@ -75,8 +75,8 @@ const Header = ({ title, subtitle }: HeaderProps) => {
   return (
     <header className="bg-white dark:bg-[#1A1A1A] sticky top-0 z-5 p-6 flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
       <div>
-        <h1 className="text-2xl font-inter font-bold text-primary">{getPageTitle()}</h1>
-        <p className="text-sm text-secondary mt-1">{getPageSubtitle()}</p>
+        <h1 className="text-2xl font-inter font-bold text-primary dark:text-white">{getPageTitle()}</h1>
+        <p className="text-sm text-secondary dark:text-gray-300 mt-1">{getPageSubtitle()}</p>
       </div>
       
       <div className="flex items-center space-x-4">

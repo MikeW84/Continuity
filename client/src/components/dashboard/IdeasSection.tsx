@@ -33,7 +33,7 @@ const IdeasSection = () => {
     <Card className="h-full">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-inter font-semibold text-primary">Idea Bank</h2>
+          <h2 className="text-xl font-inter font-semibold text-primary dark:text-white">Idea Bank</h2>
           <button className="text-secondary hover:text-primary transition-colors">
             <i className="ri-more-2-fill"></i>
           </button>
