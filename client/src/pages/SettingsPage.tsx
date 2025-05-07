@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const SettingsPage = () => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     }
   }, []);
 
@@ -56,6 +58,12 @@ const SettingsPage = () => {
       type: 'VISIBILITY_SETTINGS_CHANGED',
       settings: updatedSettings
     });
+  };
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
   const handleSaveSettings = () => {
@@ -93,7 +101,7 @@ const SettingsPage = () => {
               <Label htmlFor="theme">Theme</Label>
               <Select
                 value={theme}
-                onValueChange={setTheme}
+                onValueChange={handleThemeChange}
               >
                 <SelectTrigger id="theme">
                   <SelectValue placeholder="Select a theme" />

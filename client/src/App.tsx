@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,6 +21,12 @@ import { AppProvider } from "./context/AppContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function App() {
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
