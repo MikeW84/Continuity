@@ -38,6 +38,7 @@ function App() {
                 <ProtectedRoute path="/exercise" component={ExercisePage} />
                 <ProtectedRoute path="/family" component={FamilyPage} />
                 <ProtectedRoute path="/values" component={ValuesPage} />
+                <ProtectedRoute path="/settings" component={SettingsPage} />
                 <Route component={NotFound} />
               </Switch>
             </Layout>
