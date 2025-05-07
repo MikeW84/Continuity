@@ -68,7 +68,7 @@
   }
 
   body {
-    @apply font-workSans antialiased bg-[#F5F5F7] text-[#333333];
+    @apply font-workSans antialiased bg-[#F5F5F7] text-[#333333] dark:bg-[#111111];
   }
 
   h1, h2, h3, h4, h5, h6 {
