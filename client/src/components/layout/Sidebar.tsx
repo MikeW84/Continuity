@@ -1,20 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAppContext } from "@/context/AppContext";
-import { subscribeToEvents, AppEvent } from "@/lib/events";
-
-// Define the SectionVisibility interface
-interface SectionVisibility {
-  dashboard: boolean;
-  today: boolean;
-  projects: boolean;
-  ideas: boolean;
-  learning: boolean;
-  habits: boolean;
-  exercise: boolean;
-  family: boolean;
-  values: boolean;
-}
+import { subscribeToEvents, AppEvent, SectionVisibility } from "@/lib/events";
 
 const Sidebar = () => {
   const [location] = useLocation();

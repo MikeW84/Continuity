@@ -6,14 +6,14 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { publishEvent } from "@/lib/events";
+import { publishEvent, SectionVisibility } from "@/lib/events";
 
 const SettingsPage = () => {
   const { toast } = useToast();
   const [theme, setTheme] = useState("light");
   
   // Section visibility states
-  const [visibilitySettings, setVisibilitySettings] = useState({
+  const [visibilitySettings, setVisibilitySettings] = useState<SectionVisibility>({
     dashboard: true,
     today: true,
     projects: true,

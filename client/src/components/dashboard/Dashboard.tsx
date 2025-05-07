@@ -8,19 +8,7 @@ import ValuesSection from "./ValuesSection";
 import TodaySection from "./TodaySection";
 import { useAppContext } from "@/context/AppContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { subscribeToEvents, AppEvent } from "@/lib/events";
-
-interface SectionVisibility {
-  dashboard: boolean;
-  today: boolean;
-  projects: boolean;
-  ideas: boolean;
-  learning: boolean;
-  habits: boolean;
-  exercise: boolean;
-  family: boolean;
-  values: boolean;
-}
+import { subscribeToEvents, AppEvent, SectionVisibility } from "@/lib/events";
 
 const Dashboard = () => {
   const { isLoading, projects } = useAppContext();
