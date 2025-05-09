@@ -447,3 +447,22 @@ export const todayTasksRelations = relations(todayTasks, ({ one }) => ({
     references: [users.id]
   })
 }));
+
+// Quotes Schema
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  text: text("text").notNull(),
+  author: text("author"),
+  source: text("source"),
+  userId: integer("user_id").notNull(),
+});
+
+export const insertQuoteSchema = createInsertSchema(quotes).pick({
+  text: true,
+  author: true,
+  source: true,
+  userId: true,
+});
+
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+export type Quote = typeof quotes.$inferSelect;

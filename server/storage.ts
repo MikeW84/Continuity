@@ -13,6 +13,7 @@ import {
   type Value, type InsertValue,
   type Dream, type InsertDream,
   type TodayTask, type InsertTodayTask,
+  type Quote, type InsertQuote,
   users,
   projects,
   projectTasks,
@@ -28,7 +29,8 @@ import {
   dreams,
   projectValues,
   projectDreams,
-  todayTasks
+  todayTasks,
+  quotes
 } from "@shared/schema";
 
 import { db } from "./db";
@@ -132,6 +134,13 @@ export interface IStorage {
   getPriorityTasks(userId: number, date?: Date): Promise<TodayTask[]>;
   getRegularTasks(userId: number, date?: Date): Promise<TodayTask[]>;
   setTaskPriority(id: number, isPriority: boolean): Promise<TodayTask | undefined>;
+  
+  // Quote methods
+  getQuotes(userId: number): Promise<Quote[]>;
+  getQuote(id: number): Promise<Quote | undefined>;
+  createQuote(quote: InsertQuote): Promise<Quote>;
+  updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined>;
+  deleteQuote(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1664,6 +1673,54 @@ export class DatabaseStorage implements IStorage {
       .returning();
       
     return updatedTask;
+  }
+
+  // Quote methods
+  async getQuotes(userId: number): Promise<Quote[]> {
+    const result = await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.userId, userId))
+      .orderBy(desc(quotes.id));
+    
+    return result;
+  }
+  
+  async getQuote(id: number): Promise<Quote | undefined> {
+    const [result] = await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.id, id));
+    
+    return result;
+  }
+  
+  async createQuote(quote: InsertQuote): Promise<Quote> {
+    const [result] = await db
+      .insert(quotes)
+      .values(quote)
+      .returning();
+    
+    return result;
+  }
+  
+  async updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined> {
+    const [result] = await db
+      .update(quotes)
+      .set(quote)
+      .where(eq(quotes.id, id))
+      .returning();
+    
+    return result;
+  }
+  
+  async deleteQuote(id: number): Promise<boolean> {
+    const [result] = await db
+      .delete(quotes)
+      .where(eq(quotes.id, id))
+      .returning();
+    
+    return !!result;
   }
 }
 
