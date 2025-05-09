@@ -91,123 +91,127 @@ const SettingsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Appearance Settings */}
-        <Card>
+        {/* Combined Appearance & Section Visibility Settings */}
+        <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Customize how the application looks and feels</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="theme">Theme</Label>
-              <Select
-                value={theme}
-                onValueChange={handleThemeChange}
-              >
-                <SelectTrigger id="theme">
-                  <SelectValue placeholder="Select a theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Section Visibility Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Section Visibility</CardTitle>
-            <CardDescription>Show or hide different sections in the sidebar</CardDescription>
+            <CardTitle>Appearance & Visibility</CardTitle>
+            <CardDescription>Customize how the application looks and which sections are visible</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="dashboard-visibility" className="font-medium">Dashboard</Label>
-                <Switch
-                  id="dashboard-visibility"
-                  checked={visibilitySettings.dashboard}
-                  onCheckedChange={() => handleToggleSection('dashboard')}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Theme Settings */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Theme</h3>
+                <div className="space-y-2">
+                  <Select
+                    value={theme}
+                    onValueChange={handleThemeChange}
+                  >
+                    <SelectTrigger id="theme">
+                      <SelectValue placeholder="Select a theme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="today-visibility" className="font-medium">Today</Label>
-                <Switch
-                  id="today-visibility"
-                  checked={visibilitySettings.today}
-                  onCheckedChange={() => handleToggleSection('today')}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="projects-visibility" className="font-medium">Projects</Label>
-                <Switch
-                  id="projects-visibility"
-                  checked={visibilitySettings.projects}
-                  onCheckedChange={() => handleToggleSection('projects')}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="ideas-visibility" className="font-medium">Ideas</Label>
-                <Switch
-                  id="ideas-visibility"
-                  checked={visibilitySettings.ideas}
-                  onCheckedChange={() => handleToggleSection('ideas')}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="learning-visibility" className="font-medium">Learning</Label>
-                <Switch
-                  id="learning-visibility"
-                  checked={visibilitySettings.learning}
-                  onCheckedChange={() => handleToggleSection('learning')}
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="habits-visibility" className="font-medium">Habits</Label>
-                <Switch
-                  id="habits-visibility"
-                  checked={visibilitySettings.habits}
-                  onCheckedChange={() => handleToggleSection('habits')}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="exercise-visibility" className="font-medium">Exercise</Label>
-                <Switch
-                  id="exercise-visibility"
-                  checked={visibilitySettings.exercise}
-                  onCheckedChange={() => handleToggleSection('exercise')}
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="family-visibility" className="font-medium">Family</Label>
-                <Switch
-                  id="family-visibility"
-                  checked={visibilitySettings.family}
-                  onCheckedChange={() => handleToggleSection('family')}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="values-visibility" className="font-medium">Values & Dreams</Label>
-                <Switch
-                  id="values-visibility"
-                  checked={visibilitySettings.values}
-                  onCheckedChange={() => handleToggleSection('values')}
-                />
+
+              {/* Section Visibility */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Section Visibility</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="dashboard-visibility" className="font-medium">Dashboard</Label>
+                    <Switch
+                      id="dashboard-visibility"
+                      checked={visibilitySettings.dashboard}
+                      onCheckedChange={() => handleToggleSection('dashboard')}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="today-visibility" className="font-medium">Today</Label>
+                    <Switch
+                      id="today-visibility"
+                      checked={visibilitySettings.today}
+                      onCheckedChange={() => handleToggleSection('today')}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="projects-visibility" className="font-medium">Projects</Label>
+                    <Switch
+                      id="projects-visibility"
+                      checked={visibilitySettings.projects}
+                      onCheckedChange={() => handleToggleSection('projects')}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="ideas-visibility" className="font-medium">Ideas</Label>
+                    <Switch
+                      id="ideas-visibility"
+                      checked={visibilitySettings.ideas}
+                      onCheckedChange={() => handleToggleSection('ideas')}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="learning-visibility" className="font-medium">Learning</Label>
+                    <Switch
+                      id="learning-visibility"
+                      checked={visibilitySettings.learning}
+                      onCheckedChange={() => handleToggleSection('learning')}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="habits-visibility" className="font-medium">Habits</Label>
+                    <Switch
+                      id="habits-visibility"
+                      checked={visibilitySettings.habits}
+                      onCheckedChange={() => handleToggleSection('habits')}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="exercise-visibility" className="font-medium">Exercise</Label>
+                    <Switch
+                      id="exercise-visibility"
+                      checked={visibilitySettings.exercise}
+                      onCheckedChange={() => handleToggleSection('exercise')}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="family-visibility" className="font-medium">Family</Label>
+                    <Switch
+                      id="family-visibility"
+                      checked={visibilitySettings.family}
+                      onCheckedChange={() => handleToggleSection('family')}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="values-visibility" className="font-medium">Values & Dreams</Label>
+                    <Switch
+                      id="values-visibility"
+                      checked={visibilitySettings.values}
+                      onCheckedChange={() => handleToggleSection('values')}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
