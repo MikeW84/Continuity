@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { publishEvent, SectionVisibility } from "@/lib/events";
+import QuotesSection from "@/components/settings/QuotesSection";
 
 const SettingsPage = () => {
   const { toast } = useToast();
