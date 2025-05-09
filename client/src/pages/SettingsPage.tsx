@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { publishEvent, SectionVisibility } from "@/lib/events";
-import QuotesSection from "@/components/settings/QuotesSection";
+import QuotesManager from "@/components/settings/QuotesManager";
 
 const SettingsPage = () => {
   const { toast } = useToast();
@@ -212,6 +212,9 @@ const SettingsPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Motivational Quotes */}
+        <QuotesManager />
 
         {/* Data Management */}
         <Card className="md:col-span-2">
