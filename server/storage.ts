@@ -1477,20 +1477,12 @@ export class DatabaseStorage implements IStorage {
   
   // Today Task methods
   async getTodayTasks(userId: number, date?: Date): Promise<TodayTask[]> {
-    const today = date || new Date();
-    
-    // Set time to beginning of day for comparison
-    today.setHours(0, 0, 0, 0);
-    
+    // Just get all tasks for the user without date filtering
+    // This allows tasks to persist regardless of when they were created
     return await db
       .select()
       .from(todayTasks)
-      .where(
-        and(
-          eq(todayTasks.userId, userId),
-          gte(todayTasks.date, today)
-        )
-      )
+      .where(eq(todayTasks.userId, userId))
       .orderBy(todayTasks.position);
   }
   
@@ -1594,19 +1586,14 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getPriorityTasks(userId: number, date?: Date): Promise<TodayTask[]> {
-    const today = date || new Date();
-    
-    // Set time to beginning of day for comparison
-    today.setHours(0, 0, 0, 0);
-    
+    // Get priority tasks without date filtering to ensure persistence
     return await db
       .select()
       .from(todayTasks)
       .where(
         and(
           eq(todayTasks.userId, userId),
-          eq(todayTasks.isPriority, true),
-          gte(todayTasks.date, today)
+          eq(todayTasks.isPriority, true)
         )
       )
       .orderBy(todayTasks.position)
@@ -1614,19 +1601,14 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getRegularTasks(userId: number, date?: Date): Promise<TodayTask[]> {
-    const today = date || new Date();
-    
-    // Set time to beginning of day for comparison
-    today.setHours(0, 0, 0, 0);
-    
+    // Get regular tasks without date filtering to ensure persistence
     return await db
       .select()
       .from(todayTasks)
       .where(
         and(
           eq(todayTasks.userId, userId),
-          eq(todayTasks.isPriority, false),
-          gte(todayTasks.date, today)
+          eq(todayTasks.isPriority, false)
         )
       )
       .orderBy(todayTasks.position);
