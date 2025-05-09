@@ -18,6 +18,7 @@ import {
   insertValueSchema,
   insertDreamSchema,
   insertTodayTaskSchema,
+  insertQuoteSchema,
   projectWithRelationsSchema,
   // Tables
   projects,
@@ -25,7 +26,8 @@ import {
   projectDreams,
   values,
   dreams,
-  todayTasks
+  todayTasks,
+  quotes
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1006,6 +1008,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error reordering today tasks:", error);
       res.status(500).json({ error: "Internal server error" });
     }
+  });
+  
+  // Quotes endpoints
+  app.get("/api/quotes", async (req: Request, res: Response) => {
+    const quotes = await storage.getQuotes(TEMP_USER_ID);
+    res.json(quotes);
+  });
+  
+  app.get("/api/quotes/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const quote = await storage.getQuote(id);
+    
+    if (!quote) {
+      return res.status(404).json({ message: "Quote not found" });
+    }
+    
+    res.json(quote);
+  });
+  
+  app.post("/api/quotes", async (req: Request, res: Response) => {
+    try {
+      const quoteData = validateRequest(insertQuoteSchema, {
+        ...req.body,
+        userId: req.body.userId || TEMP_USER_ID
+      });
+      
+      const newQuote = await storage.createQuote(quoteData);
+      res.status(201).json(newQuote);
+    } catch (error: any) {
+      res.status(error.status || 500).json({ message: error.message });
+    }
+  });
+  
+  app.patch("/api/quotes/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const quoteData = validateRequest(insertQuoteSchema.partial(), req.body);
+    
+    const updatedQuote = await storage.updateQuote(id, quoteData);
+    
+    if (!updatedQuote) {
+      return res.status(404).json({ message: "Quote not found" });
+    }
+    
+    res.json(updatedQuote);
+  });
+  
+  app.delete("/api/quotes/:id", async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const success = await storage.deleteQuote(id);
+    
+    if (!success) {
+      return res.status(404).json({ message: "Quote not found" });
+    }
+    
+    res.status(204).send();
   });
 
   const httpServer = createServer(app);
