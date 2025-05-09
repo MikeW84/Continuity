@@ -563,20 +563,21 @@ const TodayPage = () => {
                                   >
                                     Edit
                                   </Button>
-                                  {priorityTasks.length < MAX_PRIORITY_TASKS && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        togglePriorityMutation.mutate({
-                                          id: task.id,
-                                          isPriority: true,
-                                        })
-                                      }
-                                    >
-                                      <ArrowUpIcon className="h-4 w-4" />
-                                    </Button>
-                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      togglePriorityMutation.mutate({
+                                        id: task.id,
+                                        isPriority: true,
+                                      })
+                                    }
+                                    title={priorityTasks.length >= MAX_PRIORITY_TASKS ? 
+                                      "Remove a priority task first to promote this one" : 
+                                      "Promote to Top 3 priority"}
+                                  >
+                                    <ArrowUpIcon className="h-4 w-4" />
+                                  </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
