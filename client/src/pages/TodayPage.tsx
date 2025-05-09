@@ -72,7 +72,7 @@ const TodayPage = () => {
   // Separate tasks into priority and regular
   const priorityTasks = tasks.filter((task) => task.isPriority)
     .sort((a, b) => a.position - b.position);
-    
+
   const regularTasks = tasks.filter((task) => !task.isPriority)
     .sort((a, b) => a.position - b.position);
 
@@ -80,7 +80,7 @@ const TodayPage = () => {
   const handleAddTaskClick = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     form.reset({
       title: "",
       isPriority: false,
@@ -95,7 +95,7 @@ const TodayPage = () => {
   useEffect(() => {
     if (editingTask) {
       const taskDate = new Date(editingTask.date);
-      
+
       form.reset({
         title: editingTask.title,
         isPriority: editingTask.isPriority,
@@ -112,13 +112,13 @@ const TodayPage = () => {
       // Add today's date and user ID
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       const taskData = {
         ...data,
         date: today.toISOString(), // Convert Date to ISO string for JSON serialization
         userId: 1, // Default user ID
       };
-      
+
       const response = await fetch("/api/today-tasks", {
         method: "POST",
         headers: {
@@ -126,13 +126,13 @@ const TodayPage = () => {
         },
         body: JSON.stringify(taskData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Task creation error:", errorData);
         throw new Error(errorData.error || "Failed to create task");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -167,7 +167,7 @@ const TodayPage = () => {
         // Convert date to ISO string if it exists and is a Date object
         ...(data.date && { date: data.date instanceof Date ? data.date.toISOString() : data.date }),
       };
-      
+
       const response = await fetch(`/api/today-tasks/${id}`, {
         method: "PATCH",
         headers: {
@@ -175,13 +175,13 @@ const TodayPage = () => {
         },
         body: JSON.stringify(taskData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Task update error:", errorData);
         throw new Error(errorData.error || "Failed to update task");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -210,11 +210,11 @@ const TodayPage = () => {
           "Content-Type": "application/json",
         },
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to toggle task completion");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -245,11 +245,11 @@ const TodayPage = () => {
         },
         body: JSON.stringify({ isPriority }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to update task priority");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -270,11 +270,11 @@ const TodayPage = () => {
       const response = await fetch(`/api/today-tasks/${id}`, {
         method: "DELETE",
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to delete task");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -303,11 +303,11 @@ const TodayPage = () => {
         },
         body: JSON.stringify({ taskIds }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to reorder tasks");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -336,32 +336,32 @@ const TodayPage = () => {
     if (!result.destination) return;
 
     const { source, destination, draggableId } = result;
-    
+
     // If dropped in the same list
     if (source.droppableId === destination.droppableId) {
       const listType = source.droppableId;
       const sourceIndex = source.index;
       const destIndex = destination.index;
-      
+
       if (sourceIndex === destIndex) return;
-      
+
       // Determine which list to update
       const list = listType === "priority-tasks" ? [...priorityTasks] : [...regularTasks];
-      
+
       // Remove the task from the source and insert at destination
       const [removed] = list.splice(sourceIndex, 1);
       list.splice(destIndex, 0, removed);
-      
+
       // Extract IDs in the new order
       const newOrder = list.map(task => task.id);
-      
+
       // Update positions in the database
       reorderTasksMutation.mutate(newOrder);
     } else {
       // Moving between lists - this changes priority status
       const taskId = parseInt(draggableId.split('-')[1]);
       const movingToPriority = destination.droppableId === "priority-tasks";
-      
+
       // Toggle priority status
       togglePriorityMutation.mutate({
         id: taskId,
@@ -381,9 +381,6 @@ const TodayPage = () => {
             <PlusIcon className="mr-2 h-4 w-4" /> Add Task
           </Button>
         </div>
-        <p className="text-muted-foreground">
-          Plan your day by prioritizing your most important tasks
-        </p>
       </div>
 
       {isLoading ? (
