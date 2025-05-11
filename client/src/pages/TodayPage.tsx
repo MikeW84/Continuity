@@ -420,7 +420,7 @@ const TodayPage = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`flex items-center justify-between p-3 rounded-md border ${
+                                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-md border ${
                                   task.isCompleted
                                     ? "bg-muted/50 text-muted-foreground"
                                     : "bg-card"
@@ -449,7 +449,7 @@ const TodayPage = () => {
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-2 mt-2 sm:mt-0 ml-8 sm:ml-0">
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -523,7 +523,7 @@ const TodayPage = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`flex items-center justify-between p-3 rounded-md border ${
+                                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-md border ${
                                   task.isCompleted
                                     ? "bg-muted/50 text-muted-foreground"
                                     : "bg-card"
@@ -552,7 +552,7 @@ const TodayPage = () => {
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-2 mt-2 sm:mt-0 ml-8 sm:ml-0">
                                   <Button
                                     variant="ghost"
                                     size="sm"
