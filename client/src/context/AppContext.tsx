@@ -136,12 +136,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // All fetch methods with useCallback
   const fetchProjects = useCallback(async (archived?: boolean) => {
     try {
-      console.log('Fetching projects...', archived ? '(including archived)' : '(active only)');
+      //console.log('Fetching projects...', archived ? '(including archived)' : '(active only)');
       const showArchived = archived !== undefined ? archived : showArchivedProjects;
       const res = await fetch(`/api/projects?showArchived=${showArchived}`);
       if (!res.ok) throw new Error('Failed to fetch projects');
       const data = await res.json();
-      console.log('Projects data received:', data);
+      //console.log('Projects data received:', data);
       setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -716,7 +716,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const toggleHabitDay = async (habitId: number, year: number, month: number, day: number) => {
     try {
-      console.log(`Toggling habit day: ${year}-${month}-${day} for habitId: ${habitId}`);
+      //console.log(`Toggling habit day: ${year}-${month}-${day} for habitId: ${habitId}`);
       
       // Make sure habitId exists before proceeding
       if (!habitId) {

@@ -13,16 +13,27 @@ const AuthPage = () => {
   const [error, setError] = useState("");
   const [, setLocation] = useLocation();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (username === "Mike" && password === "fragnaticus") {
-      localStorage.setItem("isAuthenticated", "true");
-      setLocation("/");
-    } else {
-      setError("Invalid username or password");
+    setError("");
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem("isAuthenticated", "true");
+        setLocation("/");
+      } else {
+        setError(data.message || "Invalid username or password");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

@@ -42,7 +42,7 @@ const ProjectsSection = () => {
     );
   }
 
-  console.log('ProjectsSection: raw projects =', projects);
+  // console.log('ProjectsSection: raw projects =', projects);
   const priorityProject = projects.find(p => p.isPriority);
   
   // Sort projects by impact (High > Medium > Low)
@@ -56,8 +56,8 @@ const ProjectsSection = () => {
       return impactOrder[impactA] - impactOrder[impactB];
     });
     
-  console.log('ProjectsSection: priorityProject =', priorityProject);
-  console.log('ProjectsSection: otherProjects =', otherProjects);
+  // console.log('ProjectsSection: priorityProject =', priorityProject);
+  // console.log('ProjectsSection: otherProjects =', otherProjects);
 
   return (
     <div className="lg:col-span-2">

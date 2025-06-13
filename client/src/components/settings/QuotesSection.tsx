@@ -65,18 +65,17 @@ const QuotesSection = () => {
   const { data: quotes = [], isLoading } = useQuery({
     queryKey: ["/api/quotes"],
     queryFn: async () => {
-      const response = await apiRequest<Quote[]>("/api/quotes");
-      return response || [];
+      const res = await apiRequest("GET", "/api/quotes");
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
     },
   });
 
   // Create quote mutation
   const createQuoteMutation = useMutation({
     mutationFn: async (data: QuoteFormData) => {
-      return apiRequest("/api/quotes", {
-        method: "POST",
-        body: JSON.stringify({ ...data, userId: TEMP_USER_ID }),
-      });
+      const res = await apiRequest("POST", "/api/quotes", { ...data, userId: TEMP_USER_ID });
+      return res.ok ? res.json() : Promise.reject("Failed to create quote");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
@@ -100,10 +99,8 @@ const QuotesSection = () => {
   // Update quote mutation
   const updateQuoteMutation = useMutation({
     mutationFn: async (data: { id: number; quote: QuoteFormData }) => {
-      return apiRequest(`/api/quotes/${data.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data.quote),
-      });
+      const res = await apiRequest("PATCH", `/api/quotes/${data.id}`, data.quote);
+      return res.ok ? res.json() : Promise.reject("Failed to update quote");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
@@ -127,9 +124,8 @@ const QuotesSection = () => {
   // Delete quote mutation
   const deleteQuoteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/quotes/${id}`, {
-        method: "DELETE",
-      });
+      const res = await apiRequest("DELETE", `/api/quotes/${id}`);
+      return res.ok ? true : Promise.reject("Failed to delete quote");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });

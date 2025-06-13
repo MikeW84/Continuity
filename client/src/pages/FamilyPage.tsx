@@ -88,18 +88,18 @@ const FamilyPage = () => {
       await updateDateIdea(scheduledDate.id, { isScheduled: false });
     }
 
+    // Convert description: undefined/empty string to null
+    const normalizedData = {
+      ...data,
+      description: data.description === undefined || data.description === "" ? null : data.description,
+      date: data.date ? new Date(data.date) : null,
+    };
     if (selectedDate) {
       // Update existing date idea
-      await updateDateIdea(selectedDate, {
-        ...data,
-        date: data.date ? new Date(data.date) : null,
-      });
+      await updateDateIdea(selectedDate, normalizedData);
     } else {
       // Add new date idea
-      await addDateIdea({
-        ...data,
-        date: data.date ? new Date(data.date) : null,
-      });
+      await addDateIdea(normalizedData);
     }
 
     setIsDateDialogOpen(false);
@@ -107,12 +107,17 @@ const FamilyPage = () => {
   };
 
   const handleAddParentingTask = async (data: ParentingTaskFormValues) => {
+    // Convert description: undefined/empty string to null
+    const normalizedData = {
+      ...data,
+      description: data.description === undefined || data.description === "" ? null : data.description,
+    };
     if (selectedTask) {
       // Update existing parenting task
-      await updateParentingTask(selectedTask, data);
+      await updateParentingTask(selectedTask, normalizedData);
     } else {
       // Add new parenting task
-      await addParentingTask(data);
+      await addParentingTask(normalizedData);
     }
 
     setIsTaskDialogOpen(false);

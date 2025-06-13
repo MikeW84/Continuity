@@ -1,13 +1,20 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+import './env-load';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { seedDefaultValues } from "./helpers/seedValues";
-import { seedDefaultDreams } from "./helpers/seedDreams";
+//import { seedDefaultValues } from "./helpers/seedValues";
+//import { seedDefaultDreams } from "./helpers/seedDreams";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+/* if (app.get("env") === "development") {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -37,7 +44,8 @@ app.use((req, res, next) => {
 
   next();
 });
-
+}
+ */
 (async () => {
   const server = await registerRoutes(app);
 
@@ -70,7 +78,7 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
     
     // Seed default values and dreams for testing
-    await seedDefaultValues();
-    await seedDefaultDreams();
+    //await seedDefaultValues();
+    //await seedDefaultDreams();
   });
 })();

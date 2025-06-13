@@ -144,6 +144,37 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  // Only stubs for methods not implemented elsewhere in this class
+  async getTodayTasks(userId: number, date?: Date): Promise<{ date: Date; id: number; title: string; isPriority: boolean | null; userId: number; isCompleted: boolean | null; notes: string | null; position: number | null; }[]> {
+    throw new Error('Not implemented');
+  }
+  async getTodayTask(id: number): Promise<{ date: Date; id: number; title: string; isPriority: boolean | null; userId: number; isCompleted: boolean | null; notes: string | null; position: number | null; } | undefined> {
+    throw new Error('Not implemented');
+  }
+  async createTodayTask(task: { date: Date; title: string; userId: number; isPriority?: boolean | null; isCompleted?: boolean | null; notes?: string | null; position?: number | null }): Promise<{ date: Date; id: number; title: string; isPriority: boolean | null; userId: number; isCompleted: boolean | null; notes: string | null; position: number | null; }> {
+    throw new Error('Not implemented');
+  }
+  async updateTodayTask(id: number, task: Partial<{ date: Date; title: string; userId: number; isPriority?: boolean | null; isCompleted?: boolean | null; notes?: string | null; position?: number | null }>): Promise<{ date: Date; id: number; title: string; isPriority: boolean | null; userId: number; isCompleted: boolean | null; notes: string | null; position: number | null; } | undefined> {
+    throw new Error('Not implemented');
+  }
+  async deleteTodayTask(id: number): Promise<boolean> {
+    throw new Error('Not implemented');
+  }
+
+  // --- STUBS FOR ONLY MISSING TodayTask METHODS ---
+  async toggleTodayTaskCompletion(id: number): Promise<any> { throw new Error('Not implemented'); }
+  async updateTodayTaskPositions(taskIds: number[]): Promise<any> { throw new Error('Not implemented'); }
+  async getPriorityTasks(userId: number, date?: Date): Promise<any> { throw new Error('Not implemented'); }
+  async getRegularTasks(userId: number, date?: Date): Promise<any> { throw new Error('Not implemented'); }
+  async setTaskPriority(id: number, isPriority: boolean): Promise<any> { throw new Error('Not implemented'); }
+
+  // --- STUBS FOR QUOTE METHODS ---
+  async getQuotes(userId: number): Promise<any> { throw new Error('Not implemented'); }
+  async getQuote(id: number): Promise<any> { throw new Error('Not implemented'); }
+  async createQuote(quote: any): Promise<any> { throw new Error('Not implemented'); }
+  async updateQuote(id: number, quote: any): Promise<any> { throw new Error('Not implemented'); }
+  async deleteQuote(id: number): Promise<any> { throw new Error('Not implemented'); }
+
   private users: Map<number, User>;
   private projects: Map<number, Project>;
   private projectTasks: Map<number, ProjectTask>;
@@ -219,7 +250,7 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { ...insertUser, id, displayName: insertUser.displayName ?? null, email: insertUser.email ?? null };
     this.users.set(id, user);
     return user;
   }
@@ -243,7 +274,7 @@ export class MemStorage implements IStorage {
     const { valueIds, dreamIds, ...projectData } = project;
     
     // Create the base project 
-    const newProject: Project = { ...projectData, id };
+    const newProject: Project = { ...projectData, id, description: projectData.description ?? null, progress: projectData.progress ?? null, dueDate: projectData.dueDate ?? null, isPriority: projectData.isPriority ?? null, isArchived: projectData.isArchived ?? null, impact: projectData.impact ?? null };
     this.projects.set(id, newProject);
     
     console.log("Project created with ID:", id);
@@ -336,7 +367,7 @@ export class MemStorage implements IStorage {
   async createProjectTask(task: InsertProjectTask): Promise<ProjectTask> {
     const id = this.projectTaskId++;
     const createdAt = new Date();
-    const newTask: ProjectTask = { ...task, id, createdAt };
+    const newTask: ProjectTask = { ...task, id, createdAt, isCompleted: task.isCompleted ?? null };
     this.projectTasks.set(id, newTask);
     
     // Update the project progress after adding a task
@@ -422,7 +453,7 @@ export class MemStorage implements IStorage {
   
   async createIdea(idea: InsertIdea): Promise<Idea> {
     const id = this.ideaId++;
-    const newIdea: Idea = { ...idea, id };
+    const newIdea: Idea = { ...idea, id, description: idea.description ?? null, votes: idea.votes ?? null, tags: idea.tags ?? null };
     this.ideas.set(id, newIdea);
     return newIdea;
   }
@@ -467,7 +498,7 @@ export class MemStorage implements IStorage {
   
   async createLearningItem(learningItem: InsertLearningItem): Promise<LearningItem> {
     const id = this.learningItemId++;
-    const newLearningItem: LearningItem = { ...learningItem, id };
+    const newLearningItem: LearningItem = { ...learningItem, id, progress: learningItem.progress ?? null, category: learningItem.category ?? null, resources: learningItem.resources ?? null, isCurrentlyLearning: learningItem.isCurrentlyLearning ?? null };
     this.learningItems.set(id, newLearningItem);
     return newLearningItem;
   }
@@ -498,7 +529,7 @@ export class MemStorage implements IStorage {
   
   async createHabit(habit: InsertHabit): Promise<Habit> {
     const id = this.habitId++;
-    const newHabit: Habit = { ...habit, id };
+    const newHabit: Habit = { ...habit, id, completedDays: habit.completedDays ?? null, targetDays: habit.targetDays ?? null, isCompletedToday: habit.isCompletedToday ?? null };
     this.habits.set(id, newHabit);
     return newHabit;
   }
@@ -542,7 +573,7 @@ export class MemStorage implements IStorage {
     if (!habit) return undefined;
     
     // Return a mock HabitCompletion object with the new format
-    return {
+    return { date: null, completed: null,
       id: 1,
       habitId,
       year,
@@ -564,7 +595,7 @@ export class MemStorage implements IStorage {
   
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
     const id = this.exerciseId++;
-    const newExercise: Exercise = { ...exercise, id };
+    const newExercise: Exercise = { ...exercise, id, time: exercise.time ?? null, duration: exercise.duration ?? null, distance: exercise.distance ?? null, heartRate: exercise.heartRate ?? null, weight: exercise.weight ?? null, reps: exercise.reps ?? null, sets: exercise.sets ?? null, musclesWorked: exercise.musclesWorked ?? null };
     this.exercises.set(id, newExercise);
     return newExercise;
   }
@@ -611,7 +642,7 @@ export class MemStorage implements IStorage {
   
   async createDateIdea(dateIdea: InsertDateIdea): Promise<DateIdea> {
     const id = this.dateIdeaId++;
-    const newDateIdea: DateIdea = { ...dateIdea, id };
+    const newDateIdea: DateIdea = { ...dateIdea, id, date: dateIdea.date ?? null, description: dateIdea.description ?? null, isScheduled: dateIdea.isScheduled ?? null };
     this.dateIdeas.set(id, newDateIdea);
     return newDateIdea;
   }
@@ -642,7 +673,7 @@ export class MemStorage implements IStorage {
   
   async createParentingTask(parentingTask: InsertParentingTask): Promise<ParentingTask> {
     const id = this.parentingTaskId++;
-    const newParentingTask: ParentingTask = { ...parentingTask, id };
+    const newParentingTask: ParentingTask = { ...parentingTask, id, description: parentingTask.description ?? null, isCompleted: parentingTask.isCompleted ?? null };
     this.parentingTasks.set(id, newParentingTask);
     return newParentingTask;
   }
@@ -683,7 +714,7 @@ export class MemStorage implements IStorage {
   
   async createValue(value: InsertValue): Promise<Value> {
     const id = this.valueId++;
-    const newValue: Value = { ...value, id };
+    const newValue: Value = { ...value, id, description: value.description ?? null };
     this.values.set(id, newValue);
     return newValue;
   }
@@ -714,7 +745,7 @@ export class MemStorage implements IStorage {
   
   async createDream(dream: InsertDream): Promise<Dream> {
     const id = this.dreamId++;
-    const newDream: Dream = { ...dream, id };
+    const newDream: Dream = { ...dream, id, description: dream.description ?? null, tags: dream.tags ?? null, timeframe: dream.timeframe ?? null };
     this.dreams.set(id, newDream);
     return newDream;
   }
@@ -777,7 +808,7 @@ export class DatabaseStorage implements IStorage {
     const sanitizedProject = {
       ...projectData,
       description: projectData.description ?? null,
-      resources: projectData.resources ?? null,
+      
       progress: projectData.progress ?? null,
       dueDate: projectData.dueDate ?? null,
       isPriority: projectData.isPriority ?? false
@@ -1029,7 +1060,7 @@ export class DatabaseStorage implements IStorage {
     const sanitizedIdea = {
       ...idea,
       description: idea.description ?? null,
-      resources: idea.resources ?? null,
+      
       votes: idea.votes ?? 0,
       tags: idea.tags ?? null
     };
@@ -1523,13 +1554,13 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(todayTasks.userId, task.userId),
-          eq(todayTasks.isPriority, task.isPriority)
+          eq(todayTasks.isPriority, task.isPriority ?? false)
         )
       )
       .orderBy(desc(todayTasks.position))
       .limit(1);
     
-    const position = lastTask ? lastTask.position + 1 : 0;
+    const position = (lastTask?.position ?? -1) + 1;
     task.position = position;
     
     const [newTask] = await db.insert(todayTasks).values(task).returning();
@@ -1661,7 +1692,7 @@ export class DatabaseStorage implements IStorage {
           .orderBy(desc(todayTasks.position))
           .limit(1);
     
-    const position = lastTask ? lastTask.position + 1 : 0;
+    const position = (lastTask?.position ?? -1) + 1;
     
     const [updatedTask] = await db
       .update(todayTasks)

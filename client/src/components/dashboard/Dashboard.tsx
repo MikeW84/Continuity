@@ -43,11 +43,11 @@ const Dashboard = () => {
     return () => unsubscribe();
   }, []);
   
-  console.log('Dashboard component: isLoading =', isLoading);
-  console.log('Dashboard component: projects =', projects);
+  // console.log('Dashboard component: isLoading =', isLoading);
+  // console.log('Dashboard component: projects =', projects);
 
   if (isLoading) {
-    console.log('Dashboard: rendering loading state');
+    //console.log('Dashboard: rendering loading state');
     return (
       <div className="p-6">
         <div className="space-y-6">

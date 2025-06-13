@@ -59,6 +59,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return Math.round((completedTasks / tasks.length) * 100);
   };
 
+  // Authentication endpoint
+  app.post("/api/login", async (req: Request, res: Response) => {
+    console.log("[LOGIN] Received:", req.body);
+
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required" });
+    }
+    try {
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        console.log("[LOGIN] No user found for username:", username);
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      console.log("[LOGIN] Found user in DB:", user);
+      // Plain text password check (for now)
+      if (user.password !== password) {
+        console.log(`[LOGIN] Password mismatch. Entered: '${password}', DB: '${user.password}'`);
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      // For now, just return a success (no token/session)
+      return res.json({ success: true, user: { id: user.id, username: user.username, displayName: user.displayName, email: user.email } });
+    } catch (err) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Projects endpoints
   app.get("/api/projects", async (req: Request, res: Response) => {
     // Get showArchived query parameter, defaults to false
